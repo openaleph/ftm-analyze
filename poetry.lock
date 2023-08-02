@@ -1544,6 +1544,27 @@ files = [
 all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2)"]
 
 [[package]]
+name = "importlib-resources"
+version = "6.5.2"
+description = "Read resources from Python packages"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+markers = "python_version == \"3.11\""
+files = [
+    {file = "importlib_resources-6.5.2-py3-none-any.whl", hash = "sha256:789cfdc3ed28c78b67a06acb8126751ced69a3d5f79c095a98298cd8a760ccec"},
+    {file = "importlib_resources-6.5.2.tar.gz", hash = "sha256:185f87adef5bcc288449d98fb4fba07cea78bc036455dd44c5fc4a2fe78fed2c"},
+]
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1) ; sys_platform != \"cygwin\""]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-lint"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["jaraco.test (>=5.4)", "pytest (>=6,!=8.1.*)", "zipp (>=3.17)"]
+type = ["pytest-mypy"]
+
+[[package]]
 name = "iniconfig"
 version = "2.1.0"
 description = "brain-dead simple config-ini parsing"
@@ -4326,6 +4347,18 @@ dev = ["black", "build", "bump2version", "coverage (>=4.1)", "mypy", "pip (>=10.
 docs = ["cairosvg", "mkdocs", "mkdocs-material", "mkdocstrings[python]", "pillow"]
 
 [[package]]
+name = "rstr"
+version = "3.2.2"
+description = "Generate random strings in Python"
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "rstr-3.2.2-py3-none-any.whl", hash = "sha256:f39195d38da1748331eeec52f1276e71eb6295e7949beea91a5e9af2340d7b3b"},
+    {file = "rstr-3.2.2.tar.gz", hash = "sha256:c4a564d4dfb4472d931d145c43d1cf1ad78c24592142e7755b8866179eeac012"},
+]
+
+[[package]]
 name = "s3fs"
 version = "2025.7.0"
 description = "Convenient Filesystem interface over S3"
@@ -4345,6 +4378,26 @@ fsspec = "2025.7.0"
 [package.extras]
 awscli = ["aiobotocore[awscli] (>=2.5.4,<3.0.0)"]
 boto3 = ["aiobotocore[boto3] (>=2.5.4,<3.0.0)"]
+
+[[package]]
+name = "schwifty"
+version = "2025.6.0"
+description = "IBAN parsing and validation"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "schwifty-2025.6.0-py3-none-any.whl", hash = "sha256:678a68d36237b2d23ef2c1e92265e32da9dcd8e3122554ff93bae6b9a47e3a0f"},
+    {file = "schwifty-2025.6.0.tar.gz", hash = "sha256:abad87f782a38f637d6e71e7dd7bb1986bb0911785234160bebbe717fbecb8b4"},
+]
+
+[package.dependencies]
+importlib-resources = {version = ">=5.10", markers = "python_version <= \"3.11\""}
+pycountry = "*"
+rstr = "*"
+
+[package.extras]
+pydantic = ["pydantic (>=2.0)"]
 
 [[package]]
 name = "scikit-learn"
@@ -5498,4 +5551,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "e8ac32500eaaacad870388ff8985de37ade89d30b87d9cb53058891d4ac8f48b"
+content-hash = "10df8fc17734b3c537ffae434fe10677204b0294b9d5e3465d66cc2bcb5e8c29"

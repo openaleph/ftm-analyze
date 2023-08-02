@@ -17,10 +17,11 @@ from ftm_analyze.analysis.util import (
     ANALYZABLE,
     DOCUMENT,
     TAG_COMPANY,
+    TAG_IBAN,
     TAG_PERSON,
     text_chunks,
 )
-from ftm_analyze.annotate import ANNOTATED, Annotator
+from ftm_analyze.annotate import ANNOTATED, NAMED, Annotator
 from ftm_analyze.settings import Settings
 
 log = logging.getLogger(__name__)
@@ -74,6 +75,8 @@ class Analyzer(object):
                 countries.add(key)
 
         mention_ids = set()
+        entity_ids = set()
+
         for key, prop, values in results:
             label = values[0]
             if prop.type == registry.name:
@@ -81,22 +84,28 @@ class Analyzer(object):
 
             resolved = False
             proxy = None
-            if values and self.resolve_mentions:
+            if values and self.resolve_mentions and prop.name in NAMED:
                 # convert mentions in actual entities if their names are known
                 for value in values:
                     lookup = juditha.lookup(value)
                     if lookup is not None:
                         proxy = self.make_entity(key, values, lookup, countries)
-                        mention_ids.add(proxy.id)
+                        entity_ids.add(proxy.id)
                         yield proxy
                         resolved = True
 
                         break
 
-                # annotate mentions
-                if self.annotate and proxy is not None:
-                    for value in values:
-                        self.annotator.add_mention(value, proxy)
+            elif prop == TAG_IBAN:
+                for value in values:
+                    iban_proxy = self.make_bankaccount(value, countries)
+                    entity_ids.add(iban_proxy.id)
+                    yield iban_proxy
+
+            # annotate mentions
+            if self.annotate and proxy is not None:
+                for value in values:
+                    self.annotator.add_mention(value, proxy)
 
             if not resolved:
                 # otherwise create Mention entities
@@ -119,16 +128,19 @@ class Analyzer(object):
 
         if len(results):
             log.debug(
-                "Extracted %d prop values, %d mentions [%s]: %s",
+                "Extracted %d prop values, %d mentions, %d entities [%s]: %s",
                 len(results),
                 len(mention_ids),
+                len(entity_ids),
                 self.entity.schema.name,
                 self.entity.id,
             )
 
             yield self.entity
 
-    def make_mention(self, prop, key, values, schema, countries) -> EntityProxy:
+    def make_mention(
+        self, prop, key, values, schema, countries: set[str] | None = None
+    ) -> EntityProxy:
         mention = model.make_entity("Mention")
         mention.make_id("mention", self.entity.id, prop, key)
         mention.add("resolved", make_entity_id(key))
@@ -138,7 +150,9 @@ class Analyzer(object):
         mention.add("contextCountry", countries)
         return mention
 
-    def make_entity(self, key, values, result, countries) -> EntityProxy:
+    def make_entity(
+        self, key, values, result, countries: set[str] | None = None
+    ) -> EntityProxy:
         proxy = model.make_entity(result.common_schema)
         proxy.id = make_entity_id(key)
         proxy.add("proof", self.entity.id)
@@ -146,3 +160,13 @@ class Analyzer(object):
         proxy.add("name", result.caption)
         proxy.add("country", countries)
         return proxy
+
+    def make_bankaccount(
+        self, value: str, countries: set[str] | None = None
+    ) -> EntityProxy:
+        bank_account = model.make_entity("BankAccount")
+        bank_account.make_id("iban", self.entity.id, value)
+        bank_account.add("proof", self.entity.id)
+        bank_account.add("iban", value)
+        bank_account.add("country", countries)
+        return bank_account

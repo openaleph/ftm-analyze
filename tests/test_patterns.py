@@ -1,4 +1,9 @@
-from ftm_analyze.analysis.patterns import EMAIL_REGEX, IBAN_REGEX, PHONE_REGEX
+from ftm_analyze.analysis.patterns import (
+    EMAIL_REGEX,
+    IBAN_REGEX,
+    PHONE_REGEX,
+    check_iban,
+)
 
 
 def test_patterns_phonenumbers():
@@ -39,6 +44,11 @@ def test_patterns_iban():
     for iban in IBANS:
         matches = IBAN_REGEX.findall(iban)
         assert len(matches) == 1
+    valid = 0
+    for iban in IBANS:
+        if check_iban(iban):
+            valid += 1
+    assert valid > 1
 
 
 def test_patterns_email():

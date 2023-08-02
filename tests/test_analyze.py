@@ -77,3 +77,17 @@ def test_analyze_pattern_extract():
     assert "+919988111222" in phones
     countries = entity.get_type_values(registry.country)
     assert "in" in countries
+
+
+def test_analyze_extract_iban():
+    text = "Mr. Flubby Flubber has the bank account CH5604835012345678009"
+    entity = model.make_entity("PlainText")
+    entity.id = "test"
+    entity.add("bodyText", text)
+    results = {e.schema.name: e for e in logic.analyze_entity(entity)}
+    bank_account = results["BankAccount"]
+    assert bank_account.first("iban") == "CH5604835012345678009"
+    assert bank_account.id == "1b8e09f7119e26d44460014eaa8748874e2bf53d"
+    assert bank_account.first("proof") == "test"
+    doc = results["PlainText"]
+    assert "[CH5604835012345678009](p_ibanMentioned)" in doc.first("indexText")

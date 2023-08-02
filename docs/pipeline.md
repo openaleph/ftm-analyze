@@ -8,9 +8,13 @@ ftm-analyze uses the [fastText](https://fasttext.cc/) text classification librar
 
 ftm-analyze uses the [SpaCy](https://spacy.io/) natural-language processing (NLP) framework and a number of [pre-trained models](https://spacy.io/) for different languages to extract names of people, organizations, and countries from the text previously extracted from the Word document.
 
+If the extracted names are [*known entities*](./ner.md), they will be converted into an actual Entity (`Person`, `Company`, ...), otherwise they will be stored as a [`Mention`](https://followthemoney.tech/explorer/schemata/Mention/).
+
 ## Extract patterns
 
 In addition to NLP techniques, ftm-analyze also uses [simple regular expressions](https://github.com/dataresearchcenter/ftm-analyze/blob/main/ftm_analyze/analysis/patterns.py) to extract phone numbers, IBAN bank account numbers, and email addresses from documents.
+
+In the special case of a valid IBAN (checked via [`schwifty`](https://schwifty.readthedocs.io/en/latest/)), an additional [`BankAccount`](https://followthemoney.tech/explorer/schemata/BankAccount/) entity is created.
 
 ## Write fragments
 

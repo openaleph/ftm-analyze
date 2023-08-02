@@ -1,5 +1,6 @@
 import re
 
+import schwifty
 from banal import ensure_list
 
 from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_IBAN, TAG_PHONE
@@ -18,6 +19,13 @@ REGEX_TYPES = {
 }
 
 
+def check_iban(value: str) -> str | None:
+    try:
+        return schwifty.IBAN(value, allow_invalid=True).is_valid
+    except schwifty.exceptions.SchwiftyException:
+        return
+
+
 def extract_patterns(entity, text):
     for pattern, prop in REGEX_TYPES.items():
         for match in pattern.finditer(text):
@@ -25,6 +33,9 @@ def extract_patterns(entity, text):
             value = prop.type.clean(match_text, proxy=entity)
             if value is None:
                 continue
+            if prop == TAG_IBAN:
+                if not check_iban(value):
+                    continue
             yield (prop, value)
             for country in ensure_list(prop.type.country_hint(value)):
                 yield (TAG_COUNTRY, country)

@@ -20,7 +20,7 @@ Analyze [FollowTheMoney](https://followthemoney.tech) entities. This is part of 
 - Detect country based on location names
 - Named Entity Extraction (via [spacy](https://spacy.io/)) and schema prediction
 - Convert `Mention` entities into their resolved counterparts if they are known (via [juditha](https://github.com/dataresearchcenter/juditha)) [Read more](./ner.md)
-- Extract email, phonenumbers, ibans [Read more](./pipeline.md)
+- Extract email, phonenumbers, ibans (with [schwifty](https://schwifty.readthedocs.io/en/latest/))
 - Annotate extracted patterns and names for full text search [Read more](./annotate.md)
 
 ## Installation

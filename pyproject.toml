@@ -27,6 +27,7 @@ dependencies = [
     "juditha (>=4.0.1,<5.0.0)",
     "rigour (>=1.0.2,<2.0.0)",
     "followthemoney (>=4.0.3,<5.0.0)",
+    "schwifty (>=2025.6.0,<2026.0.0)",
 ]
 
 [project.optional-dependencies]
