@@ -8,11 +8,14 @@
 
 Analyze [FollowTheMoney](https://followthemoney.tech) entities. This is part of the ingestion process for [OpenAleph](https://openaleph.org) but can be used standalone or in other applications as well.
 
-`ftm-analyze` replaces the "analyze" pipeline within [ingest-file](https://github.com/openaleph/ingest-file/).
+`ftm-analyze` outsources the "analyze" pipeline from [ingest-file](https://github.com/openaleph/ingest-file/).
 
 ## Features
 
--
+- Detect language
+- Detect country based on location names
+- Named Entity Extraction (via [spacy](https://spacy.io/)) and schema prediction
+- Extract email, phonenumbers, ibans
 
 ## Installation
 
@@ -20,13 +23,7 @@ Analyze [FollowTheMoney](https://followthemoney.tech) entities. This is part of 
 
 ## Quickstart
 
-NER extraction:
-
     ftm-analyze ner -i s3://data/entities.ftm.json
-
-Language detection:
-
-    cat entities.ftm.json | ftm-analyze detect-language -o gcs://my_bucket/entities.ftm.json
 
 ## Documentation
 

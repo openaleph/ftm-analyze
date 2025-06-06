@@ -18,10 +18,10 @@ console = Console(stderr=True)
 log = get_logger(__name__)
 
 IN = Annotated[
-    str, typer.Option("-", "-i", help="Input entities uri (file, http, s3...)")
+    str, typer.Option(..., "-i", help="Input entities uri (file, http, s3...)")
 ]
 OUT = Annotated[
-    str, typer.Option("-", "-o", help="Output entities uri (file, http, s3...)")
+    str, typer.Option(..., "-o", help="Output entities uri (file, http, s3...)")
 ]
 
 
