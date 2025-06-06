@@ -48,8 +48,14 @@ class Settings(BaseSettings):
     ner_type_model_path: Path = Path("./models/model_type_prediction.ftz")
     """Local path to ftm type predict model"""
 
+    ner_type_model_confidence: float = 0.85
+    """Minimum confidence for ftm type predict model"""
+
     lid_model_path: Path = Path("./models/lid.176.ftz")
     """Local path to lid model"""
 
     ner_models: NerModels = NerModels()
     """Spacy models"""
+
+    resolve_mentions: bool = True
+    """Resolve known mentions via `juditha`"""

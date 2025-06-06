@@ -10,9 +10,14 @@ settings = Settings()
 
 
 class TagAggregatorFasttext(object):
-    def __init__(self, model_path=settings.ner_type_model_path):
+    def __init__(
+        self,
+        model_path=settings.ner_type_model_path,
+        confidence: float | None = settings.ner_type_model_confidence,
+    ):
         self.values = defaultdict(set)
         self.model = FTTypeModel(str(model_path))
+        self.confidence = confidence
 
     def add(self, prop, value):
         if value is None:
@@ -27,8 +32,14 @@ class TagAggregatorFasttext(object):
                 continue
             values = list(values)
             labels, confidences = self.model.confidence(values)
+            if not self.confidence:
+                # very messy
+                yield (key, prop, values)
+                continue
             for label, confidence in zip(labels, confidences):
-                if label == "trash" or confidence < 0.85:
+                if label == "trash" or (
+                    self.confidence and confidence < self.confidence
+                ):
                     break
             else:
                 yield (key, prop, values)

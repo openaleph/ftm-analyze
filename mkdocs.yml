@@ -3,6 +3,8 @@ site_url: https://docs.investigraph.dev/lib/ftm-analyze
 repo_url: https://github.com/dataresearchcenter/ftm-analyze
 nav:
   - Intro: index.md
+  - Features:
+    - ner.md
   - Reference:
     - reference/cli.md
     - reference/settings.md

@@ -25,6 +25,7 @@ dependencies = [
     "spacy (>=3.8.7,<4.0.0)",
     "languagecodes (>=1.1.1,<2.0.0)",
     "fasttext-numpy2 (>=0.10.4,<0.11.0)",
+    "juditha (>=0.1.1,<0.2.0)",
 ]
 
 [project.optional-dependencies]
@@ -62,3 +63,6 @@ mkdocs-typer2 = "^0.1.4"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest_env]
+JUDITHA_URI = ".testdata/juditha.db"

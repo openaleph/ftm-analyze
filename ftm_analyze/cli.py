@@ -54,11 +54,17 @@ def cli_download():
 
 
 @cli.command("analyze")
-def cli_analyze(in_uri: IN = "-", out_uri: OUT = "-"):
+def cli_analyze(
+    in_uri: IN = "-",
+    out_uri: OUT = "-",
+    resolve_mentions: Annotated[
+        bool, typer.Option(help="Resolve known mentions via `juditha`")
+    ] = True,
+):
     """
     Analyze a stream of entities.
     """
     with ErrorHandler(log):
         entities = smart_stream_proxies(in_uri)
-        results = logic.analyze_entities(entities)
+        results = logic.analyze_entities(entities, resolve_mentions)
         smart_write_proxies(out_uri, results)
