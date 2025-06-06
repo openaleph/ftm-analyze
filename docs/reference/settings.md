@@ -1,0 +1,1 @@
+::: ftm_analyze.settings

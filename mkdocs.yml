@@ -5,6 +5,7 @@ nav:
   - Intro: index.md
   - Reference:
     - reference/cli.md
+    - reference/settings.md
 theme:
   name: material
   logo: https://cdn.investigativedata.org/style/logos/darc/svg/DARC-Logo-RGB-Horizontal-Neg.svg

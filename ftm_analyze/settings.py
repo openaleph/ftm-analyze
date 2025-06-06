@@ -5,9 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class NerModels(BaseSettings):
     """
-    Easily overwrite specific language model via:
+    Easily overwrite specific language model for specific languages via:
 
-    `FTM_ANALYZE_NER_MODELS_ENG=de_core_news_lg`
+    `FTM_ANALYZE_NER_MODELS_DEU=de_core_news_lg`
     """
 
     eng: str = "en_core_web_sm"
@@ -46,5 +46,10 @@ class Settings(BaseSettings):
     )
 
     ner_type_model_path: Path = Path("./models/model_type_prediction.ftz")
+    """Local path to ftm type predict model"""
+
     lid_model_path: Path = Path("./models/lid.176.ftz")
+    """Local path to lid model"""
+
     ner_models: NerModels = NerModels()
+    """Spacy models"""
