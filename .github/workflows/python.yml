@@ -52,7 +52,9 @@ jobs:
         key: ftm-model-type-predict
     - name: Download predict model
       if: steps.cache-predict.outputs.cache-hit != 'true'
-      run: wget -O ~/models/model_type_prediction.ftz  https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
+      run: |
+        mkdir ~/models
+        wget -O ~/models/model_type_prediction.ftz  https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
     - name: Test spacy download cache
       id: cache-spacy
       uses: actions/cache@v4
