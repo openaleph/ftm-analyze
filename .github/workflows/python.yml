@@ -26,7 +26,7 @@ jobs:
     - name: Install poetry
       run: curl -sSL https://install.python-poetry.org | python3 -
     - name: Install leveldb
-      run: sudo apt-get install pkg-config libleveldb-dev
+      run: sudo apt-get install pkg-config
     - name: Configure poetry
       run: poetry config virtualenvs.in-project true
     - name: set PY
@@ -44,6 +44,26 @@ jobs:
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-${{ runner.os }}-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
+    - name: Set up predict model cache
+      id: cache-predict
+      uses: actions/cache@v4
+      with:
+        path: ~/models/model_type_prediction.ftz
+        key: ftm-model-type-predict
+    - name: Download predict model
+      if: steps.cache-predict.outputs.cache-hit != 'true'
+      run: wget -O ~/models/model_type_prediction.ftz  https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
+    - name: Test spacy download cache
+      id: cache-spacy
+      uses: actions/cache@v4
+      with:
+        path: ~/spacy-downloaded
+        key: spacy-download
+    - name: Download spacy models
+      if: steps.cache-spacy.outputs.cache-hit != 'true'
+      run: |
+        ftm-analyze download-spacy
+        touch ~/spacy-downloaded
     - name: Install dependencies
       run: poetry install --with dev --all-extras
     - name: Run pre-commit hooks
@@ -51,6 +71,8 @@ jobs:
     - name: Lint with flake8
       run: make lint
     - name: Test with pytest
+      env:
+        FTM_ANALYZE_NER_TYPE_MODEL_PATH: ~/models/model_type_prediction.ftz
       run: make test
     - name: Test building
       run: poetry build
