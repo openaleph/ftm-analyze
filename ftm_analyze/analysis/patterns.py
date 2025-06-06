@@ -1,7 +1,8 @@
 import re
 
 from banal import ensure_list
-from ingestors.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_IBAN, TAG_PHONE
+
+from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_IBAN, TAG_PHONE
 
 EMAIL_REGEX = re.compile(r"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}", re.IGNORECASE)
 PHONE_REGEX = re.compile(r"(\+?[\d\-\(\)\/\s]{5,}\d{2})", re.IGNORECASE)

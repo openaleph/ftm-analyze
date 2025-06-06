@@ -1,10 +1,19 @@
-import logging
+from functools import cache
 
 import fasttext
-from ingestors import settings
+from anystore.logging import get_logger
 
-log = logging.getLogger(__name__)
+from ftm_analyze.settings import Settings
+
+log = get_logger(__name__)
+settings = Settings()
+
 THRESHOLD = 0.6
+
+
+@cache
+def get_lid_model():
+    return fasttext.load_model(str(settings.lid_model_path))
 
 
 def detect_languages(entity, text, k=1):
@@ -13,10 +22,7 @@ def detect_languages(entity, text, k=1):
         # Don't detect if a language is hard-coded.
         return
     entity.pop("detectedLanguage")
-    if not hasattr(settings, "_lang_detector"):
-        lid_model = fasttext.load_model(settings.LID_MODEL_PATH)
-        settings._lang_detector = lid_model
-    langs = settings._lang_detector.predict(text, k=k)
+    langs = get_lid_model().predict(text, k=k)
     for lang, score in zip(*langs):
         if score <= THRESHOLD:
             continue

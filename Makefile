@@ -18,7 +18,7 @@ test:
 	poetry run pytest -v --capture=sys --cov=ftm_analyze --cov-report lcov
 
 build:
-	poetry run build
+	poetry build
 
 clean:
 	rm -fr build/

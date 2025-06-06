@@ -1,16 +1,17 @@
 import logging
 from itertools import chain
+from typing import Generator
 
 from followthemoney import model
-from followthemoney.namespace import Namespace
+from followthemoney.proxy import EntityProxy
 from followthemoney.types import registry
 from followthemoney.util import make_entity_id
-from ingestors import settings
-from ingestors.analysis.aggregate import TagAggregator, TagAggregatorFasttext
-from ingestors.analysis.extract import extract_entities
-from ingestors.analysis.language import detect_languages
-from ingestors.analysis.patterns import extract_patterns
-from ingestors.analysis.util import (
+
+from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
+from ftm_analyze.analysis.extract import extract_entities
+from ftm_analyze.analysis.language import detect_languages
+from ftm_analyze.analysis.patterns import extract_patterns
+from ftm_analyze.analysis.util import (
     ANALYZABLE,
     DOCUMENT,
     TAG_COMPANY,
@@ -24,17 +25,13 @@ log = logging.getLogger(__name__)
 class Analyzer(object):
     MENTIONS = {TAG_COMPANY: "Organization", TAG_PERSON: "Person"}
 
-    def __init__(self, dataset, entity, context):
-        self.dataset = dataset
-        self.ns = Namespace(context.get("namespace", dataset.name))
+    def __init__(self, entity: EntityProxy):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
         self.aggregator_entities = TagAggregatorFasttext()
         self.aggregator_patterns = TagAggregator()
 
     def feed(self, entity):
-        if not settings.ANALYZE_ENTITIES:
-            return
         if not entity.schema.is_a(ANALYZABLE):
             return
         # HACK: Tables should be mapped, don't try to tag them here.
@@ -49,8 +46,7 @@ class Analyzer(object):
             for prop, tag in extract_patterns(self.entity, text):
                 self.aggregator_patterns.add(prop, tag)
 
-    def flush(self):
-        writer = self.dataset.bulk()
+    def flush(self) -> Generator[EntityProxy, None, None]:
         countries = set()
         results = list(
             chain(
@@ -78,9 +74,7 @@ class Analyzer(object):
                 mention.add("name", values)
                 mention.add("detectedSchema", schema)
                 mention.add("contextCountry", countries)
-                mention = self.ns.apply(mention)
-                writer.put(mention)
-                # pprint(mention.to_dict())
+                yield mention
 
             self.entity.add(prop, label, cleaned=True, quiet=True)
 
@@ -92,7 +86,5 @@ class Analyzer(object):
                 self.entity.schema.name,
                 self.entity.id,
             )
-            writer.put(self.entity)
-            writer.flush()
 
-        return mention_ids
+            yield self.entity

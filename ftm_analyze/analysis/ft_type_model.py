@@ -2,15 +2,25 @@ import logging
 
 import fasttext
 import numpy as np
-from ingestors.util import SingletonDecorator
 from normality import normalize
 
 log = logging.getLogger(__name__)
 
 
+class SingletonDecorator:
+    def __init__(self, klass):
+        self.klass = klass
+        self.instance = None
+
+    def __call__(self, *args, **kwds):
+        if self.instance is None:
+            self.instance = self.klass(*args, **kwds)
+        return self.instance
+
+
 @SingletonDecorator
 class FTTypeModel(object):
-    def __init__(self, model_path):
+    def __init__(self, model_path: str):
         self.model_path = model_path
         self.model = fasttext.load_model(model_path)
         self.n_labels = len(self.model.get_labels())

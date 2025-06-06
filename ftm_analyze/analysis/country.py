@@ -6,6 +6,8 @@ from countrytagger import tag_place
 log = logging.getLogger(__name__)
 
 
-def location_country(location):
-    code, score, country = tag_place(location)
-    return ensure_list(country)
+def location_country(location) -> list[str]:
+    res = tag_place(location)
+    if res is None:
+        return []
+    return ensure_list(res[2])

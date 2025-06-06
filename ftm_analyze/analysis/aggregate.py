@@ -1,16 +1,18 @@
-import logging
 from collections import defaultdict
 
-from ingestors.analysis.ft_type_model import FTTypeModel
-from ingestors.settings import NER_TYPE_MODEL_PATH
+from anystore.logging import get_logger
 
-log = logging.getLogger(__name__)
+from ftm_analyze.analysis.ft_type_model import FTTypeModel
+from ftm_analyze.settings import Settings
+
+log = get_logger(__name__)
+settings = Settings()
 
 
 class TagAggregatorFasttext(object):
-    def __init__(self, model_path=NER_TYPE_MODEL_PATH):
+    def __init__(self, model_path=settings.ner_type_model_path):
         self.values = defaultdict(set)
-        self.model = FTTypeModel(model_path)
+        self.model = FTTypeModel(str(model_path))
 
     def add(self, prop, value):
         if value is None:

@@ -1,4 +1,4 @@
-libpostal*
+models/model_type_prediction.ftz
 .anystore
 nomenklatura.db
 
