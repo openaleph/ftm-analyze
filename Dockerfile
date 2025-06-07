@@ -1,4 +1,4 @@
-FROM ghcr.io/dataresearchcenter/ftmq:latest
+FROM ghcr.io/dataresearchcenter/ftm-analyze-base:latest
 
 RUN apt update && apt full-upgrade -y && apt autoremove -y && apt clean
 RUN apt install -y wget
@@ -14,12 +14,9 @@ WORKDIR /app
 RUN pip install ".[openaleph]"
 RUN pip install psycopg-binary
 
-# download ftm type prediction model
-RUN wget -O /app/models/model_type_prediction.ftz \
-    https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
-
-# download spacy models
-RUN ftm-analyze download-spacy
+# download configured spacy models
+# they are in base image now, and could overwritten here via docker ARG
+# RUN ftm-analyze download-spacy
 
 ENV PROCRASTINATE_APP="ftm_analyze.tasks.app"
 
