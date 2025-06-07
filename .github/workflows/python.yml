@@ -74,7 +74,7 @@ jobs:
       run: make lint
     - name: Test with pytest
       env:
-        FTM_ANALYZE_NER_TYPE_MODEL_PATH: ~/models/model_type_prediction.ftz
+        FTM_ANALYZE_NER_TYPE_MODEL_PATH: /home/runner/models/model_type_prediction.ftz
       run: make test
     - name: Test building
       run: poetry build
