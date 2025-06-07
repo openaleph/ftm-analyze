@@ -64,7 +64,7 @@ jobs:
     - name: Download spacy models
       if: steps.cache-spacy.outputs.cache-hit != 'true'
       run: |
-        ftm-analyze download-spacy
+        poetry run ftm-analyze download-spacy
         touch ~/spacy-downloaded
     - name: Install dependencies
       run: poetry install --with dev --all-extras
