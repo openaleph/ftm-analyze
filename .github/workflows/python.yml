@@ -15,8 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # python-version: ["3.11", "3.12", "3.13"]
-        python-version: ["3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13"]
 
     steps:
     - uses: actions/checkout@v4
@@ -63,7 +62,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ~/spacy-downloaded
-        key: spacy-download
+        key: spacy-download-venv-${{ runner.os }}-${{ env.PY }}-${{ hashFiles('**/poetry.lock') }}
     - name: Download spacy models
       if: steps.cache-spacy.outputs.cache-hit != 'true'
       run: |
@@ -94,5 +93,4 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         parallel-finished: true
-        # carryforward: "run-3.11,run-3.12,run-3.13"
-        carryforward: "run-3.12,run-3.13"
+        carryforward: "run-3.11,run-3.12,run-3.13"
