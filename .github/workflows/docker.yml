@@ -2,7 +2,11 @@ name: Build docker container
 
 on:
   workflow_dispatch: {}
-  push: {}
+  push:
+    paths:
+      - Dockerfile
+      - pyproject.toml
+      - ftm_analyze/*
 
 permissions:
   packages: write
