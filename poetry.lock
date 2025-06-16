@@ -2786,21 +2786,22 @@ files = [
 
 [[package]]
 name = "openaleph-procrastinate"
-version = "0.0.3"
+version = "0.0.4"
 description = "Task queue logic for OpenAleph built upon procrastinate"
 optional = true
 python-versions = "<4,>=3.11"
 groups = ["main"]
 markers = "extra == \"openaleph\""
 files = [
-    {file = "openaleph_procrastinate-0.0.3-py3-none-any.whl", hash = "sha256:27f9e963c16b693784431220d79007c50a6abf67ec84b0ae02fa164c61e85451"},
-    {file = "openaleph_procrastinate-0.0.3.tar.gz", hash = "sha256:a7cd86759d36a1ca3ca6409889cb9e903ab9744f1e5b72b8b4d608008a0db604"},
+    {file = "openaleph_procrastinate-0.0.4-py3-none-any.whl", hash = "sha256:98b82cea3ac647c18033fd26da4a141692592deecacb6d32328d58e1b3809659"},
+    {file = "openaleph_procrastinate-0.0.4.tar.gz", hash = "sha256:4ebbdd8da8e81a56472ed1f94294b36bc01aee8ca3101d55a78bb9ef796bb4dc"},
 ]
 
 [package.dependencies]
+anystore = ">=0.3.6,<0.4.0"
 followthemoney = ">=3.8.4,<4.0.0"
 followthemoney-store = {version = ">=3.1.0,<4.0.0", extras = ["postgresql"]}
-ftmq = ">=0.8.5,<0.9.0"
+ftmq = ">=0.8.6,<0.9.0"
 orjson = ">=3.10.18,<4.0.0"
 procrastinate = ">=3.2.2,<4.0.0"
 pydantic = ">=2.11.5,<3.0.0"
@@ -5453,4 +5454,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "df8ef4079794bdb034348e158fa7cacfb321a4e15517c616da4f3616b6cde0f3"
+content-hash = "2da6f68d94da2739b76a7304a16cf5732b161d060ad5e92a0c0404ccb83c4a3d"
