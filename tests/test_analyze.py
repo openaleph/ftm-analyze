@@ -19,8 +19,11 @@ def test_analyze_convert_mentions(documents):
     mention = res["2e4168096c5b1ad089d402457fc34a3b5d383240"]
     assert mention.schema.is_a("Mention")
     resolved_id = mention.first("resolved")
+    assert resolved_id not in res
+    assert len(res) == 7
 
     res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=True)}
+    assert len(res) == 7
     assert res[resolved_id].schema.is_a("Organization")
 
 
