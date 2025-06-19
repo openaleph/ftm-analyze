@@ -4,10 +4,12 @@ RUN apt update && apt full-upgrade -y && apt autoremove -y && apt clean
 RUN apt install -y wget
 
 # download ftm type prediction model
+RUN mkdir -p /app/models
 RUN wget -O /app/models/model_type_prediction.ftz \
     https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
 
 # Install spaCy models
+RUN pip3 install spacy
 RUN python3 -m spacy download en_core_web_sm \
     && python3 -m spacy download de_core_news_sm \
     && python3 -m spacy download fr_core_news_sm \

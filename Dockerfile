@@ -1,8 +1,5 @@
 FROM ghcr.io/dataresearchcenter/ftm-analyze-base:latest
 
-RUN apt update && apt full-upgrade -y && apt autoremove -y && apt clean
-RUN apt install -y wget
-
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models
 COPY setup.py /app/setup.py
