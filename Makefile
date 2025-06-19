@@ -20,6 +20,9 @@ test:
 build:
 	poetry build
 
+build-docker:
+	docker build . -t ghcr.io/openaleph/ftm-analyze
+
 clean:
 	rm -fr build/
 	rm -fr dist/
