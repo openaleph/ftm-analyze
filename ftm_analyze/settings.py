@@ -3,6 +3,13 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class TaskSettings(BaseSettings):
+    """Settings within a procrastinate environment (for OpenAleph)"""
+
+    defer_index: bool = False
+    """Defer analyzed entities to an index task"""
+
+
 class NerModels(BaseSettings):
     """
     Easily overwrite specific language model for specific languages via:
@@ -59,3 +66,6 @@ class Settings(BaseSettings):
 
     resolve_mentions: bool = True
     """Resolve known mentions via `juditha`"""
+
+    tasks: TaskSettings = TaskSettings()
+    """Task settings for `openaleph-procrastinate`"""
