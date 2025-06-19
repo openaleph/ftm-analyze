@@ -4,8 +4,8 @@ import spacy
 from anystore.logging import get_logger
 from fingerprints import clean_entity_prefix
 from followthemoney.types import registry
-from languagecodes import list_to_alpha3
 from normality import collapse_spaces
+from rigour.langs import list_to_alpha3
 
 from ftm_analyze.analysis.country import location_country
 from ftm_analyze.analysis.util import TAG_COMPANY, TAG_COUNTRY, TAG_LOCATION, TAG_PERSON
