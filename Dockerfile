@@ -17,4 +17,4 @@ RUN pip install psycopg-binary
 
 ENV PROCRASTINATE_APP="ftm_analyze.tasks.app"
 
-ENTRYPOINT [ "ftm-analyze" ]
+ENTRYPOINT [ "" ]

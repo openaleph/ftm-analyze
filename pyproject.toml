@@ -29,7 +29,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate (>=0.0.4,<0.0.5)"]
+openaleph = [
+    "openaleph-procrastinate (>=0.0.7,<0.0.8)",
+]
 
 [project.scripts]
 ftm-analyze = "ftm_analyze.cli:cli"
