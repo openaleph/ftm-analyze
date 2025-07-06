@@ -7,14 +7,14 @@ from openaleph_procrastinate.tasks import task
 from ftm_analyze.logic import analyze_entities
 
 app = make_app(__loader__.name)
-ORIGIN = "ftm-analyze"
+ORIGIN = "analyze"
 
 
 @task(app=app)
 def analyze(job: DatasetJob) -> None:
     entities: list[EntityProxy] = list(job.load_entities())
-    with job.get_writer() as bulk:
+    with job.get_writer(ORIGIN) as bulk:
         for entity in analyze_entities(entities):
-            bulk.put(entity, origin=ORIGIN)
+            bulk.add_entity(entity)
             entities.append(entity)
     defer.index(app, job.dataset, entities, **job.context)
