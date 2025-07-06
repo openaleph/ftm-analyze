@@ -7,6 +7,7 @@ from followthemoney import model
 from followthemoney.proxy import EntityProxy
 from followthemoney.types import registry
 from followthemoney.util import make_entity_id
+from normality import collapse_spaces
 
 from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
 from ftm_analyze.analysis.extract import extract_entities
@@ -32,12 +33,15 @@ class Analyzer(object):
         self,
         entity: EntityProxy,
         resolve_mentions: bool | None = settings.resolve_mentions,
+        annotate: bool | None = settings.annotate,
     ):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
         self.aggregator_entities = TagAggregatorFasttext()
         self.aggregator_patterns = TagAggregator()
         self.resolve_mentions = resolve_mentions
+        self.annotate = annotate
+        self.texts: list[str] = []
 
     def feed(self, entity):
         if not entity.schema.is_a(ANALYZABLE):
@@ -46,8 +50,8 @@ class Analyzer(object):
         if entity.schema.is_a("Table"):
             return
 
-        texts = entity.get_type_values(registry.text)
-        for text in text_chunks(texts):
+        self.texts = [collapse_spaces(t) for t in entity.get_type_values(registry.text)]
+        for text in text_chunks(self.texts):
             detect_languages(self.entity, text)
             for prop, tag in extract_entities(self.entity, text):
                 self.aggregator_entities.add(prop, tag)
@@ -73,14 +77,18 @@ class Analyzer(object):
                 label = registry.name.pick(values)
 
             resolved = False
-            if self.resolve_mentions:
+            if label and self.resolve_mentions:
                 # convert mentions in actual entities if their names are known
                 lookup = juditha.lookup(label)
                 if lookup is not None:
-                    proxy = self.make_proxy(key, values, lookup.schema_, countries)
+                    proxy = self.make_entity(key, values, lookup.schema_, countries)
                     mention_ids.add(proxy.id)
                     yield proxy
                     resolved = True
+
+                    # annotate text mention
+                    if self.annotate:
+                        self.texts = self.annotate_texts(label, lookup)
 
             if not resolved:
                 # otherwise create Mention entities
@@ -91,6 +99,8 @@ class Analyzer(object):
                     yield mention
 
             self.entity.add(prop, label, cleaned=True, quiet=True)
+
+        self.entity.set("indexText", self.texts)
 
         if len(results):
             log.debug(
@@ -113,10 +123,22 @@ class Analyzer(object):
         mention.add("contextCountry", countries)
         return mention
 
-    def make_proxy(self, key, values, schema, countries) -> EntityProxy:
+    def make_entity(self, key, values, schema, countries) -> EntityProxy:
         proxy = model.make_entity(schema)
         proxy.id = make_entity_id(key)
         proxy.add("proof", self.entity.id)
         proxy.add("name", values)
         proxy.add("country", countries)
         return proxy
+
+    def annotate_texts(self, name: str, result: juditha.store.Result) -> list[str]:
+        """
+        Annotate full text according to
+        https://www.elastic.co/docs/reference/elasticsearch/plugins/mapper-annotated-text-usage
+        """
+        names = "&".join(n.replace(" ", "+") for n in result.names)
+        if result.schema_:
+            repl = f"[{name}]({names}&{result.schema_})"
+        else:
+            repl = f"[{name}]({names})"
+        return [t.replace(name, repl) for t in self.texts]

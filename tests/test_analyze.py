@@ -24,7 +24,16 @@ def test_analyze_convert_mentions(documents):
 
     res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=True)}
     assert len(res) == 7
-    assert res[resolved_id].schema.is_a("Organization")
+    org = res[resolved_id]
+    assert org.schema.is_a("Organization")
+    doc = res[org.first("proof")]
+    tested = False
+    for txt in doc.get("indexText"):
+        tested = (
+            "[Circular Plastics Alliance](Circular+Plastics+Alliance&Organization)"
+            in txt
+        )
+    assert tested
 
 
 def test_analyze_ner_extract():
