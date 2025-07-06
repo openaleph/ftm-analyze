@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 from anystore.util import rm_rf
-from ftmq.io import smart_stream_proxies
+from ftmq.io import smart_read_proxies
 from juditha.io import load_proxies
 
 FIXTURES_PATH = (Path(__file__).parent / "fixtures").absolute()
@@ -17,7 +17,7 @@ def fixtures_path():
 
 @pytest.fixture(scope="module")
 def documents():
-    return [x for x in smart_stream_proxies(FIXTURES_PATH / DOCUMENTS)]
+    return [x for x in smart_read_proxies(FIXTURES_PATH / DOCUMENTS)]
 
 
 @pytest.fixture(scope="session", autouse=True)
