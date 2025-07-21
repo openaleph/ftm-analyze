@@ -1364,22 +1364,6 @@ redis = ["fakeredis (>=2.26.2,<3.0.0)", "redis (>=5.2.1,<6.0.0)"]
 sql = ["sqlalchemy (>=2.0.36,<3.0.0)"]
 
 [[package]]
-name = "furl"
-version = "2.1.4"
-description = "URL manipulation made simple."
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "furl-2.1.4-py2.py3-none-any.whl", hash = "sha256:da34d0b34e53ffe2d2e6851a7085a05d96922b5b578620a37377ff1dbeeb11c8"},
-    {file = "furl-2.1.4.tar.gz", hash = "sha256:877657501266c929269739fb5f5980534a41abd6bbabcb367c136d1d3b2a6015"},
-]
-
-[package.dependencies]
-orderedmultidict = ">=1.0.1"
-six = ">=1.8.0"
-
-[[package]]
 name = "ghp-import"
 version = "2.1.0"
 description = "Copy your docs directly to the gh-pages branch."
@@ -1800,14 +1784,14 @@ files = [
 
 [[package]]
 name = "juditha"
-version = "4.0.0"
+version = "4.0.1"
 description = "A super-fast canonical name lookup service"
 optional = false
 python-versions = "<4,>=3.11"
 groups = ["main"]
 files = [
-    {file = "juditha-4.0.0-py3-none-any.whl", hash = "sha256:2bca9309225948d8b7de8c924e69396c550ec0bf4a6de535af442014a7f796ec"},
-    {file = "juditha-4.0.0.tar.gz", hash = "sha256:b6543462f233c752df29165c602d992f50e72ea74ef3e5aa5003696e57943dd3"},
+    {file = "juditha-4.0.1-py3-none-any.whl", hash = "sha256:c89cbe09d878d44873b730343191d868ce6523e29a10783bf4f3f95a29ace217"},
+    {file = "juditha-4.0.1.tar.gz", hash = "sha256:aed7da53e275d340454b98133eca4f78f6d489451e91e6a724154539edb2cb9a"},
 ]
 
 [package.dependencies]
@@ -2700,13 +2684,13 @@ files = [
 
 [[package]]
 name = "nomenklatura"
-version = "4.0.1"
+version = "4.0.4"
 description = "Make record linkages in followthemoney data."
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "nomenklatura-4.0.1-py3-none-any.whl", hash = "sha256:e0b7840990719c2b903c50db401e32a8c4cff87673c28728fb62b898ab6d71f4"},
+    {file = "nomenklatura-4.0.4-py3-none-any.whl", hash = "sha256:443ab0566aa3a7bca60088a6d679c294101e3a17d220579345f50ff72a88a763"},
 ]
 
 [package.dependencies]
@@ -2847,21 +2831,6 @@ files = [
 
 [package.dependencies]
 et-xmlfile = "*"
-
-[[package]]
-name = "orderedmultidict"
-version = "1.0.1"
-description = "Ordered Multivalue Dictionary"
-optional = false
-python-versions = "*"
-groups = ["main"]
-files = [
-    {file = "orderedmultidict-1.0.1-py2.py3-none-any.whl", hash = "sha256:43c839a17ee3cdd62234c47deca1a8508a3f2ca1d0678a3bf791c87cf84adbf3"},
-    {file = "orderedmultidict-1.0.1.tar.gz", hash = "sha256:04070bbb5e87291cc9bfa51df413677faf2141c73c61d2a5f7b26bea3cd882ad"},
-]
-
-[package.dependencies]
-six = ">=1.8.0"
 
 [[package]]
 name = "orjson"
@@ -4310,14 +4279,14 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "rich"
-version = "13.9.4"
+version = "14.0.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.8.0"
 groups = ["main", "dev"]
 files = [
-    {file = "rich-13.9.4-py3-none-any.whl", hash = "sha256:6049d5e6ec054bf2779ab3358186963bac2ea89175919d699e378b99738c2a90"},
-    {file = "rich-13.9.4.tar.gz", hash = "sha256:439594978a49a09530cff7ebc4b5c7103ef57baf48d5ea3184f21d9a2befa098"},
+    {file = "rich-14.0.0-py3-none-any.whl", hash = "sha256:1c9491e1951aac09caffd42f448ee3d04e58923ffe14993f6e83068dc395d7e0"},
+    {file = "rich-14.0.0.tar.gz", hash = "sha256:82f1bc23a6a21ebca4ae0c45af9bdbc492ed20231dcb63f297d6d1021a9d5725"},
 ]
 
 [package.dependencies]
@@ -4329,13 +4298,13 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "rigour"
-version = "1.0.2"
+version = "1.0.3"
 description = "Financial crime domain data validation and normalization library."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "rigour-1.0.2-py3-none-any.whl", hash = "sha256:c63adf096d18b79aa8f28cc065f0e5d3b726664abbdb57fb95ec0e4d5fbcf1f4"},
+    {file = "rigour-1.0.3-py3-none-any.whl", hash = "sha256:026ac9a362f3b3cdd6f12eb6b73930707d7e6d583f1c4c1c9216ae130dd92723"},
 ]
 
 [package.dependencies]
@@ -4863,21 +4832,15 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "structlog"
-version = "24.4.0"
+version = "25.4.0"
 description = "Structured Logging for Python"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "structlog-24.4.0-py3-none-any.whl", hash = "sha256:597f61e80a91cc0749a9fd2a098ed76715a1c8a01f73e336b746504d1aad7610"},
-    {file = "structlog-24.4.0.tar.gz", hash = "sha256:b27bfecede327a6d2da5fbc96bd859f114ecc398a6389d664f62085ee7ae6fc4"},
+    {file = "structlog-25.4.0-py3-none-any.whl", hash = "sha256:fe809ff5c27e557d14e613f45ca441aabda051d119ee5a0102aaba6ce40eed2c"},
+    {file = "structlog-25.4.0.tar.gz", hash = "sha256:186cd1b0a8ae762e29417095664adf1d6a31702160a46dacb7796ea82f7409e4"},
 ]
-
-[package.extras]
-dev = ["freezegun (>=0.2.8)", "mypy (>=1.4)", "pretend", "pytest (>=6.0)", "pytest-asyncio (>=0.17)", "rich", "simplejson", "twisted"]
-docs = ["cogapp", "furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-mermaid", "sphinxext-opengraph", "twisted"]
-tests = ["freezegun (>=0.2.8)", "pretend", "pytest (>=6.0)", "pytest-asyncio (>=0.17)", "simplejson"]
-typing = ["mypy (>=1.4)", "rich", "twisted"]
 
 [[package]]
 name = "tantivy"
@@ -4932,14 +4895,14 @@ files = [
 
 [[package]]
 name = "textual"
-version = "3.7.1"
+version = "4.0.0"
 description = "Modern Text User Interface framework"
 optional = false
 python-versions = "<4.0.0,>=3.8.1"
 groups = ["main"]
 files = [
-    {file = "textual-3.7.1-py3-none-any.whl", hash = "sha256:ab5d153f4f65e77017977fa150d0376409e0acf5f1d2e25e2e4ab9de6c0d61ff"},
-    {file = "textual-3.7.1.tar.gz", hash = "sha256:a76ba0c8a6c194ef24fd5c3681ebfddca55e7127c064a014128c84fbd7f5d271"},
+    {file = "textual-4.0.0-py3-none-any.whl", hash = "sha256:214051640f890676a670aa7d29cd2a37d27cfe6b2cf866e9d5abc3b6c89c5800"},
+    {file = "textual-4.0.0.tar.gz", hash = "sha256:1cab4ea3cfc0e47ae773405cdd6bc2a17ed76ff7b648379ac8017ea89c5ad28c"},
 ]
 
 [package.dependencies]
@@ -5535,4 +5498,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "f582630c1bf938015acad5ac1f3f15277785621936c5754a495fdf7095b3aa23"
+content-hash = "01cb0cec86c56a905a783ce8984963613b5edf0df1d401e91f23a506e5104b38"

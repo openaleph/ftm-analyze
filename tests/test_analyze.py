@@ -1,7 +1,10 @@
 from followthemoney import model
 from followthemoney.types import registry
+from juditha import get_store
+from juditha.io import load_proxies
 
 from ftm_analyze import logic
+from tests.conftest import FIXTURES_PATH, JUDITHA
 
 
 def _analyze_entity(entity):
@@ -14,7 +17,11 @@ def test_analyze(documents):
     assert len(res) > len(documents)
 
 
-def test_analyze_convert_mentions(documents):
+def test_analyze_convert_mentions(documents, monkeypatch, tmp_path):
+    monkeypatch.setenv("JUDITHA_URI", str(tmp_path / "juditha.db"))
+    get_store.cache_clear()
+    load_proxies(FIXTURES_PATH / JUDITHA)
+
     res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=False)}
     mention = res["2e4168096c5b1ad089d402457fc34a3b5d383240"]
     assert mention.schema.is_a("Mention")
@@ -27,13 +34,13 @@ def test_analyze_convert_mentions(documents):
     org = res[resolved_id]
     assert org.schema.is_a("Organization")
     doc = res[org.first("proof")]
-    tested = False
-    for txt in doc.get("indexText"):
-        tested = (
-            "[Circular Plastics Alliance](Circular+Plastics+Alliance&Organization)"
-            in txt
-        )
-    assert tested
+    assert (
+        "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&s_LegalEntity&s_Organization)"
+        in str(doc.first("indexText"))
+    )
+
+    doc = res[documents[0].id]
+    assert "[info@fooddrinkeurope.eu](p_emailMentioned)" in str(doc.first("indexText"))
 
 
 def test_analyze_ner_extract():

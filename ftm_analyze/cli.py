@@ -60,11 +60,14 @@ def cli_analyze(
     resolve_mentions: Annotated[
         bool, typer.Option(help="Resolve known mentions via `juditha`")
     ] = True,
+    annotate: Annotated[
+        bool, typer.Option(help="Annotate extracted patterns, names and mentions")
+    ] = True,
 ):
     """
     Analyze a stream of entities.
     """
     with ErrorHandler(log):
         entities = smart_read_proxies(in_uri)
-        results = logic.analyze_entities(entities, resolve_mentions)
+        results = logic.analyze_entities(entities, resolve_mentions, annotate)
         smart_write_proxies(out_uri, results)

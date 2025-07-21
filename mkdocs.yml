@@ -5,6 +5,7 @@ nav:
   - Intro: index.md
   - Features:
     - ner.md
+    - annotate.md
   - Reference:
     - reference/cli.md
     - reference/settings.md

@@ -1,8 +1,10 @@
 from functools import lru_cache
+from typing import Generator
 
 import spacy
 from anystore.logging import get_logger
 from fingerprints import clean_entity_prefix
+from followthemoney import Property
 from followthemoney.types import registry
 from normality import collapse_spaces
 from rigour.langs import list_to_alpha3
@@ -55,7 +57,7 @@ def get_models(entity):
         yield _load_model(model)
 
 
-def extract_entities(entity, text):
+def extract_entities(entity, text) -> Generator[tuple[Property, str]]:
     for model in get_models(entity):
         # log.debug("NER tagging %d chars (%s)", len(text), model.lang)
         doc = model(text)
@@ -65,7 +67,8 @@ def extract_entities(entity, text):
                 continue
             if prop in (TAG_COMPANY, TAG_PERSON):
                 name = clean_name(ent.text)
-                yield (prop, name)
+                if name:
+                    yield prop, name
             if prop == TAG_LOCATION:
                 for country in location_country(ent.text):
-                    yield (TAG_COUNTRY, country)
+                    yield TAG_COUNTRY, country

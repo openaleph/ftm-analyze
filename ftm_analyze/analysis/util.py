@@ -1,16 +1,17 @@
 from followthemoney import model
 from normality import collapse_spaces
 
-ANALYZABLE = model.get("Analyzable")
-DOCUMENT = model.get("Document")
-TAG_PERSON = ANALYZABLE.get("peopleMentioned")
-TAG_COMPANY = ANALYZABLE.get("companiesMentioned")
-TAG_LANGUAGE = ANALYZABLE.get("detectedLanguage")
-TAG_COUNTRY = ANALYZABLE.get("detectedCountry")
-TAG_EMAIL = ANALYZABLE.get("emailMentioned")
-TAG_PHONE = ANALYZABLE.get("phoneMentioned")
-TAG_IBAN = ANALYZABLE.get("ibanMentioned")
-TAG_LOCATION = ANALYZABLE.get("location")
+ANALYZABLE = model["Analyzable"]
+DOCUMENT = model["Document"]
+TAG_NAME = ANALYZABLE.properties["namesMentioned"]
+TAG_PERSON = ANALYZABLE.properties["peopleMentioned"]
+TAG_COMPANY = ANALYZABLE.properties["companiesMentioned"]
+TAG_LANGUAGE = ANALYZABLE.properties["detectedLanguage"]
+TAG_COUNTRY = ANALYZABLE.properties["detectedCountry"]
+TAG_EMAIL = ANALYZABLE.properties["emailMentioned"]
+TAG_PHONE = ANALYZABLE.properties["phoneMentioned"]
+TAG_IBAN = ANALYZABLE.properties["ibanMentioned"]
+TAG_LOCATION = ANALYZABLE.properties["locationMentioned"]
 
 
 def text_chunks(texts, sep=" ", max_chunk=25000):

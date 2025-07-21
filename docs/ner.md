@@ -22,5 +22,6 @@ Configure the juditha store uri:
 For example, to load all [PEPs by OpenSanctions](https://www.opensanctions.org/datasets/peps/):
 
     juditha load-dataset -i https://data.opensanctions.org/datasets/latest/peps/index.json
+    juditha build
 
 When using `ftm-analyze` now, it will turn known person names into actual `Person` entities (instead of _mentions_) if they are within this PEPs list (including fuzzy matching).
