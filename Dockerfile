@@ -9,7 +9,6 @@ COPY README.md /app/README.md
 
 WORKDIR /app
 RUN pip install ".[openaleph]"
-RUN pip install psycopg-binary
 
 # download configured spacy models
 # they are in base image now, and could overwritten here via docker ARG
