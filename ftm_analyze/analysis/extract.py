@@ -57,7 +57,7 @@ def get_models(entity):
         yield _load_model(model)
 
 
-def extract_entities(entity, text) -> Generator[tuple[Property, str]]:
+def extract_entities(entity, text) -> Generator[tuple[Property, str], None, None]:
     for model in get_models(entity):
         # log.debug("NER tagging %d chars (%s)", len(text), model.lang)
         doc = model(text)
