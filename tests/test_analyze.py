@@ -13,14 +13,14 @@ def _analyze_entity(entity):
 
 
 def test_analyze(documents):
-    res = [e for e in logic.analyze_entities(documents)]
+    res = [e for e in logic.analyze_entities(documents, resolve_mentions=False)]
     assert len(res) > len(documents)
 
 
 def test_analyze_convert_mentions(documents, monkeypatch, tmp_path):
     monkeypatch.setenv("JUDITHA_URI", str(tmp_path / "juditha.db"))
     get_store.cache_clear()
-    load_proxies(FIXTURES_PATH / JUDITHA)
+    load_proxies(FIXTURES_PATH / JUDITHA, sync=True)
 
     res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=False)}
     mention = res["2e4168096c5b1ad089d402457fc34a3b5d383240"]
