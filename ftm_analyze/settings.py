@@ -61,4 +61,4 @@ class Settings(BaseSettings):
     """Resolve known mentions via `juditha`"""
 
     annotate: bool = True
-    """Insert annotations into `indexText` for mentions"""
+    """Insert annotations into `indexText` for resolved mentions"""

@@ -3,7 +3,7 @@ from typing import Optional
 import typer
 from anystore.cli import ErrorHandler
 from anystore.logging import configure_logging, get_logger
-from ftmq.io import smart_stream_proxies, smart_write_proxies
+from ftmq.io import smart_read_proxies, smart_write_proxies
 from rich.console import Console
 from spacy.cli.download import download
 from typing_extensions import Annotated
@@ -65,6 +65,6 @@ def cli_analyze(
     Analyze a stream of entities.
     """
     with ErrorHandler(log):
-        entities = smart_stream_proxies(in_uri)
+        entities = smart_read_proxies(in_uri)
         results = logic.analyze_entities(entities, resolve_mentions)
         smart_write_proxies(out_uri, results)

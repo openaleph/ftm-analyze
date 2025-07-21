@@ -22,6 +22,6 @@ def documents():
 
 @pytest.fixture(scope="session", autouse=True)
 def juditha():
-    load_proxies(FIXTURES_PATH / JUDITHA)
+    load_proxies(FIXTURES_PATH / JUDITHA, sync=True)
     yield
     rm_rf(".testdata")
