@@ -3,12 +3,14 @@ FROM ghcr.io/dataresearchcenter/ftm-analyze-base:latest
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models
 COPY setup.py /app/setup.py
+COPY requirements.txt /app/requirements.txt
 COPY pyproject.toml /app/pyproject.toml
 COPY VERSION /app/VERSION
 COPY README.md /app/README.md
 
 WORKDIR /app
-RUN pip install ".[openaleph]"
+RUN pip install -q --no-cache-dir -r requirements.txt
+RUN pip install -q --no-cache-dir ".[openaleph]"
 RUN pip install psycopg-binary
 
 # download configured spacy models

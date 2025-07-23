@@ -73,3 +73,12 @@ repos:
     hooks:
       - id: poetry-check
       - id: poetry-lock
+
+  - repo: https://github.com/python-poetry/poetry-plugin-export
+    rev: 1.9.0
+    hooks:
+      - id: poetry-export
+        args: ["--without-hashes", "-o", "requirements.txt"]
+      - id: poetry-export
+        args:
+          ["--without-hashes", "--only", "dev", "-o", "requirements-dev.txt"]
