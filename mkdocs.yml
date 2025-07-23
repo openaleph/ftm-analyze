@@ -6,6 +6,9 @@ nav:
   - Features:
     - ner.md
     - annotate.md
+  - In depth:
+    - pipeline.md
+    - extraction.md
   - Reference:
     - reference/cli.md
     - reference/settings.md

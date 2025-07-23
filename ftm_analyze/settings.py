@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from anystore.settings import BaseSettings
+from pydantic_settings import SettingsConfigDict
 
 
 class NerModels(BaseSettings):

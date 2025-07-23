@@ -12,7 +12,11 @@ from ftm_analyze import __version__, logic
 from ftm_analyze.settings import Settings
 
 settings = Settings()
-cli = typer.Typer(no_args_is_help=True)
+cli = typer.Typer(
+    no_args_is_help=True,
+    pretty_exceptions_enable=True,
+    pretty_exceptions_short=not settings.debug,
+)
 console = Console(stderr=True)
 
 log = get_logger(__name__)
@@ -28,18 +32,17 @@ OUT = Annotated[
 @cli.callback(invoke_without_command=True)
 def cli_base(
     version: Annotated[Optional[bool], typer.Option(..., help="Show version")] = False,
+    settings: Annotated[
+        Optional[bool], typer.Option(..., help="Show current settings")
+    ] = False,
 ):
     if version:
         print(__version__)
         raise typer.Exit()
+    if settings:
+        print(Settings())
+        raise typer.Exit()
     configure_logging()
-
-
-@cli.command("settings")
-def cli_settings():
-    """Show current configuration"""
-    with ErrorHandler(log):
-        console.print(settings)
 
 
 @cli.command("download-spacy")
