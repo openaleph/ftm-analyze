@@ -91,3 +91,13 @@ def test_analyze_extract_iban():
     assert bank_account.first("proof") == "test"
     doc = results["PlainText"]
     assert "[CH5604835012345678009](p_ibanMentioned)" in doc.first("indexText")
+
+
+def test_analyze_extract_location():
+    text = "Jane Doe lives in New York City"
+    entity = model.make_entity("PlainText")
+    entity.id = "test"
+    entity.add("bodyText", text)
+    entity = _analyze_entity(entity)
+    assert entity.first("locationMentioned", "New York City")
+    assert "lives in [New York City](p_locationMentioned)"
