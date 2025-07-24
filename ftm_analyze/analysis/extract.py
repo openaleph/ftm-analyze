@@ -65,7 +65,7 @@ def extract_entities(entity, text) -> Generator[tuple[Property, str], None, None
             prop = SPACY_TYPES.get(ent.label_)
             if prop is None:
                 continue
-            if prop in (TAG_COMPANY, TAG_PERSON):
+            if prop in (TAG_COMPANY, TAG_PERSON, TAG_LOCATION):
                 name = clean_name(ent.text)
                 if name:
                     yield prop, name

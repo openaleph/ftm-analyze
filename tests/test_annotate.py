@@ -1,9 +1,9 @@
-from ftm_analyze.analysis.util import TAG_EMAIL, TAG_NAME, TAG_PERSON
+from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_NAME, TAG_PERSON
 from ftm_analyze.annotate import Annotation, Annotator, clean_text
 
 
 def test_annotate(documents):
-    assert clean_text("lorem [foo. x](bar) \n ipsum") == "lorem foo. x ipsum"
+    assert clean_text("lorem [foo. x](bar) \n ipsum") == "lorem foo. x bar ipsum"
 
     a = Annotation(value="Mrs. Jane Doe")
     assert a.value == "Mrs. Jane Doe"
@@ -27,3 +27,8 @@ def test_annotate(documents):
         if "[info@fooddrinkeurope.eu](p_emailMentioned)" in text:
             tested = True
     assert tested
+
+    # ignore non mentions
+    annotator.add_tag(TAG_COUNTRY, "fr")
+    assert "info@fooddrinkeurope.eu" in annotator.annotations
+    assert "fr" not in annotator.annotations

@@ -3,7 +3,6 @@ Annotate entities for use with
 https://www.elastic.co/docs/reference/elasticsearch/plugins/mapper-annotated-text-usage
 """
 
-import re
 from functools import cache
 from typing import Iterable, Self
 from urllib.parse import quote_plus as qs
@@ -14,13 +13,31 @@ from followthemoney.compare import _normalize_names
 from normality import collapse_spaces
 from pydantic import BaseModel
 
-from ftm_analyze.analysis.util import TAG_COMPANY, TAG_NAME, TAG_PERSON
+from ftm_analyze.analysis.util import (
+    TAG_COMPANY,
+    TAG_EMAIL,
+    TAG_IBAN,
+    TAG_LOCATION,
+    TAG_NAME,
+    TAG_PERSON,
+    TAG_PHONE,
+)
 
 ANNOTATED = "__annotated__"
+MENTION_PROPS = {
+    TAG_NAME.name,
+    TAG_PERSON.name,
+    TAG_COMPANY.name,
+    TAG_EMAIL.name,
+    TAG_PHONE.name,
+    TAG_IBAN.name,
+    TAG_LOCATION.name,
+}
 PER = "Person"
 ORG = "Organization"
 LEG = "LegalEntity"
 NAMED = {TAG_COMPANY.name, TAG_PERSON.name, TAG_NAME.name}
+SKIP_CHARS = "()[]"
 
 
 def entity_fingerprints(entity: EntityProxy) -> set[str]:
@@ -40,7 +57,9 @@ def make_fingerprints(schemata: set[Schema], names: Iterable[str]) -> set[str]:
 
 def clean_text(text: str) -> str:
     """Clean the text before annotation: Remove [...](...) patterns"""
-    return collapse_spaces(re.sub(r"\[(.*)\]\(.*\)", r"\1", text)) or ""
+    for c in SKIP_CHARS:
+        text = text.replace(c, " ")
+    return collapse_spaces(text) or ""
 
 
 @cache
@@ -113,12 +132,9 @@ class Annotation(BaseModel):
             return f"[{self.value}]({query})"
 
     def annotate(self, text: str) -> str:
-        cleaned = clean_text(text)
-        if not cleaned:
-            return ""
         repl = self.repl
         if repl:
-            return cleaned.replace(self.value, repl)
+            return text.replace(self.value, repl)
         return text
 
     def update(self, a: Self) -> None:
@@ -151,6 +167,9 @@ class Annotator:
         self.annotations: dict[str, Annotation] = {}
 
     def add(self, a: Annotation) -> None:
+        if not a.props & MENTION_PROPS:
+            # skip non mentions
+            return
         if a.value in self.annotations:
             self.annotations[a.value].update(a)
         else:
@@ -173,6 +192,7 @@ class Annotator:
 
     def get_texts(self) -> StrGenerator:
         for text in self.entity.get_type_values(registry.text):
+            text = clean_text(text)
             annotated = self.annotate_text(text)
             if annotated:
                 yield annotated
