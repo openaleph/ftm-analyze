@@ -13,8 +13,8 @@ ORIGIN = "analyze"
 @task(app=app)
 def analyze(job: DatasetJob) -> None:
     entities: list[EntityProxy] = list(job.load_entities())
-    with job.get_writer(ORIGIN) as bulk:
+    with job.get_writer() as bulk:
         for entity in analyze_entities(entities):
-            bulk.add_entity(entity)
+            bulk.put(entity, origin=ORIGIN)
             entities.append(entity)
     defer.index(app, job.dataset, entities, **job.context)
