@@ -1,10 +1,11 @@
 from pathlib import Path
 
 from anystore.settings import BaseSettings
+from pydantic_settings import BaseSettings as _BaseSettings
 from pydantic_settings import SettingsConfigDict
 
 
-class NerModels(BaseSettings):
+class NerModels(_BaseSettings):
     """
     Easily overwrite specific language model for specific languages via:
 
