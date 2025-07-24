@@ -40,7 +40,7 @@ def make_fingerprints(schemata: set[Schema], names: Iterable[str]) -> set[str]:
 
 def clean_text(text: str) -> str:
     """Clean the text before annotation: Remove [...](...) patterns"""
-    return collapse_spaces(re.sub(r"\[([\w]+)]\([\w]+\)", r"\1", text)) or ""
+    return collapse_spaces(re.sub(r"\[(.*)\]\(.*\)", r"\1", text)) or ""
 
 
 @cache

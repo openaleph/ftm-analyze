@@ -3,7 +3,7 @@ from ftm_analyze.annotate import Annotation, Annotator, clean_text
 
 
 def test_annotate(documents):
-    assert clean_text("lorem [foo](bar) \n ipsum") == "lorem foo ipsum"
+    assert clean_text("lorem [foo. x](bar) \n ipsum") == "lorem foo. x ipsum"
 
     a = Annotation(value="Mrs. Jane Doe")
     assert a.value == "Mrs. Jane Doe"
