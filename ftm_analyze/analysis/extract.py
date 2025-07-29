@@ -3,11 +3,11 @@ from typing import Generator
 
 import spacy
 from anystore.logging import get_logger
-from fingerprints import clean_entity_prefix
 from followthemoney import Property
 from followthemoney.types import registry
 from normality import collapse_spaces
 from rigour.langs import list_to_alpha3
+from rigour.names import remove_org_prefixes, remove_person_prefixes
 
 from ftm_analyze.analysis.country import location_country
 from ftm_analyze.analysis.util import TAG_COMPANY, TAG_COUNTRY, TAG_LOCATION, TAG_PERSON
@@ -27,6 +27,11 @@ SPACY_TYPES = {
     "GPE": TAG_LOCATION,
 }
 NER_MODELS = settings.ner_models.model_dump()
+
+
+def clean_entity_prefix(name: str) -> str:
+    name = remove_org_prefixes(name)
+    return remove_person_prefixes(name)
 
 
 def clean_name(text):
