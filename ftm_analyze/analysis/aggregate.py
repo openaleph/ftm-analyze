@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from anystore.logging import get_logger
+from ftmq.util import clean_name
 
 from ftm_analyze.analysis.ft_type_model import FTTypeModel
 from ftm_analyze.settings import Settings
@@ -20,7 +21,7 @@ class TagAggregatorFasttext(object):
         self.confidence = confidence
 
     def add(self, prop, value):
-        if value is None:
+        if clean_name(value) is None:
             return
         key = prop.type.node_id_safe(value)
         self.values[(key, prop)].add(value)

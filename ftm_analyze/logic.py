@@ -40,5 +40,5 @@ def analyze_entities(
     resolve_mentions: bool | None = settings.resolve_mentions,
     annotate: bool | None = settings.annotate,
 ) -> Generator[EntityProxy, None, None]:
-    for e in logged_items(entities, "Analyze", item_name="Entity", logger=log):
+    for e in logged_items(entities, "Analyze", 1000, item_name="Entity", logger=log):
         yield from analyze_entity(e, resolve_mentions, annotate)
