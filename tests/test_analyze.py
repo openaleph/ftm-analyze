@@ -35,7 +35,7 @@ def test_analyze_convert_mentions(documents, monkeypatch, tmp_path):
     assert org.schema.is_a("Organization")
     doc = res[org.first("proof")]
     assert (
-        "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&s_LegalEntity&s_Organization)"
+        "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&q_37500572&s_LegalEntity&s_Organization)"
         in str(doc.first("indexText"))
     )
 

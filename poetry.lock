@@ -1355,12 +1355,10 @@ name = "ftmq"
 version = "4.1.0"
 description = "followthemoney query dsl and io helpers"
 optional = false
-python-versions = "<4,>=3.11"
+python-versions = ">=3.11,<4"
 groups = ["main"]
-files = [
-    {file = "ftmq-4.1.0-py3-none-any.whl", hash = "sha256:49608f6c9f0fdfdcb189447508c4a1b7e88872fb8a7eb29bd12c9eab5060d408"},
-    {file = "ftmq-4.1.0.tar.gz", hash = "sha256:90949b47762a573a5e2d71cbd08781320049b18f8ea4136e8f4d745a25b47bf4"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 anystore = ">=0.3.9,<0.4.0"
@@ -1380,6 +1378,12 @@ level = ["plyvel (>=1.5.1,<2.0.0)"]
 postgres = ["psycopg2 (>=2.9.10,<3.0.0)", "sqlalchemy (>=2.0.36,<3.0.0)"]
 redis = ["fakeredis (>=2.26.2,<3.0.0)", "redis (>=5.2.1,<6.0.0)"]
 sql = ["sqlalchemy (>=2.0.36,<3.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/dataresearchcenter/ftmq.git"
+reference = "HEAD"
+resolved_reference = "ed514d7f859eeccb4f7092d7a250d9e3aef9de53"
 
 [[package]]
 name = "ghp-import"
@@ -5608,4 +5612,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "063c85106a788c13939d44d2ab4bdc09d0a063016af70254621c044589fff188"
+content-hash = "8d33cd337f7d3de871e896ad96aa504093d227172d92ce726608424898e71d96"

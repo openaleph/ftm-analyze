@@ -4,14 +4,15 @@ https://www.elastic.co/docs/reference/elasticsearch/plugins/mapper-annotated-tex
 """
 
 from functools import cache
-from typing import Iterable, Self
+from typing import Self
 from urllib.parse import quote_plus as qs
 
 from anystore.types import StrGenerator
 from followthemoney import E, EntityProxy, Property, Schema, model, registry
-from followthemoney.compare import _normalize_names
+from ftmq.util import make_fingerprints
 from normality import collapse_spaces
 from pydantic import BaseModel
+from rigour.names import Name, normalize_name, tag_org_name, tag_person_name
 
 from ftm_analyze.analysis.util import (
     TAG_COMPANY,
@@ -40,26 +41,23 @@ NAMED = {TAG_COMPANY.name, TAG_PERSON.name, TAG_NAME.name}
 SKIP_CHARS = "()[]"
 
 
-def entity_fingerprints(entity: EntityProxy) -> set[str]:
-    """Get the set of entity name fingerprints"""
-    # FIXME
-    return set(_normalize_names(entity.schema, entity.names))
-
-
-def make_fingerprints(schemata: set[Schema], names: Iterable[str]) -> set[str]:
-    """Mimic `fingerprints.generate`"""
-    # FIXME
-    fps: set[str] = set()
-    for schema in schemata:
-        fps.update(set(_normalize_names(schema, names)))
-    return fps
-
-
 def clean_text(text: str) -> str:
     """Clean the text before annotation: Remove [...](...) patterns"""
     for c in SKIP_CHARS:
         text = text.replace(c, " ")
     return collapse_spaces(text) or ""
+
+
+def get_symbols(*names: str) -> set[str]:
+    symbols: set[str] = set()
+    for name in names:
+        n = Name(name)
+        for symbol in [
+            *tag_person_name(n, normalize_name).symbols,
+            *tag_org_name(n, normalize_name).symbols,
+        ]:
+            symbols.add(str(symbol.id))
+    return symbols
 
 
 @cache
@@ -85,10 +83,14 @@ class Annotation(BaseModel):
 
     @property
     def fingerprints(self) -> set[str]:
+        if not self.is_name:
+            return set()
         schemata = self._schemata or {model[LEG]}
-        if self.is_name:
-            return make_fingerprints(schemata, self._names)
-        return set()
+        return make_fingerprints(schemata, self._names)
+
+    @property
+    def symbols(self) -> set[str]:
+        return get_symbols(*self._names)
 
     @property
     def _names(self) -> set[str]:
@@ -123,6 +125,8 @@ class Annotation(BaseModel):
             parts.add(f"p_{prop}")
         for schema in self._schemata:
             parts.add(f"s_{schema.name}")
+        for symbol in self.symbols:
+            parts.add(f"q_{symbol}")
         return "&".join(sorted(parts))
 
     @property
