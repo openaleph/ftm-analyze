@@ -1,7 +1,7 @@
 annotated-types==0.7.0 ; python_version >= "3.11" and python_version < "3.14"
 asttokens==3.0.0 ; python_version >= "3.11" and python_version < "3.14"
 babel==2.17.0 ; python_version >= "3.11" and python_version < "3.14"
-backrefs==5.9 ; python_version >= "3.11" and python_version < "3.14"
+backrefs==6.0.1 ; python_version >= "3.11" and python_version < "3.14"
 black==25.1.0 ; python_version >= "3.11" and python_version < "3.14"
 bump2version==1.0.1 ; python_version >= "3.11" and python_version < "3.14"
 certifi==2025.7.14 ; python_version >= "3.11" and python_version < "3.14"
