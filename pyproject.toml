@@ -17,7 +17,7 @@ classifiers = [
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "anystore (>=0.3.8,<0.4.0)",
-    "ftmq @ git+https://github.com/dataresearchcenter/ftmq.git",
+    "ftmq (>=4.1.1,<5.0.0)",
     "typer",
     "pydantic (>=2.11.7,<3.0.0)",
     "pydantic-settings (>=2.9.1,<3.0.0)",
@@ -31,7 +31,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate (>=0.0.13,<0.0.14)"]
+openaleph = ["openaleph-procrastinate (>=0.0.17,<0.0.18)"]
 
 [project.scripts]
 ftm-analyze = "ftm_analyze.cli:cli"
@@ -66,3 +66,7 @@ poetry-plugin-export = ">=1.8"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest_env]
+DEBUG = 1
+FTM_ANALYZE_ANNOTATE = 1

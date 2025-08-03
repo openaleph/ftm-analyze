@@ -62,5 +62,5 @@ class Settings(BaseSettings):
     resolve_mentions: bool = True
     """Resolve known mentions via `juditha`"""
 
-    annotate: bool = True
+    annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
