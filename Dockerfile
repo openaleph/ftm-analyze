@@ -1,4 +1,4 @@
-FROM ghcr.io/dataresearchcenter/ftm-analyze-base:latest
+FROM ghcr.io/openaleph/ftm-analyze-base:latest
 
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models

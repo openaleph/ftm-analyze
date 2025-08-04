@@ -23,7 +23,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/dataresearchcenter/ftm-analyze-base
+          images: ghcr.io/openaleph/ftm-analyze-base
           tags: |
             type=raw,value=latest
       - name: Set up Docker Buildx
@@ -58,7 +58,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/dataresearchcenter/ftm-analyze
+          images: ghcr.io/openaleph/ftm-analyze
           tags: |
             type=ref,event=branch
             type=semver,pattern={{version}}
