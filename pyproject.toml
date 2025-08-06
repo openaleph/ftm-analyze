@@ -28,10 +28,11 @@ dependencies = [
     "rigour (>=1.0.2,<2.0.0)",
     "followthemoney (>=4.1.1,<5.0.0)",
     "schwifty (>=2025.6.0,<2026.0.0)",
+    "openaleph-procrastinate (>=0.0.20,<0.0.21)",
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate (>=0.0.17,<0.0.18)"]
+openaleph = ["openaleph-procrastinate (>=0.0.20,<0.0.21)"]
 
 [project.scripts]
 ftm-analyze = "ftm_analyze.cli:cli"

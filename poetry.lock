@@ -294,10 +294,9 @@ sql = ["sqlalchemy (>=2.0.36,<3.0.0)"]
 name = "asgiref"
 version = "3.9.1"
 description = "ASGI specs, helper code, and adapters"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "asgiref-3.9.1-py3-none-any.whl", hash = "sha256:f3bba7092a48005b5f5bacd747d36ee4a5a61f4a269a6df590b43144355ebd2c"},
     {file = "asgiref-3.9.1.tar.gz", hash = "sha256:a5ab6582236218e5ef1648f242fd9f10626cfd4de8dc377db215d5d5098e3142"},
@@ -902,10 +901,9 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 name = "croniter"
 version = "6.0.0"
 description = "croniter provides iteration for datetime object with cron like format"
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.6"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "croniter-6.0.0-py2.py3-none-any.whl", hash = "sha256:2f878c3856f17896979b2a4379ba1f09c83e374931ea15cc835c5dd2eee9b368"},
     {file = "croniter-6.0.0.tar.gz", hash = "sha256:37c504b313956114a983ece2c2b07790b1f1094fe9d81cc94739214748255577"},
@@ -2857,27 +2855,28 @@ files = [
 
 [[package]]
 name = "openaleph-procrastinate"
-version = "0.0.17"
+version = "0.0.20"
 description = "Task queue logic for OpenAleph built upon procrastinate"
-optional = true
+optional = false
 python-versions = "<4,>=3.11"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
-    {file = "openaleph_procrastinate-0.0.17-py3-none-any.whl", hash = "sha256:7927cfcb736ecd85d5b758bd1a618e87b840df442df43802ad5138e2a3340f59"},
-    {file = "openaleph_procrastinate-0.0.17.tar.gz", hash = "sha256:b10696d425c0260d5bcda62dc41e13b28af1ee08a5e45b5645c1f775f5d7bb52"},
+    {file = "openaleph_procrastinate-0.0.20-py3-none-any.whl", hash = "sha256:a9aff0945a15079bec5fd508e9d2d95ce31f7ba7ced8d0762d2a554775b6dcfb"},
+    {file = "openaleph_procrastinate-0.0.20.tar.gz", hash = "sha256:92e27db97c189daf0631fa3646a757290c73b301b428054a7149f6422c5b2d56"},
 ]
 
 [package.dependencies]
 followthemoney = ">=4.1.1,<5.0.0"
-ftmq = ">=4.1.0,<5.0.0"
+ftmq = ">=4.1.1,<5.0.0"
 procrastinate = ">=3.2.2"
 psycopg2-binary = ">=2.9.10,<3.0.0"
 pydantic = ">=2.11.7,<3.0.0"
 pydantic-settings = ">=2.10.1,<3.0.0"
 
 [package.extras]
+backlog = ["deltalake (>=1.1.3,<2.0.0)", "pandas (>=2.3.1,<3.0.0)"]
 django = ["dj-database-url (>=2.3.0,<3.0.0)", "django (>=5.2,<6.0)", "procrastinate[django] (>=3.1.0,<4.0.0)"]
+jobs-export = ["deltalake (>=1.1.3,<2.0.0)", "pandas (>=2.3.1,<3.0.0)"]
 
 [[package]]
 name = "openpyxl"
@@ -3278,10 +3277,9 @@ murmurhash = ">=0.28.0,<1.1.0"
 name = "procrastinate"
 version = "3.4.0"
 description = "Postgres-based distributed task processing library"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "procrastinate-3.4.0-py3-none-any.whl", hash = "sha256:dbcca697dc78d8b71873692e3567de482db076bf06f55af775c09aa82a3e1066"},
     {file = "procrastinate-3.4.0.tar.gz", hash = "sha256:9cd3af413f351c88da40681d3d88b6df8904c8a3423aec87687c0b7eb7d684a4"},
@@ -3429,10 +3427,9 @@ files = [
 name = "psycopg"
 version = "3.2.9"
 description = "PostgreSQL database adapter for Python"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg-3.2.9-py3-none-any.whl", hash = "sha256:01a8dadccdaac2123c916208c96e06631641c0566b22005493f09663c7a8d3b6"},
     {file = "psycopg-3.2.9.tar.gz", hash = "sha256:2fbb46fcd17bc81f993f28c47f1ebea38d66ae97cc2dbc3cad73b37cefbff700"},
@@ -3455,10 +3452,9 @@ test = ["anyio (>=4.0)", "mypy (>=1.14)", "pproxy (>=2.7)", "pytest (>=6.2.5)", 
 name = "psycopg-pool"
 version = "3.2.6"
 description = "Connection Pool for Psycopg"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg_pool-3.2.6-py3-none-any.whl", hash = "sha256:5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7"},
     {file = "psycopg_pool-3.2.6.tar.gz", hash = "sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5"},
@@ -3471,10 +3467,9 @@ typing-extensions = ">=4.6"
 name = "psycopg2-binary"
 version = "2.9.10"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
-optional = true
+optional = false
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg2-binary-2.9.10.tar.gz", hash = "sha256:4b3df0e6990aa98acda57d983942eff13d824135fe2250e6522edaa782a06de2"},
     {file = "psycopg2_binary-2.9.10-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:0ea8e3d0ae83564f2fc554955d327fa081d065c8ca5cc6d2abb643e2c9c1200f"},
@@ -5603,4 +5598,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "06150721efa94c2dbd4fe080658ba6032aee49658c9d3215d1d41cc950788bdf"
+content-hash = "fb5ea5b5eeb578cac747d3c6a7c321426b36ad1240eb3de1429f3bb046088fb2"
