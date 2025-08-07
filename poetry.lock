@@ -294,9 +294,10 @@ sql = ["sqlalchemy (>=2.0.36,<3.0.0)"]
 name = "asgiref"
 version = "3.9.1"
 description = "ASGI specs, helper code, and adapters"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "asgiref-3.9.1-py3-none-any.whl", hash = "sha256:f3bba7092a48005b5f5bacd747d36ee4a5a61f4a269a6df590b43144355ebd2c"},
     {file = "asgiref-3.9.1.tar.gz", hash = "sha256:a5ab6582236218e5ef1648f242fd9f10626cfd4de8dc377db215d5d5098e3142"},
@@ -761,26 +762,6 @@ pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<3.0.0"
 srsly = ">=2.4.0,<3.0.0"
 
 [[package]]
-name = "countrynames"
-version = "1.16.10"
-description = "A library to map country names to 2-letter ISO codes."
-optional = false
-python-versions = ">=3.10"
-groups = ["main"]
-files = [
-    {file = "countrynames-1.16.10-py3-none-any.whl", hash = "sha256:b1e59d5d30a2df05c7b49d4f483ebfa405d3dc11794b1b18e4e0533368471664"},
-]
-
-[package.dependencies]
-banal = ">=1.0.6,<1.1.0"
-normality = ">=2.5.0"
-pyyaml = ">=5.0.0,<7.0.0"
-rapidfuzz = ">=3.9.0,<4.0.0"
-
-[package.extras]
-dev = ["build", "bump2version", "coverage (>=4.1)", "mypy", "pytest", "pytest-cov", "ruff", "types-pyyaml"]
-
-[[package]]
 name = "countrytagger"
 version = "0.1.2"
 description = "Tag the names of countries and in text."
@@ -901,9 +882,10 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 name = "croniter"
 version = "6.0.0"
 description = "croniter provides iteration for datetime object with cron like format"
-optional = false
+optional = true
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.6"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "croniter-6.0.0-py2.py3-none-any.whl", hash = "sha256:2f878c3856f17896979b2a4379ba1f09c83e374931ea15cc835c5dd2eee9b368"},
     {file = "croniter-6.0.0.tar.gz", hash = "sha256:37c504b313956114a983ece2c2b07790b1f1094fe9d81cc94739214748255577"},
@@ -1164,20 +1146,19 @@ pyflakes = ">=3.4.0,<3.5.0"
 
 [[package]]
 name = "followthemoney"
-version = "4.1.1"
+version = "4.1.2"
 description = "A data model for anti corruption data modeling and analysis."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "followthemoney-4.1.1-py3-none-any.whl", hash = "sha256:9f5cfbad94cd1a9b84bc9ca40e1e77195dae10e2b99a2d958ef910719af9399d"},
+    {file = "followthemoney-4.1.2-py3-none-any.whl", hash = "sha256:ca1a231f1290614eafb346d1731371ebfba875661c50a001f335ad60044f39aa"},
 ]
 
 [package.dependencies]
 babel = ">=2.14.0,<3.0.0"
 banal = ">=1.0.6,<1.1.0"
 click = ">=8.0,<9.0.0"
-countrynames = ">=1.13.0,<2.0.0"
 networkx = ">=2.5,<3.5"
 normality = ">=3.0.1,<4.0.0"
 openpyxl = ">=3.0.5,<4.0.0"
@@ -1189,7 +1170,7 @@ pytz = ">=2021.1"
 pyyaml = ">=5.0.0,<7.0.0"
 rdflib = ">=6.2.0,<7.2.0"
 requests = ">=2.21.0,<3.0.0"
-rigour = ">=1.1.1,<2.0.0"
+rigour = ">=1.2.0,<2.0.0"
 sqlalchemy = {version = ">=2.0.0,<3.0.0", extras = ["mypy"]}
 
 [package.extras]
@@ -2855,18 +2836,19 @@ files = [
 
 [[package]]
 name = "openaleph-procrastinate"
-version = "0.0.20"
+version = "0.0.21"
 description = "Task queue logic for OpenAleph built upon procrastinate"
-optional = false
+optional = true
 python-versions = "<4,>=3.11"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
-    {file = "openaleph_procrastinate-0.0.20-py3-none-any.whl", hash = "sha256:a9aff0945a15079bec5fd508e9d2d95ce31f7ba7ced8d0762d2a554775b6dcfb"},
-    {file = "openaleph_procrastinate-0.0.20.tar.gz", hash = "sha256:92e27db97c189daf0631fa3646a757290c73b301b428054a7149f6422c5b2d56"},
+    {file = "openaleph_procrastinate-0.0.21-py3-none-any.whl", hash = "sha256:e5ba497fa30fdd7ab90e73815307593a8df39e0182011cf30bdd9fe7a3510862"},
+    {file = "openaleph_procrastinate-0.0.21.tar.gz", hash = "sha256:a306c6cd31a8ab23bba9acebe1d7d7332a90afbcfb878401f67088035f9e498b"},
 ]
 
 [package.dependencies]
-followthemoney = ">=4.1.1,<5.0.0"
+followthemoney = ">=4.1.2,<5.0.0"
 ftmq = ">=4.1.1,<5.0.0"
 procrastinate = ">=3.2.2"
 psycopg2-binary = ">=2.9.10,<3.0.0"
@@ -2874,9 +2856,7 @@ pydantic = ">=2.11.7,<3.0.0"
 pydantic-settings = ">=2.10.1,<3.0.0"
 
 [package.extras]
-backlog = ["deltalake (>=1.1.3,<2.0.0)", "pandas (>=2.3.1,<3.0.0)"]
 django = ["dj-database-url (>=2.3.0,<3.0.0)", "django (>=5.2,<6.0)", "procrastinate[django] (>=3.1.0,<4.0.0)"]
-jobs-export = ["deltalake (>=1.1.3,<2.0.0)", "pandas (>=2.3.1,<3.0.0)"]
 
 [[package]]
 name = "openpyxl"
@@ -3277,9 +3257,10 @@ murmurhash = ">=0.28.0,<1.1.0"
 name = "procrastinate"
 version = "3.4.0"
 description = "Postgres-based distributed task processing library"
-optional = false
+optional = true
 python-versions = ">=3.9"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "procrastinate-3.4.0-py3-none-any.whl", hash = "sha256:dbcca697dc78d8b71873692e3567de482db076bf06f55af775c09aa82a3e1066"},
     {file = "procrastinate-3.4.0.tar.gz", hash = "sha256:9cd3af413f351c88da40681d3d88b6df8904c8a3423aec87687c0b7eb7d684a4"},
@@ -3427,9 +3408,10 @@ files = [
 name = "psycopg"
 version = "3.2.9"
 description = "PostgreSQL database adapter for Python"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg-3.2.9-py3-none-any.whl", hash = "sha256:01a8dadccdaac2123c916208c96e06631641c0566b22005493f09663c7a8d3b6"},
     {file = "psycopg-3.2.9.tar.gz", hash = "sha256:2fbb46fcd17bc81f993f28c47f1ebea38d66ae97cc2dbc3cad73b37cefbff700"},
@@ -3452,9 +3434,10 @@ test = ["anyio (>=4.0)", "mypy (>=1.14)", "pproxy (>=2.7)", "pytest (>=6.2.5)", 
 name = "psycopg-pool"
 version = "3.2.6"
 description = "Connection Pool for Psycopg"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg_pool-3.2.6-py3-none-any.whl", hash = "sha256:5887318a9f6af906d041a0b1dc1c60f8f0dda8340c2572b74e10907b51ed5da7"},
     {file = "psycopg_pool-3.2.6.tar.gz", hash = "sha256:0f92a7817719517212fbfe2fd58b8c35c1850cdd2a80d36b581ba2085d9148e5"},
@@ -3467,9 +3450,10 @@ typing-extensions = ">=4.6"
 name = "psycopg2-binary"
 version = "2.9.10"
 description = "psycopg2 - Python-PostgreSQL Database Adapter"
-optional = false
+optional = true
 python-versions = ">=3.8"
 groups = ["main"]
+markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg2-binary-2.9.10.tar.gz", hash = "sha256:4b3df0e6990aa98acda57d983942eff13d824135fe2250e6522edaa782a06de2"},
     {file = "psycopg2_binary-2.9.10-cp310-cp310-macosx_12_0_x86_64.whl", hash = "sha256:0ea8e3d0ae83564f2fc554955d327fa081d065c8ca5cc6d2abb643e2c9c1200f"},
@@ -4359,13 +4343,13 @@ jupyter = ["ipywidgets (>=7.5.1,<9)"]
 
 [[package]]
 name = "rigour"
-version = "1.1.1"
+version = "1.2.2"
 description = "Financial crime domain data validation and normalization library."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "rigour-1.1.1-py3-none-any.whl", hash = "sha256:53a2b4b2724bc37639aea32d6193c89f0173c75a842d9bfad1566379b55d6a7f"},
+    {file = "rigour-1.2.2-py3-none-any.whl", hash = "sha256:185b15ddd2b89fea8f21d6894d67aa6816439b24836a6d3b11fc6c3bc9d079f8"},
 ]
 
 [package.dependencies]
@@ -4376,6 +4360,7 @@ fingerprints = ">=1.0.1,<2.0.0"
 jellyfish = ">=1.0.0,<2.0.0"
 jinja2 = ">=3.1.0,<4.0.0"
 normality = ">=3.0.1,<4.0.0"
+orjson = ">=3.0.0,<4.0.0"
 pyicu = ">=2.15.2,<3.0.0"
 python-stdnum = ">=2.0,<3.0.0"
 pytz = ">=2021.1"
@@ -5598,4 +5583,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "fb5ea5b5eeb578cac747d3c6a7c321426b36ad1240eb3de1429f3bb046088fb2"
+content-hash = "e390c6ce3004dbb1ececf5c677805e5a298be8bfa9651046535f39eafee0c5d2"
