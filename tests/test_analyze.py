@@ -86,9 +86,15 @@ def test_analyze_extract_iban():
     entity.add("bodyText", text)
     results = {e.schema.name: e for e in logic.analyze_entity(entity)}
     bank_account = results["BankAccount"]
-    assert bank_account.first("iban") == "CH5604835012345678009"
-    assert bank_account.id == "1b8e09f7119e26d44460014eaa8748874e2bf53d"
+    assert bank_account.caption == "CH5604835012345678009"
+    assert (
+        bank_account.first("iban")
+        == bank_account.first("accountNumber")
+        == "CH5604835012345678009"
+    )
+    assert bank_account.id == "iban-ch5604835012345678009"
     assert bank_account.first("proof") == "test"
+    assert "ch" in bank_account.countries
     doc = results["PlainText"]
     assert "[CH5604835012345678009](p_ibanMentioned)" in doc.first("indexText")
 

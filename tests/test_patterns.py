@@ -2,7 +2,7 @@ from ftm_analyze.analysis.patterns import (
     EMAIL_REGEX,
     IBAN_REGEX,
     PHONE_REGEX,
-    check_iban,
+    get_iban_country,
 )
 
 
@@ -46,7 +46,7 @@ def test_patterns_iban():
         assert len(matches) == 1
     valid = 0
     for iban in IBANS:
-        if check_iban(iban):
+        if get_iban_country(iban):
             valid += 1
     assert valid > 1
 

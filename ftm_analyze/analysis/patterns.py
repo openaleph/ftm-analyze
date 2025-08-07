@@ -19,11 +19,13 @@ REGEX_TYPES = {
 }
 
 
-def check_iban(value: str) -> str | None:
+def get_iban_country(value: str) -> str | None:
     try:
-        return schwifty.IBAN(value, allow_invalid=True).is_valid
-    except schwifty.exceptions.SchwiftyException:
-        return
+        iban = schwifty.IBAN(value, allow_invalid=True)
+        if iban.is_valid:
+            return iban.country_code
+    except Exception:
+        pass
 
 
 def extract_patterns(entity, text):
@@ -33,9 +35,6 @@ def extract_patterns(entity, text):
             value = prop.type.clean(match_text, proxy=entity)
             if value is None:
                 continue
-            if prop == TAG_IBAN:
-                if not check_iban(value):
-                    continue
             yield (prop, value)
             for country in ensure_list(prop.type.country_hint(value)):
                 yield (TAG_COUNTRY, country)

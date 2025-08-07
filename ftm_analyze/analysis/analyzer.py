@@ -7,12 +7,13 @@ from followthemoney import model
 from followthemoney.proxy import EntityProxy
 from followthemoney.types import registry
 from followthemoney.util import make_entity_id
+from normality import slugify
 from rigour.names import pick_name
 
 from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
 from ftm_analyze.analysis.extract import extract_entities
 from ftm_analyze.analysis.language import detect_languages
-from ftm_analyze.analysis.patterns import extract_patterns
+from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
 from ftm_analyze.analysis.util import (
     ANALYZABLE,
     DOCUMENT,
@@ -98,9 +99,11 @@ class Analyzer(object):
 
             elif prop == TAG_IBAN:
                 for value in values:
-                    iban_proxy = self.make_bankaccount(value, countries)
-                    entity_ids.add(iban_proxy.id)
-                    yield iban_proxy
+                    country = get_iban_country(value)
+                    if country is not None:
+                        iban_proxy = self.make_bankaccount(value, country)
+                        entity_ids.add(iban_proxy.id)
+                        yield iban_proxy
 
             # annotate mentions
             if self.annotate and proxy is not None:
@@ -161,12 +164,11 @@ class Analyzer(object):
         proxy.add("country", countries)
         return proxy
 
-    def make_bankaccount(
-        self, value: str, countries: set[str] | None = None
-    ) -> EntityProxy:
+    def make_bankaccount(self, value: str, country: str) -> EntityProxy:
         bank_account = model.make_entity("BankAccount")
-        bank_account.make_id("iban", self.entity.id, value)
+        bank_account.id = slugify(f"iban {value}")
         bank_account.add("proof", self.entity.id)
+        bank_account.add("accountNumber", value)
         bank_account.add("iban", value)
-        bank_account.add("country", countries)
+        bank_account.add("country", country)
         return bank_account
