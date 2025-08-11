@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     ner_models: NerModels = NerModels()
     """Spacy models"""
 
-    resolve_mentions: bool = True
+    resolve_mentions: bool = False
     """Resolve known mentions via `juditha`"""
 
     annotate: bool = False
