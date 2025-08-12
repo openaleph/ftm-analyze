@@ -3,8 +3,9 @@ Annotate entities for use with
 https://www.elastic.co/docs/reference/elasticsearch/plugins/mapper-annotated-text-usage
 """
 
+import re
 from functools import cache
-from typing import Self
+from typing import Literal, Self
 from urllib.parse import quote_plus as qs
 
 from anystore.types import StrGenerator
@@ -39,6 +40,7 @@ ORG = "Organization"
 LEG = "LegalEntity"
 NAMED = {TAG_COMPANY.name, TAG_PERSON.name, TAG_NAME.name}
 SKIP_CHARS = "()[]"
+PATTERN_RE = r"(?<!\[)\b{value}\b(?![^\[\]]*\])"
 
 
 def clean_text(text: str) -> str:
@@ -48,15 +50,19 @@ def clean_text(text: str) -> str:
     return collapse_spaces(text) or ""
 
 
-def get_symbols(*names: str) -> set[str]:
+def get_symbols(*names: str, schema: Literal["PER", "ORG", None]) -> set[str]:
     symbols: set[str] = set()
+    if schema == "PER":
+        taggers = [tag_person_name]
+    elif schema == "ORG":
+        taggers = [tag_org_name]
+    else:
+        taggers = [tag_person_name, tag_org_name]
     for name in names:
         n = Name(name)
-        for symbol in [
-            *tag_person_name(n, normalize_name).symbols,
-            *tag_org_name(n, normalize_name).symbols,
-        ]:
-            symbols.add(str(symbol.id))
+        for tagger in taggers:
+            for symbol in tagger(n, normalize_name).symbols:
+                symbols.add(str(symbol.id))
     return symbols
 
 
@@ -86,11 +92,11 @@ class Annotation(BaseModel):
         if not self.is_name:
             return set()
         schemata = self._schemata or {model[LEG]}
-        return make_fingerprints(schemata, self._names)
+        return make_fingerprints(*self._names, schemata=schemata)
 
     @property
     def symbols(self) -> set[str]:
-        return get_symbols(*self._names)
+        return get_symbols(*self._names, schema=self._schema)
 
     @property
     def _names(self) -> set[str]:
@@ -103,6 +109,13 @@ class Annotation(BaseModel):
         if self.is_name:
             return set([*self.props, TAG_NAME.name])
         return self.props
+
+    @property
+    def _schema(self) -> Literal["ORG", "PER", None]:
+        if TAG_PERSON.name in self._props:
+            return "PER"
+        if TAG_COMPANY.name in self._props:
+            return "ORG"
 
     @property
     def _schemata(self) -> set[Schema]:
@@ -138,7 +151,8 @@ class Annotation(BaseModel):
     def annotate(self, text: str) -> str:
         repl = self.repl
         if repl:
-            return text.replace(self.value, repl)
+            pat = PATTERN_RE.format(value=re.escape(self.value))
+            return re.sub(pat, repl, text)
         return text
 
     def update(self, a: Self) -> None:

@@ -1,12 +1,9 @@
-from followthemoney import model
-
 from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_NAME, TAG_PERSON
 from ftm_analyze.annotate import (
     Annotation,
     Annotator,
     clean_text,
     get_symbols,
-    make_fingerprints,
 )
 
 
@@ -48,11 +45,17 @@ def test_annotate(documents):
 def test_annotate_symbols():
     JANE = "Mrs. Jane Doe"
     DARC = "IDIO Daten Import Export GmbH"
-    assert get_symbols(JANE) == {
+    assert get_symbols(JANE, schema="PER") == {
         "1682564",
         "5407747",
         "12791967",
         "37110043",
         "12573029",
     }
-    assert get_symbols(DARC) == {"EXPORT", "LLC", "IMPORT"}
+    assert get_symbols(DARC, schema="ORG") == {"EXPORT", "LLC", "IMPORT"}
+
+
+def test_annotate_invalid():
+    text = "foo [Jane Doe](bar)"
+    a = Annotation(value="Jane", props={TAG_NAME.name})
+    assert a.annotate(text) == text
