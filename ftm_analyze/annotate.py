@@ -151,8 +151,11 @@ class Annotation(BaseModel):
     def annotate(self, text: str) -> str:
         repl = self.repl
         if repl:
-            pat = PATTERN_RE.format(value=re.escape(self.value))
-            return re.sub(pat, repl, text)
+            try:
+                pat = PATTERN_RE.format(value=re.escape(self.value))
+                return re.sub(pat, repl, text)
+            except Exception:
+                pass
         return text
 
     def update(self, a: Self) -> None:
