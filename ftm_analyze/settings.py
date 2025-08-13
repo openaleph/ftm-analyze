@@ -1,15 +1,16 @@
 from pathlib import Path
+from typing import Literal
 
 from anystore.settings import BaseSettings
 from pydantic_settings import BaseSettings as _BaseSettings
 from pydantic_settings import SettingsConfigDict
 
 
-class NerModels(_BaseSettings):
+class SpacyNerModels(_BaseSettings):
     """
     Easily overwrite specific language model for specific languages via:
 
-    `FTM_ANALYZE_NER_MODELS_DEU=de_core_news_lg`
+    `FTM_ANALYZE_SPACY_MODELS_DEU=de_core_news_lg`
     """
 
     eng: str = "en_core_web_sm"
@@ -28,6 +29,31 @@ class NerModels(_BaseSettings):
     nob: str = "nb_core_news_sm"
     nor: str = "nb_core_news_sm"
     dan: str = "da_core_news_sm"
+
+
+class FlairNerModels(_BaseSettings):
+    """
+    Easily overwrite specific language model for specific languages via:
+
+    `FTM_ANALYZE_FLAIR_MODELS_DEU=de_core_news_lg`
+    """
+
+    eng: str = "ner"
+    deu: str = "de-ner"
+    fra: str = "fr-ner"
+    spa: str = "es-ner-large"  # FIXME
+    # rus: str = "ru_core_news_md"
+    # por: str = "pt_core_news_sm"
+    # ron: str = "ro_core_news_sm"
+    # mkd: str = "mk_core_news_sm"
+    # ell: str = "el_core_news_sm"
+    # pol: str = "pl_core_news_sm"
+    # ita: str = "it_core_news_sm"
+    # lit: str = "lt_core_news_sm"
+    nld: str = "nl-ner"
+    # nob: str = "nb_core_news_sm"
+    # nor: str = "nb_core_news_sm"
+    # dan: str = "da_core_news_sm"
 
 
 class Settings(BaseSettings):
@@ -53,11 +79,23 @@ class Settings(BaseSettings):
     ner_type_model_confidence: float = 0.85
     """Minimum confidence for ftm type predict model"""
 
+    ner_engine: Literal["spacy", "flair", "bert"] = "spacy"
+    """NER engine to use (may need install extra dependencies)"""
+
     lid_model_path: Path = Path("./models/lid.176.ftz")
     """Local path to lid model"""
 
-    ner_models: NerModels = NerModels()
+    spacy_models: SpacyNerModels = SpacyNerModels()
     """Spacy models"""
+
+    flair_models: FlairNerModels = FlairNerModels()
+    """Flair models"""
+
+    bert_model: str = "dslim/bert-base-NER"
+    """Model when using BERT transformers"""
+
+    ner_default_lang: str = "eng"
+    """Default ner language, 3-letter code"""
 
     resolve_mentions: bool = False
     """Resolve known mentions via `juditha`"""

@@ -11,7 +11,11 @@ from normality import slugify
 from rigour.names import pick_name
 
 from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
-from ftm_analyze.analysis.extract import extract_entities
+from ftm_analyze.analysis.extract import (
+    extract_ner_bert,
+    extract_ner_flair,
+    extract_ner_spacy,
+)
 from ftm_analyze.analysis.language import detect_languages
 from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
 from ftm_analyze.analysis.util import (
@@ -52,6 +56,12 @@ class Analyzer(object):
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
         self.annotator = Annotator(entity)
+        if settings.ner_engine == "bert":
+            self.ner_extract = extract_ner_bert
+        elif settings.ner_engine == "flair":
+            self.ner_extract = extract_ner_flair
+        else:
+            self.ner_extract = extract_ner_spacy
 
     def feed(self, entity):
         if not entity.schema.is_a(ANALYZABLE):
@@ -59,7 +69,7 @@ class Analyzer(object):
         texts = entity.get_type_values(registry.text)
         for text in text_chunks(texts):
             detect_languages(self.entity, text)
-            for prop, tag in extract_entities(self.entity, text):
+            for prop, tag in self.ner_extract(self.entity, text):
                 self.aggregator_entities.add(prop, tag)
             for prop, tag in extract_patterns(self.entity, text):
                 self.aggregator_patterns.add(prop, tag)

@@ -5,7 +5,6 @@ from anystore.cli import ErrorHandler
 from anystore.logging import configure_logging, get_logger
 from ftmq.io import smart_read_proxies, smart_write_proxies
 from rich.console import Console
-from spacy.cli.download import download
 from typing_extensions import Annotated
 
 from ftm_analyze import __version__, logic
@@ -50,8 +49,10 @@ def cli_download():
     """
     Download required spacy models based on current settings
     """
-    console.print(settings.ner_models)
-    models = settings.ner_models.model_dump()
+    from spacy.cli.download import download
+
+    console.print(settings.spacy_models)
+    models = settings.spacy_models.model_dump()
     for model in models.values():
         download(model)
 
@@ -75,5 +76,7 @@ def cli_analyze(
     """
     with ErrorHandler(log):
         entities = smart_read_proxies(in_uri)
-        results = logic.analyze_entities(entities, resolve_mentions, annotate, validate_names)
+        results = logic.analyze_entities(
+            entities, resolve_mentions, annotate, validate_names
+        )
         smart_write_proxies(out_uri, results)
