@@ -62,15 +62,18 @@ def cli_analyze(
     out_uri: OUT = "-",
     resolve_mentions: Annotated[
         bool, typer.Option(help="Resolve known mentions via `juditha`")
-    ] = True,
+    ] = settings.resolve_mentions,
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
-    ] = True,
+    ] = settings.annotate,
+    validate_names: Annotated[
+        bool, typer.Option(help="Validate NER extracted names against known tokens")
+    ] = settings.validate_names,
 ):
     """
     Analyze a stream of entities.
     """
     with ErrorHandler(log):
         entities = smart_read_proxies(in_uri)
-        results = logic.analyze_entities(entities, resolve_mentions, annotate)
+        results = logic.analyze_entities(entities, resolve_mentions, annotate, validate_names)
         smart_write_proxies(out_uri, results)

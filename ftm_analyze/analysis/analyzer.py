@@ -43,10 +43,11 @@ class Analyzer(object):
         entity: EntityProxy,
         resolve_mentions: bool | None = settings.resolve_mentions,
         annotate: bool | None = settings.annotate,
+        validate_names: bool | None = settings.validate_names,
     ):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
-        self.aggregator_entities = TagAggregatorFasttext()
+        self.aggregator_entities = TagAggregatorFasttext(validate_names=validate_names)
         self.aggregator_patterns = TagAggregator()
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
@@ -71,9 +72,9 @@ class Analyzer(object):
             )
         )
 
-        for key, prop, _ in results:
+        for _, prop, country in results:
             if prop.type == registry.country:
-                countries.add(key)
+                countries.add(country[0])
 
         mention_ids = set()
         entity_ids = set()
