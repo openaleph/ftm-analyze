@@ -10,7 +10,7 @@ from followthemoney.util import make_entity_id
 from normality import slugify
 from rigour.names import pick_name
 
-from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
+from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext, get_tag
 from ftm_analyze.analysis.extract import (
     extract_ner_bert,
     extract_ner_flair,
@@ -99,14 +99,16 @@ class Analyzer(object):
             if values and self.resolve_mentions and prop.name in NAMED:
                 # convert mentions in actual entities if their names are known
                 for value in values:
-                    lookup = juditha.lookup(value)
-                    if lookup is not None:
-                        proxy = self.make_entity(key, values, lookup, countries)
-                        entity_ids.add(proxy.id)
-                        yield proxy
-                        resolved = True
+                    tag = get_tag(prop)
+                    if juditha.validate_name(value, tag):
+                        lookup = juditha.lookup(value)
+                        if lookup is not None:
+                            proxy = self.make_entity(key, values, lookup, countries)
+                            entity_ids.add(proxy.id)
+                            yield proxy
+                            resolved = True
 
-                        break
+                            break
 
             elif prop == TAG_IBAN:
                 for value in values:
