@@ -9,8 +9,8 @@ COPY VERSION /app/VERSION
 COPY README.md /app/README.md
 
 WORKDIR /app
-RUN pip install -q --no-cache-dir -r requirements.txt
-RUN pip install -q --no-cache-dir ".[openaleph]"
+RUN pip install -q --no-cache-dir --no-deps -r requirements.txt
+RUN pip install -q --no-cache-dir --no-deps ".[openaleph,ner-spacy]"
 RUN pip install psycopg-binary
 
 # download configured spacy models

@@ -10,8 +10,12 @@ from followthemoney.util import make_entity_id
 from normality import slugify
 from rigour.names import pick_name
 
-from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
-from ftm_analyze.analysis.extract import extract_entities
+from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext, get_tag
+from ftm_analyze.analysis.extract import (
+    extract_ner_bert,
+    extract_ner_flair,
+    extract_ner_spacy,
+)
 from ftm_analyze.analysis.language import detect_languages
 from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
 from ftm_analyze.analysis.util import (
@@ -22,7 +26,7 @@ from ftm_analyze.analysis.util import (
     TAG_PERSON,
     text_chunks,
 )
-from ftm_analyze.annotate import ANNOTATED, NAMED, Annotator
+from ftm_analyze.annotate.annotator import ANNOTATED, NAMED, Annotator
 from ftm_analyze.settings import Settings
 
 log = logging.getLogger(__name__)
@@ -43,14 +47,21 @@ class Analyzer(object):
         entity: EntityProxy,
         resolve_mentions: bool | None = settings.resolve_mentions,
         annotate: bool | None = settings.annotate,
+        validate_names: bool | None = settings.validate_names,
     ):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
-        self.aggregator_entities = TagAggregatorFasttext()
+        self.aggregator_entities = TagAggregatorFasttext(validate_names=validate_names)
         self.aggregator_patterns = TagAggregator()
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
         self.annotator = Annotator(entity)
+        if settings.ner_engine == "bert":
+            self.ner_extract = extract_ner_bert
+        elif settings.ner_engine == "flair":
+            self.ner_extract = extract_ner_flair
+        else:
+            self.ner_extract = extract_ner_spacy
 
     def feed(self, entity):
         if not entity.schema.is_a(ANALYZABLE):
@@ -58,7 +69,7 @@ class Analyzer(object):
         texts = entity.get_type_values(registry.text)
         for text in text_chunks(texts):
             detect_languages(self.entity, text)
-            for prop, tag in extract_entities(self.entity, text):
+            for prop, tag in self.ner_extract(self.entity, text):
                 self.aggregator_entities.add(prop, tag)
             for prop, tag in extract_patterns(self.entity, text):
                 self.aggregator_patterns.add(prop, tag)
@@ -71,9 +82,9 @@ class Analyzer(object):
             )
         )
 
-        for key, prop, _ in results:
+        for _, prop, country in results:
             if prop.type == registry.country:
-                countries.add(key)
+                countries.add(country[0])
 
         mention_ids = set()
         entity_ids = set()
@@ -88,14 +99,16 @@ class Analyzer(object):
             if values and self.resolve_mentions and prop.name in NAMED:
                 # convert mentions in actual entities if their names are known
                 for value in values:
-                    lookup = juditha.lookup(value)
-                    if lookup is not None:
-                        proxy = self.make_entity(key, values, lookup, countries)
-                        entity_ids.add(proxy.id)
-                        yield proxy
-                        resolved = True
+                    tag = get_tag(prop)
+                    if juditha.validate_name(value, tag):
+                        lookup = juditha.lookup(value)
+                        if lookup is not None:
+                            proxy = self.make_entity(key, values, lookup, countries)
+                            entity_ids.add(proxy.id)
+                            yield proxy
+                            resolved = True
 
-                        break
+                            break
 
             elif prop == TAG_IBAN:
                 for value in values:

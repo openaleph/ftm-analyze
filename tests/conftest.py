@@ -5,7 +5,6 @@ from ftmq.io import smart_read_proxies
 
 FIXTURES_PATH = (Path(__file__).parent / "fixtures").absolute()
 DOCUMENTS = "documents.ftm.json"
-JUDITHA = "juditha.ftm.json"
 
 
 @pytest.fixture(scope="module")
