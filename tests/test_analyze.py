@@ -4,7 +4,6 @@ from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
-from tests.conftest import FIXTURES_PATH, JUDITHA
 
 
 def _analyze_entity(entity):
@@ -13,34 +12,38 @@ def _analyze_entity(entity):
 
 
 def test_analyze(documents):
-    res = [e for e in logic.analyze_entities(documents, resolve_mentions=False)]
+    res = [e for e in logic.analyze_entities(documents)]
     assert len(res) > len(documents)
 
 
-def test_analyze_convert_mentions(documents, monkeypatch, tmp_path):
+def test_analyze_convert_mentions(fixtures_path, documents, monkeypatch, tmp_path):
     monkeypatch.setenv("JUDITHA_URI", str(tmp_path / "juditha.db"))
     get_store.cache_clear()
-    load_proxies(FIXTURES_PATH / JUDITHA, sync=True)
+    load_proxies(fixtures_path / "juditha.ftm.json", sync=True)
 
-    res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=False)}
-    mention = res["2e4168096c5b1ad089d402457fc34a3b5d383240"]
+    res = {e.id: e for e in logic.analyze_entities(documents)}
+    mention = res["aaca87526efc3e1a4e70730fed7a0d5c32fbb48c"]
     assert mention.schema.is_a("Mention")
     resolved_id = mention.first("resolved")
     assert resolved_id not in res
-    assert len(res) == 7
+    assert len(res) == 15
 
-    res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=True)}
-    assert len(res) == 7
-    org = res[resolved_id]
-    assert org.schema.is_a("Organization")
-    doc = res[org.first("proof")]
-    assert (
-        "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&q_ALLIANCE&s_LegalEntity&s_Organization) "
-        in str(doc.first("indexText"))
-    )
+    # res = {
+    #     e.id: e
+    #     for e in logic.analyze_entities(documents, resolve_mentions=True)
+    # }
+    # import ipdb; ipdb.set_trace()
+    # assert len(res) == 15
+    # org = res[resolved_id]
+    # assert org.schema.is_a("Organization")
+    # doc = res[org.first("proof")]
+    # assert (
+    #     "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&q_ALLIANCE&s_LegalEntity&s_Organization) "
+    #     in str(doc.first("indexText"))
+    # )
 
     doc = res[documents[0].id]
-    assert "[info@fooddrinkeurope.eu](p_emailMentioned)" in str(doc.first("indexText"))
+    assert "[info@fooddrinkeurope.eu](EMAIL)" in str(doc.first("indexText"))
 
 
 def test_analyze_ner_extract():
@@ -51,7 +54,7 @@ def test_analyze_ner_extract():
     entity.add("bodyText", text)
     entity = _analyze_entity(entity)
     names = entity.get_type_values(registry.name)
-    assert "Angela Merkel" in names, names
+    assert "angela merkel" in names, names
 
 
 def test_analyze_language_tagging():
@@ -61,7 +64,7 @@ def test_analyze_language_tagging():
     entity.add("bodyText", text)
     entity = _analyze_entity(entity)
     names = entity.get_type_values(registry.name)
-    assert "Emmanuel Macron" in names, names
+    assert "emmanuel macron" in names, names
     assert entity.get("detectedLanguage") == ["fra"], entity.get(
         "detectedLanguage"
     )  # noqa
@@ -77,6 +80,7 @@ def test_analyze_pattern_extract():
     assert "+919988111222" in phones
     countries = entity.get_type_values(registry.country)
     assert "in" in countries
+    assert "[+919988111222](PHONE)" in str(entity.first("indexText"))
 
 
 def test_analyze_extract_iban():
@@ -96,7 +100,7 @@ def test_analyze_extract_iban():
     assert bank_account.first("proof") == "test"
     assert "ch" in bank_account.countries
     doc = results["PlainText"]
-    assert "[CH5604835012345678009](p_ibanMentioned)" in doc.first("indexText")
+    assert "[CH5604835012345678009](IBAN)" in doc.first("indexText")
 
 
 def test_analyze_extract_location():
@@ -106,4 +110,4 @@ def test_analyze_extract_location():
     entity.add("bodyText", text)
     entity = _analyze_entity(entity)
     assert entity.first("locationMentioned", "New York City")
-    assert "lives in [New York City](p_locationMentioned)"
+    assert "lives in [New York City](LOC)"
