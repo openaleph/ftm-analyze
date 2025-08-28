@@ -26,7 +26,7 @@ from ftm_analyze.analysis.util import (
     TAG_PERSON,
     text_chunks,
 )
-from ftm_analyze.annotate import ANNOTATED, NAMED, Annotator
+from ftm_analyze.annotate.annotator import ANNOTATED, NAMED, Annotator
 from ftm_analyze.settings import Settings
 
 log = logging.getLogger(__name__)

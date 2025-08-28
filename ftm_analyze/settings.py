@@ -103,5 +103,5 @@ class Settings(BaseSettings):
     annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
 
-    validate_names: bool = True
+    validate_names: bool = False
     """Validate NER results against known name tokens"""

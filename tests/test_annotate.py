@@ -1,29 +1,32 @@
+from followthemoney import model
+
 from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_NAME, TAG_PERSON
 from ftm_analyze.annotate import (
     Annotation,
     Annotator,
     clean_text,
-    get_symbols,
+    get_symbol_annotations,
 )
 
 
 def test_annotate(documents):
-    assert clean_text("lorem [foo. x](bar) \n ipsum") == "lorem foo. x bar ipsum"
+    assert (
+        clean_text("lorem [foo. x](bar) \n <div class='1'>ipsum</div>")
+        == "lorem foo. x bar ipsum"
+    )
 
     a = Annotation(value="Mrs. Jane Doe")
     assert a.value == "Mrs. Jane Doe"
-    assert not a.fingerprints
     assert not a.repl
     assert a.annotate("Mrs. Jane Doe") == "Mrs. Jane Doe"
     a = Annotation(value="Mrs. Jane Doe", props={TAG_NAME.name})
-    assert a.fingerprints == {"mrs. jane doe", "doe jane"}
     assert (
-        a.repl
-        == "[Mrs. Jane Doe](f_doe+jane&f_mrs.+jane+doe&p_namesMentioned&q_12573029&q_12791967&q_1682564&q_37110043&q_5407747)"
+        a.repl == "[Mrs. Jane Doe](LEG&Q12573029&Q12791967&Q1682564&Q37110043&Q5407747)"
     )
     a = Annotation(value="Mrs. Jane Doe", props={TAG_PERSON.name})
-    assert a.fingerprints == {"mrs. jane doe", "doe jane"}
-    annotated = "[Mrs. Jane Doe](f_doe+jane&f_mrs.+jane+doe&p_namesMentioned&p_peopleMentioned&q_12573029&q_12791967&q_1682564&q_37110043&q_5407747&s_LegalEntity&s_Person)"
+    annotated = (
+        "[Mrs. Jane Doe](LEG&PER&Q12573029&Q12791967&Q1682564&Q37110043&Q5407747)"
+    )
     assert a.repl == annotated
     assert annotated in a.annotate("lorem ipsum Mrs. Jane Doe dolor")
 
@@ -32,7 +35,7 @@ def test_annotate(documents):
     annotator.add_tag(TAG_EMAIL, "info@fooddrinkeurope.eu")
     tested = False
     for text in annotator.get_texts():
-        if "[info@fooddrinkeurope.eu](p_emailMentioned)" in text:
+        if "[info@fooddrinkeurope.eu](EMAIL)" in text:
             tested = True
     assert tested
 
@@ -45,14 +48,18 @@ def test_annotate(documents):
 def test_annotate_symbols():
     JANE = "Mrs. Jane Doe"
     DARC = "IDIO Daten Import Export GmbH"
-    assert get_symbols(JANE, schema="PER") == {
-        "1682564",
-        "5407747",
-        "12791967",
-        "37110043",
-        "12573029",
+    assert get_symbol_annotations(model["Person"], JANE) == {
+        "Q1682564",
+        "Q5407747",
+        "Q12791967",
+        "Q37110043",
+        "Q12573029",
     }
-    assert get_symbols(DARC, schema="ORG") == {"EXPORT", "LLC", "IMPORT"}
+    assert get_symbol_annotations(model["Company"], DARC) == {
+        "SYM_EXPORT",
+        "SYM_IMPORT",
+        "ORG_LLC",
+    }
 
 
 def test_annotate_invalid():

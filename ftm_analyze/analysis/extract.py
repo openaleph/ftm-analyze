@@ -1,7 +1,8 @@
 import typing
-from functools import cache, lru_cache
+from functools import lru_cache
 from typing import Generator, TypeAlias
 
+from anystore.functools import weakref_cache as cache
 from anystore.logging import get_logger
 from followthemoney import Property
 from followthemoney.types import registry

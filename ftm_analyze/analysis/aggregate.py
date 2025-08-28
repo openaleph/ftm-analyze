@@ -4,6 +4,7 @@ from anystore.logging import get_logger
 from followthemoney import Property
 from juditha import validate_name
 from juditha.validate import Tag
+from rigour.names import normalize_name
 
 from ftm_analyze.analysis.extract import test_name
 from ftm_analyze.analysis.ft_type_model import FTTypeModel
@@ -56,12 +57,12 @@ class TagAggregatorFasttext(object):
             values.discard(None)
             if not values:
                 continue
-            values = list(values)
-            labels, confidences = self.model.confidence(values)
+            values = list(filter(bool, map(normalize_name, values)))
             if not self.confidence and not self.validate_names:
                 # very messy
                 yield (key, prop, values)
             else:
+                labels, confidences = self.model.confidence(values)
                 if not _skip_result(labels, confidences, self.confidence):
                     tag = get_tag(prop)
                     if tag is not None and self.validate_names:
