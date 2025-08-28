@@ -3,10 +3,13 @@ name: Build docker container
 on:
   workflow_dispatch: {}
   push:
+    branches:
+      - main
     paths:
       - Dockerfile
       - Dockerfile.base
       - pyproject.toml
+      - requirements.txt
       - ftm_analyze/*
 
 permissions:
