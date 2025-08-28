@@ -25,6 +25,7 @@ def analyze(job: DatasetJob) -> None:
             to_index.append(entity)
             if should_geocode(entity):
                 to_geocode.append(entity)
-    defer.index(app, job.dataset, to_index, batch=job.batch, **job.context)
+    if to_index:
+        defer.index(app, job.dataset, to_index, batch=job.batch, **job.context)
     if to_geocode:
         defer.geocode(app, job.dataset, entities, batch=job.batch, **job.context)
