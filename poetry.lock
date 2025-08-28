@@ -1725,14 +1725,14 @@ wcwidth = "*"
 
 [[package]]
 name = "ftmq"
-version = "4.2.1"
+version = "4.2.2"
 description = "followthemoney query dsl and io helpers"
 optional = false
 python-versions = "<4,>=3.11"
 groups = ["main"]
 files = [
-    {file = "ftmq-4.2.1-py3-none-any.whl", hash = "sha256:6be7c721e8603d80667a5ad04c1f78438ef74c13e47fee74992ac1a5f20ff3ec"},
-    {file = "ftmq-4.2.1.tar.gz", hash = "sha256:f760b26b4ca2d7cedaf1583e61caa57849b3a41c5cfb22b3ca2bfd8d863be308"},
+    {file = "ftmq-4.2.2-py3-none-any.whl", hash = "sha256:3810d887ce198e5110a970a4219baa903d74a8f23d59e51dbe3f2915110fd935"},
+    {file = "ftmq-4.2.2.tar.gz", hash = "sha256:73476839c97f74b603589f867d7718cc26e07c9bf6e2f3fb42819dde6dbe5696"},
 ]
 
 [package.dependencies]
@@ -7185,4 +7185,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "dbe3783140f44f2daaa4cc8b2bb47b94820450ead088fb8297884b07759c1e44"
+content-hash = "e88926a433e0aa0b1eb799ec584796a5b4e06c3bf4b4c5ba679ef10f1acdc9fe"
