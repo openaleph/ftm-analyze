@@ -1,6 +1,8 @@
-FROM ghcr.io/dataresearchcenter/ftmq:latest
+FROM python:3.13-slim
 
-RUN apt update && apt full-upgrade -y && apt autoremove -y && apt clean
+RUN apt-get -qq update && apt-get -qq -y upgrade
+RUN apt-get install -qq -y pkg-config libicu-dev build-essential
+RUN apt-get -qq -y autoremove && apt-get clean
 RUN apt install -y wget
 
 # download ftm type prediction model
@@ -25,3 +27,6 @@ RUN python3 -m spacy download el_core_news_sm \
     && python3 -m spacy download nl_core_news_sm \
     && python3 -m spacy download nb_core_news_sm \
     && python3 -m spacy download da_core_news_sm
+
+RUN pip install --no-cache-dir -U pip setuptools
+RUN pip install --no-cache-dir -q --no-binary=:pyicu: pyicu
