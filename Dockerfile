@@ -11,6 +11,7 @@ COPY README.md /app/README.md
 WORKDIR /app
 RUN pip install -q --no-cache-dir --no-deps -r requirements.txt
 RUN pip install -q --no-cache-dir ".[openaleph,ner-spacy]"
+RUN pip install -q --no-cache-dir "psycopg[binary]"
 
 # download configured spacy models
 # they are in base image now, and could overwritten here via docker ARG
