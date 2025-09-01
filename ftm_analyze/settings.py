@@ -100,8 +100,11 @@ class Settings(BaseSettings):
     resolve_mentions: bool = False
     """Resolve known mentions via `juditha`"""
 
+    refine_mentions: bool = False
+    """Refine schema classification for mentions via `juditha` fasttext model"""
+
     annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
 
     validate_names: bool = False
-    """Validate NER results against known name tokens"""
+    """Validate NER results against known name tokens via `juditha`"""

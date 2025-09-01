@@ -1,9 +1,8 @@
 from collections import defaultdict
+from typing import Generator, Iterable, TypeAlias
 
 from anystore.logging import get_logger
 from followthemoney import Property
-from juditha import validate_name
-from juditha.validate import Tag
 from rigour.names import normalize_name
 
 from ftm_analyze.analysis.extract import test_name
@@ -13,14 +12,8 @@ from ftm_analyze.settings import Settings
 log = get_logger(__name__)
 settings = Settings()
 
-
-def get_tag(prop: Property) -> Tag | None:
-    if prop.name == "peopleMentioned":
-        return "PER"
-    if prop.name == "companiesMentioned":
-        return "ORG"
-    if prop.name == "locationMentioned":
-        return "LOC"
+Result: TypeAlias = tuple[str, Property, Iterable[str]]
+Results: TypeAlias = Generator[Result, None, None]
 
 
 def _skip_result(
@@ -39,41 +32,34 @@ class TagAggregatorFasttext(object):
         self,
         model_path=settings.ner_type_model_path,
         confidence: float | None = settings.ner_type_model_confidence,
-        validate_names: bool | None = settings.validate_names,
     ):
         self.values = defaultdict(set)
         self.model = FTTypeModel(str(model_path))
         self.confidence = confidence
-        self.validate_names = validate_names
 
     def add(self, prop, value):
         if not test_name(value):
             return
-        key = prop.type.node_id_safe(value)
+        key = normalize_name(prop.type.node_id_safe(value))
         self.values[(key, prop)].add(value)
 
-    def results(self):
+    def results(self) -> Results:
         for (key, prop), values in self.values.items():
             values.discard(None)
             if not values:
                 continue
-            values = list(filter(bool, map(normalize_name, values)))
-            if not self.confidence and not self.validate_names:
+            if not self.confidence:
                 # very messy
                 yield (key, prop, values)
             else:
                 labels, confidences = self.model.confidence(values)
                 if not _skip_result(labels, confidences, self.confidence):
-                    tag = get_tag(prop)
-                    if tag is not None and self.validate_names:
-                        values = [v for v in values if validate_name(v, tag)]
                     if values:
                         log.debug(
                             f"Fasttext: [{prop}]",
                             labels=labels,
                             confidences=confidences,
                             values=values,
-                            validate_names=self.validate_names,
                         )
                         yield (key, prop, values)
 
@@ -98,9 +84,9 @@ class TagAggregator(object):
 
         self.values[(key, prop)].append(value)
 
-    def results(self):
+    def results(self) -> Results:
         for (key, prop), values in self.values.items():
-            yield (key, prop, values)
+            yield key, prop, values
 
     def __len__(self):
         return len(self.values)

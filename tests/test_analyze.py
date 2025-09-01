@@ -22,25 +22,20 @@ def test_analyze_convert_mentions(fixtures_path, documents, monkeypatch, tmp_pat
     load_proxies(fixtures_path / "juditha.ftm.json", sync=True)
 
     res = {e.id: e for e in logic.analyze_entities(documents)}
-    mention = res["aaca87526efc3e1a4e70730fed7a0d5c32fbb48c"]
+    mention = res["960330b10c91e2f38d80049a868f9665351d229a"]
     assert mention.schema.is_a("Mention")
     resolved_id = mention.first("resolved")
     assert resolved_id not in res
     assert len(res) == 15
 
-    # res = {
-    #     e.id: e
-    #     for e in logic.analyze_entities(documents, resolve_mentions=True)
-    # }
-    # import ipdb; ipdb.set_trace()
-    # assert len(res) == 15
-    # org = res[resolved_id]
-    # assert org.schema.is_a("Organization")
-    # doc = res[org.first("proof")]
-    # assert (
-    #     "[Circular Plastics Alliance](f_alliance+circular+plastics&f_circular+plastics+alliance&p_companiesMentioned&p_namesMentioned&q_ALLIANCE&s_LegalEntity&s_Organization) "
-    #     in str(doc.first("indexText"))
-    # )
+    res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=True)}
+    assert len(res) == 15
+    org = res[resolved_id]
+    assert org.schema.is_a("Organization")
+    doc = res[org.first("proof")]
+    assert "[Circular Plastics Alliance](LEG&ORG&SYM_ALLIANCE)" in str(
+        doc.first("indexText")
+    )
 
     doc = res[documents[0].id]
     assert "[info@fooddrinkeurope.eu](EMAIL)" in str(doc.first("indexText"))
