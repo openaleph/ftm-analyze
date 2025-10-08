@@ -19,6 +19,7 @@ def analyze_entity(
     annotate: bool | None = settings.annotate,
     validate_names: bool | None = settings.validate_names,
     refine_mentions: bool | None = settings.refine_mentions,
+    refine_locations: bool | None = settings.refine_locations,
 ) -> Generator[EntityProxy, None, None]:
     """
     Analyze an Entity.
@@ -33,7 +34,12 @@ def analyze_entity(
         A generator of entity fragments
     """
     analyzer = Analyzer(
-        entity, resolve_mentions, annotate, validate_names, refine_mentions
+        entity,
+        resolve_mentions,
+        annotate,
+        validate_names,
+        refine_mentions,
+        refine_locations,
     )
     analyzer.feed(entity)
     yield from analyzer.flush()
@@ -45,8 +51,14 @@ def analyze_entities(
     annotate: bool | None = settings.annotate,
     validate_names: bool | None = settings.validate_names,
     refine_mentions: bool | None = settings.refine_mentions,
+    refine_locations: bool | None = settings.refine_locations,
 ) -> Generator[EntityProxy, None, None]:
     for e in logged_items(entities, "Analyze", 1000, item_name="Entity", logger=log):
         yield from analyze_entity(
-            e, resolve_mentions, annotate, validate_names, refine_mentions
+            e,
+            resolve_mentions,
+            annotate,
+            validate_names,
+            refine_mentions,
+            refine_locations,
         )

@@ -103,6 +103,9 @@ class Settings(BaseSettings):
     refine_mentions: bool = False
     """Refine schema classification for mentions via `juditha` fasttext model"""
 
+    refine_locations: bool = False
+    """Refine location mentions via geonames"""
+
     annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
 

@@ -128,7 +128,7 @@ def clean_name(
 @lru_cache(LRU)
 def refine_location(name: str) -> Location | None:
     """Refine extracted locations against geonames_tagger"""
-    # Christina is a valid location in canadata...
+    # Christina is a valid location in canada...
     if is_rigour_person(name):
         return
     try:

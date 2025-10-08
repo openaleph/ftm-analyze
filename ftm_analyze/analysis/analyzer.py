@@ -97,6 +97,7 @@ class Mention(BaseModel):
         refine_mentions: bool | None = settings.refine_mentions,
         validate_names: bool | None = settings.validate_names,
         resolve_mentions: bool | None = settings.resolve_mentions,
+        refine_locations: bool | None = settings.refine_locations,
     ) -> None:
         # 1. basic NER resolution based on builtin rigour heuristic
         refined_ner = classify_name_rigour(self.caption)
@@ -116,7 +117,7 @@ class Mention(BaseModel):
                 ]
             )
         # 2b. geonames_tagger
-        if self.ner_tag == "LOC":
+        if refine_locations and self.ner_tag == "LOC":
             location = refine_location(self.caption)
             if location is not None:
                 self.canonized_value = location.name
@@ -172,6 +173,7 @@ class Analyzer:
         annotate: bool | None = settings.annotate,
         validate_names: bool | None = settings.validate_names,
         refine_mentions: bool | None = settings.refine_mentions,
+        refine_locations: bool | None = settings.refine_locations,
     ):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
@@ -179,6 +181,7 @@ class Analyzer:
         self.aggregator_patterns = TagAggregator()
         self.validate_names = validate_names
         self.refine_mentions = refine_mentions
+        self.refine_locations = refine_locations
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
         self.annotator = Annotator(entity)
@@ -239,6 +242,7 @@ class Analyzer:
                 refine_mentions=self.refine_mentions,
                 validate_names=self.validate_names,
                 resolve_mentions=self.resolve_mentions,
+                refine_locations=self.refine_locations,
             )
             if not mention.is_valid:
                 continue
