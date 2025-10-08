@@ -27,5 +27,5 @@ def detect_languages(entity, text, k=1):
             continue
         # fasttext labels are prefixed, with '__label__' by default
         lang = lang.replace("__label__", "")
-        log.debug("Detected (%s chars): %s -> %.3f", len(text), lang, score)
+        log.debug("Detected (%s chars): %s -> %.3f" % (len(text), lang, score))
         entity.add("detectedLanguage", lang)
