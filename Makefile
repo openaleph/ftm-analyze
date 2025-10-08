@@ -36,4 +36,4 @@ clean:
 
 documentation:
 	mkdocs build
-	aws --endpoint-url https://s3.investigativedata.org s3 sync ./site s3://docs.investigraph.dev/lib/ftm-analyze
+	aws --endpoint-url https://s3.investigativedata.org s3 sync ./site s3://openaleph.org/docs/lib/ftm-analyze
