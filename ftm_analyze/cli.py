@@ -2,6 +2,7 @@ from typing import Optional
 
 import typer
 from anystore.cli import ErrorHandler
+from anystore.io import smart_read
 from anystore.logging import configure_logging, get_logger
 from ftmq.io import smart_read_proxies, smart_write_proxies
 from rich.console import Console
@@ -70,6 +71,12 @@ def cli_analyze(
     validate_names: Annotated[
         bool, typer.Option(help="Validate NER extracted names against known tokens")
     ] = settings.validate_names,
+    refine_mentions: Annotated[
+        bool, typer.Option(help="Refine mentions using additional heuristics")
+    ] = settings.refine_mentions,
+    refine_locations: Annotated[
+        bool, typer.Option(help="Refine location mentions via geonames")
+    ] = settings.refine_locations,
 ):
     """
     Analyze a stream of entities.
@@ -77,6 +84,55 @@ def cli_analyze(
     with ErrorHandler(log):
         entities = smart_read_proxies(in_uri)
         results = logic.analyze_entities(
-            entities, resolve_mentions, annotate, validate_names
+            entities,
+            resolve_mentions,
+            annotate,
+            validate_names,
+            refine_mentions,
+            refine_locations,
+        )
+        smart_write_proxies(out_uri, results)
+
+
+@cli.command("analyze-text")
+def cli_analyze_text(
+    in_uri: IN = "-",
+    out_uri: OUT = "-",
+    resolve_mentions: Annotated[
+        bool, typer.Option(help="Resolve known mentions via `juditha`")
+    ] = settings.resolve_mentions,
+    annotate: Annotated[
+        bool, typer.Option(help="Annotate extracted patterns, names and mentions")
+    ] = settings.annotate,
+    validate_names: Annotated[
+        bool, typer.Option(help="Validate NER extracted names against known tokens")
+    ] = settings.validate_names,
+    refine_mentions: Annotated[
+        bool, typer.Option(help="Refine mentions using additional heuristics")
+    ] = settings.refine_mentions,
+    refine_locations: Annotated[
+        bool, typer.Option(help="Refine location mentions via geonames")
+    ] = settings.refine_locations,
+):
+    """
+    Analyze a text string (for debugging purposes).
+    """
+    with ErrorHandler(log):
+        from followthemoney import model
+
+        text = smart_read(in_uri)
+
+        # Create a minimal PlainText entity to hold the text
+        entity = model.make_entity("PlainText")
+        entity.make_id("debug-text")
+        entity.add("bodyText", text)
+
+        results = logic.analyze_entity(
+            entity,
+            resolve_mentions,
+            annotate,
+            validate_names,
+            refine_mentions,
+            refine_locations,
         )
         smart_write_proxies(out_uri, results)
