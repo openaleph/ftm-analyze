@@ -231,6 +231,8 @@ class Analyzer:
 
         # NER mentions
         for key, prop, values in self.aggregator_entities.results():
+            if not key:
+                continue
             mention = Mention(
                 key=key,
                 entity_id=self.entity.id,
