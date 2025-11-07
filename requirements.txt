@@ -1,4 +1,4 @@
-ahocorasick-rs==0.22.2 ; python_version >= "3.11" and python_version < "3.14"
+ahocorasick-rs==1.0.3 ; python_version >= "3.11" and python_version < "3.14"
 aiobotocore==2.25.1 ; python_version >= "3.11" and python_version < "3.14"
 aiohappyeyeballs==2.6.1 ; python_version >= "3.11" and python_version < "3.14"
 aiohttp==3.13.2 ; python_version >= "3.11" and python_version < "3.14"
