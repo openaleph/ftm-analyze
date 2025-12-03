@@ -33,7 +33,7 @@ class FTTypeModel(object):
         return list(self._clean_labels(labels)), confidence
 
     def _clean_input(self, values):
-        return [normalize(v, lowercase=True, latinize=True) for v in values]
+        return [normalize(v, lowercase=True, latinize=True) or v for v in values]
 
     def _clean_labels(self, labels):
         for label in labels:
