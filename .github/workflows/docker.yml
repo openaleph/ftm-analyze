@@ -1,64 +1,25 @@
 name: Build docker container
 
 on:
-  workflow_dispatch: {}
   push:
     branches:
       - main
     tags:
       - '*'
-    paths:
-      - Dockerfile
-      - Dockerfile.base
-      - pyproject.toml
-      - requirements.txt
-      - ftm_analyze/*
+  workflow_dispatch:
 
 permissions:
   packages: write
 
 jobs:
-  build-base:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/openaleph/ftm-analyze-base
-          tags: |
-            type=raw,value=latest
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          install: true
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push release
-        uses: docker/build-push-action@v6
-        with:
-          file: Dockerfile.base
-          platforms: linux/amd64 #,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   build:
     runs-on: ubuntu-latest
-    needs: build-base
     steps:
       - uses: actions/checkout@v6
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
@@ -68,22 +29,67 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=sha
+            type=raw,value=cache
             type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags') }}
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
           install: true
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and push release
+
+      - name: Build and push (amd64)
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64 #,linux/arm64
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-arm64:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/openaleph/ftm-analyze
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push (arm64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
