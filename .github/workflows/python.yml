@@ -32,7 +32,7 @@ jobs:
     - name: set PY
       run: echo "PY=$(python -VV | sha256sum | cut -d' ' -f1)" >> $GITHUB_ENV
     - name: Set up poetry cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: .venv
         key: venv-${{ runner.os }}-${{ env.PY }}-${{ hashFiles('**/poetry.lock') }}
@@ -40,13 +40,13 @@ jobs:
       if: steps.cache.outputs.cache-hit == 'true'
       run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
     - name: Set up pre-commit cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cache/pre-commit
         key: pre-commit-${{ runner.os }}-${{ env.PY }}-${{ hashFiles('.pre-commit-config.yaml') }}
     - name: Set up predict model cache
       id: cache-predict
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/models/model_type_prediction.ftz
         key: ftm-model-type-predict
@@ -59,7 +59,7 @@ jobs:
       run: poetry install --with dev --extras ner-spacy
     - name: Test spacy download cache
       id: cache-spacy
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/spacy-downloaded
         key: spacy-download-venv-${{ runner.os }}-${{ env.PY }}-${{ hashFiles('**/poetry.lock') }}
