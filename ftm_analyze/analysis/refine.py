@@ -5,12 +5,12 @@ It is a mix of hard-coded heuristics and a classifier fasttext model (if
 configured), and results seem to be slightly better than pure spacy output
 """
 
+from functools import lru_cache
 from typing import Callable
 
 import jellyfish
 from anystore.logging import get_logger
 from followthemoney import Property
-from ftmq.util import lru_cache
 from geonames_tagger.tagger import Location, tag_locations
 from geonames_tagger.util import text_norm
 from juditha.model import NER_TAG
