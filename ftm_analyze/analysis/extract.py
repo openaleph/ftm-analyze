@@ -21,6 +21,7 @@ from ftm_analyze.analysis.util import TAG_COMPANY, TAG_COUNTRY, TAG_LOCATION, TA
 from ftm_analyze.settings import Settings
 
 if typing.TYPE_CHECKING:
+    from gliner import GLiNER
     from transformers import Pipeline
 
 
@@ -42,6 +43,10 @@ NER_TYPES = {
     "B-LOC": TAG_LOCATION,
     "I-LOC": TAG_LOCATION,
     "GPE": TAG_LOCATION,
+    # GLiNER labels
+    "person": TAG_PERSON,
+    "organization": TAG_COMPANY,
+    "location": TAG_LOCATION,
 }
 SPACY_MODELS = settings.spacy_models.model_dump()
 
@@ -135,6 +140,26 @@ def extract_ner_bert(entity: EntityProxy, text: str) -> NERs:
     results = ner(text)
     for res in results:
         yield from _ner_result(res["entity_group"], res["word"], "BERT")
+
+
+GLINER_LABELS = ["person", "organization", "location"]
+
+
+@cache
+def get_gliner() -> "GLiNER":
+    from gliner import GLiNER
+
+    return GLiNER.from_pretrained(settings.gliner_model)
+
+
+def extract_ner_gliner(entity: EntityProxy, text: str) -> NERs:
+    """GLiNER zero-shot NER extraction"""
+    model = get_gliner()
+    entities = model.predict_entities(
+        text, GLINER_LABELS, threshold=settings.gliner_threshold
+    )
+    for ent in entities:
+        yield from _ner_result(ent["label"], ent["text"], "GLiNER")
 
 
 def validate_person_name(name: str) -> bool:

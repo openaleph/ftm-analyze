@@ -16,6 +16,7 @@ from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
 from ftm_analyze.analysis.extract import (
     extract_ner_bert,
     extract_ner_flair,
+    extract_ner_gliner,
     extract_ner_spacy,
 )
 from ftm_analyze.analysis.language import detect_languages
@@ -189,6 +190,8 @@ class Analyzer:
             self.ner_extract = extract_ner_bert
         elif settings.ner_engine == "flair":
             self.ner_extract = extract_ner_flair
+        elif settings.ner_engine == "gliner":
+            self.ner_extract = extract_ner_gliner
         else:
             self.ner_extract = extract_ner_spacy
 

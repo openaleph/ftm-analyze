@@ -79,7 +79,7 @@ class Settings(BaseSettings):
     ner_type_model_confidence: float = 0.85
     """Minimum confidence for ftm type predict model"""
 
-    ner_engine: Literal["spacy", "flair", "bert"] = "spacy"
+    ner_engine: Literal["spacy", "flair", "bert", "gliner"] = "spacy"
     """NER engine to use (may need install extra dependencies)"""
 
     lid_model_path: Path = Path("./models/lid.176.ftz")
@@ -93,6 +93,12 @@ class Settings(BaseSettings):
 
     bert_model: str = "dslim/bert-base-NER"
     """Model when using BERT transformers"""
+
+    gliner_model: str = "urchade/gliner_small-v2.1"
+    """Model when using GLiNER"""
+
+    gliner_threshold: float = 0.5
+    """Confidence threshold for GLiNER (0-1)"""
 
     ner_default_lang: str = "eng"
     """Default ner language, 3-letter code"""
