@@ -14,10 +14,10 @@ from rigour.names import normalize_name, pick_name
 
 from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
 from ftm_analyze.analysis.extract import (
-    extract_ner_bert,
-    extract_ner_flair,
-    extract_ner_gliner,
-    extract_ner_spacy,
+    extract_bert,
+    extract_flair,
+    extract_gliner,
+    extract_spacy,
 )
 from ftm_analyze.analysis.language import detect_languages
 from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
@@ -187,13 +187,13 @@ class Analyzer:
         self.annotate = annotate
         self.annotator = Annotator(entity)
         if settings.ner_engine == "bert":
-            self.ner_extract = extract_ner_bert
+            self.ner_extract = extract_bert
         elif settings.ner_engine == "flair":
-            self.ner_extract = extract_ner_flair
+            self.ner_extract = extract_flair
         elif settings.ner_engine == "gliner":
-            self.ner_extract = extract_ner_gliner
+            self.ner_extract = extract_gliner
         else:
-            self.ner_extract = extract_ner_spacy
+            self.ner_extract = extract_spacy
 
     def feed(self, entity):
         if not entity.schema.is_a(ANALYZABLE):
