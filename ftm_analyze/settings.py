@@ -100,6 +100,13 @@ class Settings(BaseSettings):
     gliner_threshold: float = 0.5
     """Confidence threshold for GLiNER (0-1)"""
 
+    # Model cache directories for external volume mounts
+    flair_cache_root: Path | None = None
+    """Flair model cache directory (also settable via FLAIR_CACHE_ROOT)"""
+
+    hf_home: Path | None = None
+    """HuggingFace cache directory for transformers/GLiNER (also settable via HF_HOME)"""
+
     ner_default_lang: str = "eng"
     """Default ner language, 3-letter code"""
 

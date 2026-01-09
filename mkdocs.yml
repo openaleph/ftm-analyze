@@ -12,6 +12,8 @@ nav:
   - Reference:
     - reference/cli.md
     - reference/settings.md
+  - Builds:
+    - docker.md
 theme:
   name: material
   logo: https://cdn.investigativedata.org/style/logos/darc/svg/DARC-Logo-RGB-Horizontal-Neg.svg
@@ -26,6 +28,8 @@ theme:
     - content.code.copy
 extra_css:
   - stylesheets/extra.css
+extra_javascript:
+  - https://unpkg.com/mermaid@10/dist/mermaid.min.js
 extra:
   social:
     - icon: material/mail
@@ -43,7 +47,11 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.details
   - admonition
   - pymdownx.tasklist:
