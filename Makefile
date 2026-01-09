@@ -20,8 +20,53 @@ test:
 build:
 	poetry build
 
-build-docker:
-	docker build . -t ghcr.io/openaleph/ftm-analyze
+# Docker build targets
+DOCKER_REGISTRY ?= ghcr.io/openaleph
+DOCKER_IMAGE ?= ftm-analyze
+DOCKER_TAG ?= latest
+
+# Build all NER variants
+build-docker: build-docker-spacy build-docker-spacy-slim build-docker-flair build-docker-gliner build-docker-transformers build-docker-minimal
+
+build-docker-spacy:
+	docker build --target spacy -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(DOCKER_TAG) -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):spacy .
+
+build-docker-spacy-slim:
+	docker build --target spacy-slim -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):spacy-slim .
+
+build-docker-flair:
+	docker build --target flair -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):flair .
+
+build-docker-gliner:
+	docker build --target gliner -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):gliner .
+
+build-docker-transformers:
+	docker build --target transformers -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):transformers .
+
+build-docker-minimal:
+	docker build --target minimal -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):minimal .
+
+# Push all variants
+push-docker: push-docker-spacy push-docker-spacy-slim push-docker-flair push-docker-gliner push-docker-transformers push-docker-minimal
+
+push-docker-spacy:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):$(DOCKER_TAG)
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):spacy
+
+push-docker-spacy-slim:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):spacy-slim
+
+push-docker-flair:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):flair
+
+push-docker-gliner:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):gliner
+
+push-docker-transformers:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):transformers
+
+push-docker-minimal:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):minimal
 
 clean:
 	rm -fr build/

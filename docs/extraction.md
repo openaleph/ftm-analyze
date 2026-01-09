@@ -15,9 +15,70 @@ ftm-analyze uses the [fastText LID](https://fasttext.cc/docs/en/language-identif
 
 ## Entity extraction
 
-In order to extract named entities (names of people, companies, and countries) from files, ftm-analyze uses spaCy with [language-specific models](https://spacy.io/models). For example, it uses the `en_core_web_sm` model for English language text, and the `es_core_news_sm` model for Spanish language text.
+ftm-analyze supports multiple NER (Named Entity Recognition) engines for extracting names of people, companies, and countries from text.
 
-Running text through the spaCy models yields a number of labelled named entities. For example, the sentence …
+### NER Engines
+
+Configure the NER engine via the `FTM_ANALYZE_NER_ENGINE` environment variable:
+
+| Engine | Value | Description |
+|--------|-------|-------------|
+| **spaCy** | `spacy` | Default. Language-specific models with good accuracy |
+| **Flair** | `flair` | Sequence labeling with contextual embeddings |
+| **GLiNER** | `gliner` | Zero-shot NER, probably better results than spaCy |
+| **Transformers** | `bert` | BERT-based NER via HuggingFace |
+
+#### spaCy (Default)
+
+The default engine uses [spaCy](https://spacy.io/) with [language-specific models](https://spacy.io/models). For example, it uses the `en_core_web_sm` model for English language text, and the `es_core_news_sm` model for Spanish language text.
+
+```bash
+export FTM_ANALYZE_NER_ENGINE=spacy
+```
+
+**Configuration:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FTM_ANALYZE_SPACY_MODELS_<LANG>` | `<lang>_core_news_sm` | Override model for specific language (e.g., `FTM_ANALYZE_SPACY_MODELS_DEU=de_core_news_lg`) |
+
+#### Flair
+
+[Flair](https://github.com/flairNLP/flair) uses contextual string embeddings for sequence labeling. Models are downloaded on first use.
+
+```bash
+export FTM_ANALYZE_NER_ENGINE=flair
+```
+
+!!! note
+    Flair models are large (~500MB+) and downloaded at runtime. Consider pre-warming the cache in production deployments.
+
+#### GLiNER
+
+[GLiNER](https://github.com/urchade/GLiNER) is a zero-shot NER model that can extract entities without task-specific training.
+
+```bash
+export FTM_ANALYZE_NER_ENGINE=gliner
+```
+
+**Configuration:**
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FTM_ANALYZE_GLINER_MODEL` | `urchade/gliner_multi-v2.1` | GLiNER model to use |
+| `FTM_ANALYZE_GLINER_THRESHOLD` | `0.5` | Confidence threshold for entity extraction |
+
+#### Transformers (BERT)
+
+Uses HuggingFace transformers with BERT-based NER models. Models are downloaded on first use.
+
+```bash
+export FTM_ANALYZE_NER_ENGINE=bert
+```
+
+### How NER Works
+
+Running text through the NER models yields a number of labelled named entities. For example, the sentence …
 
 ***"Swiss tobacco giant Philip Morris International (PMI) obtained a stake in a company that won a disputed license to make and market cigarettes in Egypt, one of the world’s most desirable tobacco markets."***
 

@@ -1,7 +1,7 @@
 # Named Entity Recognition
 
 !!! info
-    Entity extraction builds on top off how `ingest-file` originally extracted mentioned Entities. [Read more](https://docs.aleph.occrp.org/developers/explanation/entity-extraction/)
+    Entity extraction builds on top off how `ingest-file` originally extracted mentioned Entities. [Read more](./extraction.md)
 
 Originally `ingest-file` filtered the entities returned by `spaCy` with a custom schema prediction model trained on existing _FollowTheMoney_ data. Based on that, [`Mention`](https://followthemoney.tech/explorer/schemata/Mention/)-Entities are created. These mentions are resolved into actual _Entities_ (e.g. Company, Person) during [cross-referencing](https://openaleph.org/docs/user-guide/103/cross-reference/) datasets.
 
