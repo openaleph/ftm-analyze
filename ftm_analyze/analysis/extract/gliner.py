@@ -1,9 +1,12 @@
+"""GLiNER zero-shot NER extractor."""
+
 import typing
 
-from anystore.functools import weakref_cache as cache
-from ftmq.util import EntityProxy
-
-from ftm_analyze.analysis.extract.base import NERs, ner_result
+from ftm_analyze.analysis.extract.base import (
+    ExtractionContext,
+    ExtractionResults,
+    make_ner_result,
+)
 from ftm_analyze.settings import Settings
 
 if typing.TYPE_CHECKING:
@@ -11,19 +14,39 @@ if typing.TYPE_CHECKING:
 
 settings = Settings()
 
-LABELS = ["person", "organization", "location"]
+DEFAULT_LABELS = ["person", "organization", "location"]
 
 
-@cache
-def _get_model() -> "GLiNER":
-    from gliner import GLiNER
-
-    return GLiNER.from_pretrained(settings.gliner_model)
-
-
-def handle(entity: EntityProxy, text: str) -> NERs:
+class GlinerExtractor:
     """Extract named entities using GLiNER zero-shot NER."""
-    model = _get_model()
-    entities = model.predict_entities(text, LABELS, threshold=settings.gliner_threshold)
-    for ent in entities:
-        yield from ner_result(ent["label"], ent["text"], "GLiNER")
+
+    name = "gliner"
+
+    def __init__(
+        self,
+        model: str | None = None,
+        labels: list[str] | None = None,
+        threshold: float | None = None,
+    ):
+        self.model_name = model or settings.gliner_model
+        self.labels = labels or DEFAULT_LABELS
+        self.threshold = threshold or settings.gliner_threshold
+        self._model: "GLiNER | None" = None
+
+    def _get_model(self) -> "GLiNER":
+        """Lazy load the GLiNER model."""
+        if self._model is None:
+            from gliner import GLiNER
+
+            self._model = GLiNER.from_pretrained(self.model_name)
+        return self._model
+
+    def extract(self, context: ExtractionContext) -> ExtractionResults:
+        """Extract named entities from text using GLiNER."""
+        model = self._get_model()
+        entities = model.predict_entities(
+            context.text, self.labels, threshold=self.threshold
+        )
+
+        for ent in entities:
+            yield from make_ner_result(ent["label"], ent["text"], self.name)

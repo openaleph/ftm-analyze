@@ -8,7 +8,7 @@ from typing import Self
 
 from anystore.types import StrGenerator
 from followthemoney import E, EntityProxy, Property, Schema, model, registry
-from normality import collapse_spaces
+from normality import squash_spaces
 from pydantic import BaseModel
 
 from ftm_analyze.analysis.util import (
@@ -46,7 +46,7 @@ def clean_text(text: str) -> str:
     for c in SKIP_CHARS:
         text = text.replace(c, " ")
     text = re.sub(HTML_TAG_RE, " ", text)
-    return collapse_spaces(text) or ""
+    return squash_spaces(text) or ""
 
 
 class Annotation(BaseModel):

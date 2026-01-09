@@ -1,304 +1,403 @@
-import logging
-from typing import Generator
+"""Main analyzer for extracting entities from FTM documents."""
 
-import juditha
-from followthemoney import Property, model
-from followthemoney.proxy import EntityProxy
+from typing import Generator, Literal
+
+from anystore.logging import get_logger
+from followthemoney import model
 from followthemoney.types import registry
-from followthemoney.util import make_entity_id
-from ftmq.util import make_entity
-from juditha.model import NER_TAG, SCHEMA_NER
-from normality import slugify
-from pydantic import BaseModel, ConfigDict, computed_field
-from rigour.names import normalize_name, pick_name
+from ftmq.util import EntityProxy
+from rigour.names import normalize_name
 
-from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
+from ftm_analyze.analysis.aggregate import Aggregator
+from ftm_analyze.analysis.emit import EntityFactory
 from ftm_analyze.analysis.extract import (
-    extract_bert,
-    extract_flair,
-    extract_gliner,
-    extract_spacy,
-)
-from ftm_analyze.analysis.language import detect_languages
-from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
-from ftm_analyze.analysis.refine import (
-    PROPS_NER_TAGS,
-    TYPE_PROPS,
-    classify_mention,
-    classify_name_rigour,
-    clean_name,
-    refine_location,
-)
-from ftm_analyze.analysis.util import (
-    ANALYZABLE,
-    TAG_COMPANY,
     TAG_IBAN,
-    TAG_NAME,
-    TAG_PERSON,
-    text_chunks,
+    TAG_LOC,
+    TAG_ORG,
+    TAG_PER,
+    BertExtractor,
+    ExtractionContext,
+    FlairExtractor,
+    GlinerExtractor,
+    PatternExtractor,
+    SpacyExtractor,
 )
+from ftm_analyze.analysis.extract.patterns import get_iban_country
+from ftm_analyze.analysis.language import detect_languages
+from ftm_analyze.analysis.resolve import (
+    GeonamesStage,
+    JudithaClassifierStage,
+    JudithaLookupStage,
+    JudithaValidatorStage,
+    Mention,
+    ResolutionContext,
+    ResolutionPipeline,
+    ResolutionStage,
+    RigourStage,
+)
+from ftm_analyze.analysis.tracer import ExtractionTracer
+from ftm_analyze.analysis.util import ANALYZABLE, text_chunks
 from ftm_analyze.annotate.annotator import ANNOTATED, Annotator
 from ftm_analyze.settings import Settings
 
-log = logging.getLogger(__name__)
+log = get_logger(__name__)
 settings = Settings()
 
-MENTIONS = {TAG_COMPANY: "Organization", TAG_PERSON: "Person"}
+NerEngine = Literal["spacy", "flair", "bert", "gliner"]
 
-
-class Mention(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-    key: str
-    entity_id: str
-    prop: Property
-    original_values: set[str]
-    resolved_values: set[str] = set()
-    canonized_value: str | None = None
-    schema_name: str | None = None
-    ner_tag: NER_TAG = "OTHER"
-    is_valid: bool = True
-
-    @property
-    def resolved_prop(self) -> Property:
-        return TYPE_PROPS.get(self.ner_tag, TAG_NAME)
-
-    @computed_field
-    @property
-    def caption(self) -> str:
-        if self.canonized_value:
-            return self.canonized_value
-        if self.resolved_values:
-            caption = pick_name(list(self.resolved_values))
-        else:
-            caption = pick_name(list(self.original_values))
-        if caption is None:
-            raise ValueError("No caption as of empty values")
-        return caption
-
-    @computed_field
-    @property
-    def names(self) -> set[str]:
-        names: set[str] = set()
-        names.add(self.caption)
-        names.update(self.original_values)
-        names.update(self.resolved_values)
-        names = {clean_name(n, self.ner_tag, normalize_name) for n in names}
-        return {n for n in names if n}
-
-    @computed_field
-    @property
-    def annotate_values(self) -> set[str]:
-        values = self.original_values
-        values = {clean_name(v, self.ner_tag) for v in values}
-        return {v for v in values if v}
-
-    def resolve(
-        self,
-        refine_mentions: bool | None = settings.refine_mentions,
-        validate_names: bool | None = settings.validate_names,
-        resolve_mentions: bool | None = settings.resolve_mentions,
-        refine_locations: bool | None = settings.refine_locations,
-    ) -> None:
-        # 1. basic NER resolution based on builtin rigour heuristic
-        refined_ner = classify_name_rigour(self.caption)
-        if refined_ner != "OTHER":
-            self.ner_tag = refined_ner
-        self.resolved_values = set(
-            [clean_name(v, self.ner_tag, normalize_name) for v in self.original_values]
-        )
-
-        # 2. use juditha NER classify model to refine
-        if refine_mentions:
-            self.ner_tag = classify_mention(self.caption, self.ner_tag)
-            self.resolved_values = set(
-                [
-                    clean_name(v, self.ner_tag, normalize_name)
-                    for v in self.original_values
-                ]
-            )
-        # 2b. geonames_tagger
-        if refine_locations and self.ner_tag == "LOC":
-            location = refine_location(self.caption)
-            if location is not None:
-                self.canonized_value = location.name
-
-        # 3. skip this mention if it is not valid according to juditha
-        if validate_names:
-            self.is_valid = any(
-                juditha.validate_name(n, self.ner_tag) for n in self.resolved_values
-            )
-
-        # 4. resolve to actual entity via juditha
-        if resolve_mentions:
-            for name in self.resolved_values:
-                result = juditha.lookup(name)
-                if result is not None:
-                    self.canonized_value = result.caption
-                    self.schema_name = result.common_schema
-                    self.ner_tag = SCHEMA_NER.get(result.common_schema, "OTHER")
-                    self.resolved_values = set(
-                        [
-                            clean_name(v, self.ner_tag, normalize_name)
-                            for v in self.original_values
-                        ]
-                    )
-                    return
-
-    def to_entity(self) -> EntityProxy | None:
-        if self.schema_name:
-            return make_entity(
-                {
-                    "id": make_entity_id(self.key),
-                    "schema": self.schema_name,
-                    "caption": self.caption,
-                    "properties": {"name": list(self.names), "proof": [self.entity_id]},
-                }
-            )
-        schema = MENTIONS.get(self.prop)
-        if schema:
-            mention = model.make_entity("Mention")
-            mention.make_id("mention", self.entity_id, self.prop.name, self.key)
-            mention.add("resolved", make_entity_id(self.key))
-            mention.add("document", self.entity_id)
-            mention.add("name", self.names)
-            mention.add("detectedSchema", schema)
-            return mention
+# Map tags to properties for entity output
+TAG_TO_PROP_NAME = {
+    TAG_PER: "namesMentioned",
+    TAG_ORG: "companiesMentioned",
+    TAG_LOC: "locationMentioned",
+}
 
 
 class Analyzer:
+    """Main analyzer for extracting structured data from FTM entities.
+
+    Orchestrates the extraction pipeline:
+    1. Language detection
+    2. NER extraction (spacy/flair/bert/gliner)
+    3. Pattern extraction (emails, phones, IBANs)
+    4. Aggregation and deduplication
+    5. Resolution (rigour heuristics, juditha ML, geonames)
+    6. Entity creation
+    """
+
     def __init__(
         self,
         entity: EntityProxy,
-        resolve_mentions: bool | None = settings.resolve_mentions,
-        annotate: bool | None = settings.annotate,
-        validate_names: bool | None = settings.validate_names,
-        refine_mentions: bool | None = settings.refine_mentions,
-        refine_locations: bool | None = settings.refine_locations,
+        ner_engine: NerEngine | None = None,
+        use_confidence: bool = True,
+        use_rigour: bool = True,
+        use_juditha_classifier: bool | None = None,
+        use_juditha_validator: bool | None = None,
+        use_juditha_lookup: bool | None = None,
+        use_geonames: bool | None = None,
+        annotate: bool | None = None,
+        enable_tracing: bool = False,
     ):
+        """Initialize the analyzer.
+
+        Args:
+            entity: The source FTM entity to analyze
+            ner_engine: NER engine to use (spacy, flair, bert, gliner)
+            use_confidence: Enable confidence-based filtering
+            use_rigour: Use rigour heuristics for classification
+            use_juditha_classifier: Use juditha ML classifier
+            use_juditha_validator: Validate names against juditha
+            use_juditha_lookup: Lookup entities in juditha (default: settings.resolve_mentions)
+            use_geonames: Refine locations with geonames (default: settings.refine_locations)
+            annotate: Generate annotated text for search (default: settings.annotate)
+            enable_tracing: Enable detailed pipeline tracing
+        """
+        # Store the source entity
+        self.source_entity = entity
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
-        self.aggregator_entities = TagAggregatorFasttext()
-        self.aggregator_patterns = TagAggregator()
-        self.validate_names = validate_names
-        self.refine_mentions = refine_mentions
-        self.refine_locations = refine_locations
-        self.resolve_mentions = resolve_mentions
-        self.annotate = annotate
-        self.annotator = Annotator(entity)
-        if settings.ner_engine == "bert":
-            self.ner_extract = extract_bert
-        elif settings.ner_engine == "flair":
-            self.ner_extract = extract_flair
-        elif settings.ner_engine == "gliner":
-            self.ner_extract = extract_gliner
-        else:
-            self.ner_extract = extract_spacy
 
-    def feed(self, entity):
+        # Initialize extractors
+        ner_engine = ner_engine or settings.ner_engine
+        self.ner_extractor = self._create_ner_extractor(ner_engine)
+        self.pattern_extractor = PatternExtractor()
+
+        # Initialize aggregator
+        self.aggregator = Aggregator(
+            use_confidence=use_confidence,
+            confidence_threshold=settings.ner_type_model_confidence,
+        )
+
+        # Initialize resolution pipeline
+        self.pipeline = self._create_pipeline(
+            use_rigour=use_rigour,
+            use_juditha_classifier=(
+                use_juditha_classifier
+                if use_juditha_classifier is not None
+                else settings.refine_mentions
+            ),
+            use_juditha_validator=(
+                use_juditha_validator
+                if use_juditha_validator is not None
+                else settings.validate_names
+            ),
+            use_juditha_lookup=(
+                use_juditha_lookup
+                if use_juditha_lookup is not None
+                else settings.resolve_mentions
+            ),
+            use_geonames=(
+                use_geonames if use_geonames is not None else settings.refine_locations
+            ),
+        )
+
+        # Initialize entity factory
+        self.factory = EntityFactory()
+
+        # Initialize annotator
+        self.annotate = annotate if annotate is not None else settings.annotate
+        self.annotator = Annotator(entity) if self.annotate else None
+
+        # Initialize tracer
+        self.tracer = ExtractionTracer(enabled=enable_tracing)
+
+        # Track countries found during analysis
+        self.countries: set[str] = set()
+
+    def _create_ner_extractor(
+        self, engine: NerEngine
+    ) -> SpacyExtractor | FlairExtractor | BertExtractor | GlinerExtractor:
+        """Create the appropriate NER extractor."""
+        if engine == "bert":
+            return BertExtractor()
+        elif engine == "flair":
+            return FlairExtractor()
+        elif engine == "gliner":
+            return GlinerExtractor()
+        else:
+            return SpacyExtractor()
+
+    def _create_pipeline(
+        self,
+        use_rigour: bool,
+        use_juditha_classifier: bool,
+        use_juditha_validator: bool,
+        use_juditha_lookup: bool,
+        use_geonames: bool,
+    ) -> ResolutionPipeline:
+        """Create the resolution pipeline with configured stages."""
+        stages: list[ResolutionStage] = []
+
+        # 1. Classification stages
+        if use_rigour:
+            stages.append(RigourStage())
+        if use_juditha_classifier:
+            stages.append(JudithaClassifierStage())
+
+        # 2. Validation/canonicalization stages (by entity type)
+        if use_juditha_validator:
+            stages.append(JudithaValidatorStage())  # PER
+        if use_geonames:
+            stages.append(GeonamesStage())  # LOC
+
+        # 3. Entity resolution (last, benefits from all refinements)
+        if use_juditha_lookup:
+            stages.append(JudithaLookupStage())
+
+        return ResolutionPipeline(stages)
+
+    def feed(self, entity: EntityProxy) -> None:
+        """Extract from an entity and aggregate results.
+
+        Args:
+            entity: FTM entity to extract from
+        """
         if not entity.schema.is_a(ANALYZABLE):
             return
+
         texts = entity.get_type_values(registry.text)
         for text in text_chunks(texts):
+            # Detect languages
             detect_languages(self.entity, text)
-            for prop, tag in self.ner_extract(self.entity, text):
-                self.aggregator_entities.add(prop, tag)
-            for prop, tag in extract_patterns(self.entity, text):
-                self.aggregator_patterns.add(prop, tag)
+
+            # Create extraction context
+            context = ExtractionContext(
+                entity=self.entity,
+                text=text,
+                languages=self.entity.get_type_values(registry.language),
+            )
+
+            # NER extraction
+            for result in self.ner_extractor.extract(context):
+                accepted = self.aggregator.add(result)
+                self.tracer.trace_extraction(
+                    result.value, result.tag, result.source, accepted
+                )
+
+            # Pattern extraction
+            for result in self.pattern_extractor.extract(context):
+                accepted = self.aggregator.add(result)
+                self.tracer.trace_extraction(
+                    result.value, result.tag, result.source, accepted
+                )
 
     def flush(self) -> Generator[EntityProxy, None, None]:
-        countries = set()
-        mention_ids = set()
-        entity_ids = set()
-        results = 0
+        """Resolve and emit entities.
 
+        Yields:
+            FTM EntityProxy objects (resolved entities, mentions, bank accounts)
+        """
         if self.entity.id is None:
             raise ValueError("Entity has no ID!")
 
-        # patterns
-        for _, prop, values in self.aggregator_patterns.results():
-            if prop.type == registry.country:
-                countries.update(values)
-            elif prop == TAG_IBAN:
-                for value in values:
-                    country = get_iban_country(value)
-                    if country is not None:
-                        iban_proxy = self.make_bankaccount(value, country)
-                        entity_ids.add(iban_proxy.id)
-                        yield iban_proxy
-            self.entity.add(prop, values, cleaned=True, quiet=True)
-            results += 1
-            if self.annotate:
-                for value in values:
-                    self.annotator.add_tag(prop, value)
+        mention_ids: set[str] = set()
+        entity_ids: set[str] = set()
+        results_count = 0
 
-        # NER mentions
-        for key, prop, values in self.aggregator_entities.results():
-            if not key:
+        # Create resolution context
+        resolution_context = ResolutionContext(
+            entity=self.entity,
+            languages=self.entity.get_type_values(registry.language),
+            countries=self.countries,
+        )
+
+        # Process aggregated results
+        for agg_result in self.aggregator.iter_results():
+            self.tracer.trace_aggregation(
+                agg_result.key, agg_result.tag, len(agg_result.values)
+            )
+
+            # Handle patterns (non-NER)
+            if agg_result.tag in (TAG_IBAN, "EMAIL", "PHONE", "COUNTRY"):
+                yield from self._handle_pattern_result(agg_result, entity_ids)
+                results_count += 1
                 continue
-            mention = Mention(
-                key=key,
+
+            # Create mention from aggregated NER result
+            mention = Mention.from_aggregated(
+                key=agg_result.key,
+                tag=agg_result.tag,
+                values=agg_result.values,
                 entity_id=self.entity.id,
-                prop=prop,
-                original_values=set(values),
-                ner_tag=PROPS_NER_TAGS.get(prop, "OTHER"),
+                sources=agg_result.sources,
             )
-            mention.resolve(
-                refine_mentions=self.refine_mentions,
-                validate_names=self.validate_names,
-                resolve_mentions=self.resolve_mentions,
-                refine_locations=self.refine_locations,
+
+            # Resolve through pipeline
+            mention = self.pipeline.resolve(mention, resolution_context)
+
+            self.tracer.trace_resolution(
+                mention.key,
+                mention.rejection_stage or "complete",
+                not mention.is_rejected,
+                mention.rejection_reason,
             )
-            if not mention.is_valid:
+
+            if mention.is_rejected:
                 continue
 
-            entity = mention.to_entity()
-            if entity is not None:
+            # Create entities from mention
+            created_entity = None
+            for entity in self.factory.create_from_mention(
+                mention, countries=self.countries
+            ):
+                created_entity = entity
                 if entity.schema.is_a("Mention"):
                     mention_ids.add(entity.id)
-                    entity.add("contextCountry", countries)
                 else:
                     entity_ids.add(entity.id)
-                    if not entity.schema.is_a("Address"):
-                        entity.add("country", countries)
+                    self.tracer.trace_entity_created(entity.schema.name, entity.id)
+
                 yield entity
 
-            # annotate mentions
-            if self.annotate:
-                if entity is not None and entity.schema.is_a("LegalEntity"):
-                    for value in mention.annotate_values:
-                        self.annotator.add_mention(value, entity)
-                else:
-                    for value in values:
-                        self.annotator.add_tag(mention.resolved_prop, value)
+            # Handle annotation
+            if self.annotator:
+                self._annotate_mention(mention, created_entity)
 
-            self.entity.add(
-                mention.resolved_prop, mention.resolved_values, cleaned=True, quiet=True
-            )
-            self.entity.add("country", countries)
-            results += 1
+            # Add to output entity properties (normalized)
+            prop_name = TAG_TO_PROP_NAME.get(mention.ner_tag)
+            if prop_name:
+                values = mention.resolved_values or mention.values
+                normalized_values = {normalize_name(v) for v in values if v}
+                self.entity.add(prop_name, normalized_values, cleaned=True, quiet=True)
 
-        if self.annotate:
+            results_count += 1
+
+        # Add countries to output entity
+        self.entity.add("country", self.countries)
+
+        # Add annotated text
+        if self.annotator:
             for text in self.annotator.get_texts():
                 self.entity.add("indexText", f"{ANNOTATED} {text}")
 
-        if results:
+        # Log summary
+        if results_count:
             log.debug(
-                "Extracted %d prop values, %d mentions, %d entities [%s]: %s",
-                results,
-                len(mention_ids),
-                len(entity_ids),
-                self.entity.schema.name,
-                self.entity.id,
+                "Extraction complete",
+                results=results_count,
+                mentions=len(mention_ids),
+                entities=len(entity_ids),
+                schema=self.entity.schema.name,
+                entity_id=self.entity.id,
             )
-
             yield self.entity
 
-    def make_bankaccount(self, value: str, country: str) -> EntityProxy:
-        bank_account = model.make_entity("BankAccount")
-        bank_account.id = slugify(f"iban {value}")
-        bank_account.add("proof", self.entity.id)
-        bank_account.add("accountNumber", value)
-        bank_account.add("iban", value)
-        bank_account.add("country", country)
-        return bank_account
+        # Log tracer summary
+        self.tracer.log_summary()
+
+    def _handle_pattern_result(
+        self,
+        agg_result,
+        entity_ids: set[str],
+    ) -> Generator[EntityProxy, None, None]:
+        """Handle pattern extraction results (emails, phones, IBANs, countries)."""
+        if agg_result.tag == "COUNTRY":
+            self.countries.update(agg_result.values)
+            return
+
+        if agg_result.tag == TAG_IBAN:
+            for value in agg_result.values:
+                country = get_iban_country(value)
+                if country:
+                    iban_entity = self.factory.create_bank_account(
+                        iban=value,
+                        country=country,
+                        proof_entity_id=self.entity.id,
+                    )
+                    entity_ids.add(iban_entity.id)
+                    self.tracer.trace_entity_created("BankAccount", iban_entity.id)
+                    yield iban_entity
+
+        # Add to output entity (emails, phones, etc.)
+        # Map pattern tags to property names
+        pattern_prop_map = {
+            "EMAIL": "emailMentioned",
+            "PHONE": "phoneMentioned",
+            TAG_IBAN: "ibanMentioned",
+        }
+        prop_name = pattern_prop_map.get(agg_result.tag)
+        if prop_name:
+            self.entity.add(prop_name, agg_result.values, cleaned=True, quiet=True)
+
+        # Annotate patterns
+        if self.annotator:
+            for value in agg_result.values:
+                # Get property from tag for annotation
+                from ftm_analyze.analysis.util import TAG_EMAIL
+                from ftm_analyze.analysis.util import TAG_IBAN as PROP_IBAN
+                from ftm_analyze.analysis.util import TAG_PHONE
+
+                prop_map = {
+                    "EMAIL": TAG_EMAIL,
+                    "PHONE": TAG_PHONE,
+                    TAG_IBAN: PROP_IBAN,
+                }
+                prop = prop_map.get(agg_result.tag)
+                if prop:
+                    self.annotator.add_tag(prop, value)
+
+    def _annotate_mention(self, mention: Mention, entity: EntityProxy | None) -> None:
+        """Add mention annotation for search."""
+        if not self.annotator:
+            return
+
+        if entity and entity.schema.is_a("LegalEntity"):
+            for value in mention.annotate_values:
+                self.annotator.add_mention(value, entity)
+        else:
+            # Fall back to tag annotation
+            from ftm_analyze.analysis.util import TAG_COMPANY, TAG_LOCATION, TAG_PERSON
+
+            prop_map = {
+                "PER": TAG_PERSON,
+                "ORG": TAG_COMPANY,
+                "LOC": TAG_LOCATION,
+            }
+            prop = prop_map.get(mention.ner_tag)
+            if prop:
+                for value in mention.values:
+                    self.annotator.add_tag(prop, value)
+
+    def get_trace_summary(self) -> dict:
+        """Get the extraction trace summary for debugging."""
+        return self.tracer.get_summary().to_dict()

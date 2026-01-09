@@ -1,3 +1,5 @@
+"""Core logic for entity analysis."""
+
 from typing import Generator, Iterable
 
 from anystore.decorators import error_handler
@@ -21,25 +23,26 @@ def analyze_entity(
     refine_mentions: bool | None = settings.refine_mentions,
     refine_locations: bool | None = settings.refine_locations,
 ) -> Generator[EntityProxy, None, None]:
-    """
-    Analyze an Entity.
+    """Analyze an Entity.
 
     Args:
-        entity: The entity proxy
-        resolve_mentions: Convert known mentions into its actual entities via
-            `juditha`
-        annotate: Annotate extracted patterns, names and mentions in `indexText`
+        entity: The entity proxy to analyze
+        resolve_mentions: Convert known mentions into actual entities via juditha
+        annotate: Annotate extracted patterns, names and mentions in indexText
+        validate_names: Validate names against juditha name datasets
+        refine_mentions: Use juditha ML classifier to refine NER tags
+        refine_locations: Refine locations using geonames
 
     Yields:
-        A generator of entity fragments
+        A generator of entity fragments (mentions, resolved entities, etc.)
     """
     analyzer = Analyzer(
         entity,
-        resolve_mentions,
-        annotate,
-        validate_names,
-        refine_mentions,
-        refine_locations,
+        use_juditha_lookup=resolve_mentions,
+        annotate=annotate,
+        use_juditha_validator=validate_names,
+        use_juditha_classifier=refine_mentions,
+        use_geonames=refine_locations,
     )
     analyzer.feed(entity)
     yield from analyzer.flush()
@@ -53,12 +56,25 @@ def analyze_entities(
     refine_mentions: bool | None = settings.refine_mentions,
     refine_locations: bool | None = settings.refine_locations,
 ) -> Generator[EntityProxy, None, None]:
-    for e in logged_items(entities, "Analyze", 1000, item_name="Entity", logger=log):
+    """Analyze multiple entities.
+
+    Args:
+        entities: Iterable of entity proxies to analyze
+        resolve_mentions: Convert known mentions into actual entities via juditha
+        annotate: Annotate extracted patterns, names and mentions in indexText
+        validate_names: Validate names against juditha name datasets
+        refine_mentions: Use juditha ML classifier to refine NER tags
+        refine_locations: Refine locations using geonames
+
+    Yields:
+        A generator of entity fragments from all analyzed entities
+    """
+    for e in logged_items(entities, "Analyze", 10, item_name="Entity", logger=log):
         yield from analyze_entity(
             e,
-            resolve_mentions,
-            annotate,
-            validate_names,
-            refine_mentions,
-            refine_locations,
+            resolve_mentions=resolve_mentions,
+            annotate=annotate,
+            validate_names=validate_names,
+            refine_mentions=refine_mentions,
+            refine_locations=refine_locations,
         )

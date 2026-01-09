@@ -1,3 +1,5 @@
+"""Command-line interface for ftm-analyze."""
+
 from typing import Optional
 
 import typer
@@ -32,14 +34,14 @@ OUT = Annotated[
 @cli.callback(invoke_without_command=True)
 def cli_base(
     version: Annotated[Optional[bool], typer.Option(..., help="Show version")] = False,
-    settings: Annotated[
-        Optional[bool], typer.Option(..., help="Show current settings")
+    show_settings: Annotated[
+        Optional[bool], typer.Option("--settings", help="Show current settings")
     ] = False,
 ):
     if version:
         print(__version__)
         raise typer.Exit()
-    if settings:
+    if show_settings:
         print(Settings())
         raise typer.Exit()
     configure_logging()
@@ -47,9 +49,7 @@ def cli_base(
 
 @cli.command("download-spacy")
 def cli_download():
-    """
-    Download required spacy models based on current settings
-    """
+    """Download required spacy models based on current settings."""
     from spacy.cli.download import download
 
     console.print(settings.spacy_models)
@@ -63,7 +63,7 @@ def cli_analyze(
     in_uri: IN = "-",
     out_uri: OUT = "-",
     resolve_mentions: Annotated[
-        bool, typer.Option(help="Resolve known mentions via `juditha`")
+        bool, typer.Option(help="Resolve known mentions via juditha")
     ] = settings.resolve_mentions,
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
@@ -78,18 +78,16 @@ def cli_analyze(
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
 ):
-    """
-    Analyze a stream of entities.
-    """
+    """Analyze a stream of entities."""
     with ErrorHandler(log):
         entities = smart_read_proxies(in_uri)
         results = logic.analyze_entities(
             entities,
-            resolve_mentions,
-            annotate,
-            validate_names,
-            refine_mentions,
-            refine_locations,
+            resolve_mentions=resolve_mentions,
+            annotate=annotate,
+            validate_names=validate_names,
+            refine_mentions=refine_mentions,
+            refine_locations=refine_locations,
         )
         smart_write_proxies(out_uri, results)
 
@@ -99,7 +97,7 @@ def cli_analyze_text(
     in_uri: IN = "-",
     out_uri: OUT = "-",
     resolve_mentions: Annotated[
-        bool, typer.Option(help="Resolve known mentions via `juditha`")
+        bool, typer.Option(help="Resolve known mentions via juditha")
     ] = settings.resolve_mentions,
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
@@ -114,9 +112,7 @@ def cli_analyze_text(
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
 ):
-    """
-    Analyze a text string (for debugging purposes).
-    """
+    """Analyze a text string (for debugging purposes)."""
     with ErrorHandler(log):
         from followthemoney import model
 
@@ -129,10 +125,10 @@ def cli_analyze_text(
 
         results = logic.analyze_entity(
             entity,
-            resolve_mentions,
-            annotate,
-            validate_names,
-            refine_mentions,
-            refine_locations,
+            resolve_mentions=resolve_mentions,
+            annotate=annotate,
+            validate_names=validate_names,
+            refine_mentions=refine_mentions,
+            refine_locations=refine_locations,
         )
         smart_write_proxies(out_uri, results)

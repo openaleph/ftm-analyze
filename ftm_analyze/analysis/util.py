@@ -1,5 +1,5 @@
 from followthemoney import model
-from normality import collapse_spaces
+from normality import squash_spaces
 
 ANALYZABLE = model["Analyzable"]
 DOCUMENT = model["Document"]
@@ -17,7 +17,7 @@ TAG_LOCATION = ANALYZABLE.properties["locationMentioned"]
 def text_chunks(texts, sep=" ", max_chunk=25000):
     """Pre-chew text snippets for NLP and pattern matching."""
     for text in texts:
-        text = collapse_spaces(text)
+        text = squash_spaces(text)
         if text is None or len(text) < 5:
             continue
         # Crudest text splitting code in documented human history.

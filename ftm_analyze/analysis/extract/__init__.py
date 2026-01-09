@@ -1,23 +1,51 @@
+"""Extraction module for NER and pattern extraction."""
+
 from ftm_analyze.analysis.extract.base import (
-    NER_TYPES,
-    NERs,
-    ner_result,
+    NER_LABEL_MAP,
+    TAG_EMAIL,
+    TAG_IBAN,
+    TAG_LOC,
+    TAG_ORG,
+    TAG_OTHER,
+    TAG_PER,
+    TAG_PHONE,
+    TAG_TO_PROP,
+    ExtractionContext,
+    ExtractionResult,
+    ExtractionResults,
+    Extractor,
+    make_ner_result,
+    normalize_label,
     test_name,
     validate_person_name,
 )
-from ftm_analyze.analysis.extract.bert import handle as extract_bert
-from ftm_analyze.analysis.extract.flair import handle as extract_flair
-from ftm_analyze.analysis.extract.gliner import handle as extract_gliner
-from ftm_analyze.analysis.extract.spacy import handle as extract_spacy
+from ftm_analyze.analysis.extract.bert import BertExtractor
+from ftm_analyze.analysis.extract.flair import FlairExtractor
+from ftm_analyze.analysis.extract.gliner import GlinerExtractor
+from ftm_analyze.analysis.extract.patterns import PatternExtractor
+from ftm_analyze.analysis.extract.spacy import SpacyExtractor
 
 __all__ = [
-    "NERs",
-    "NER_TYPES",
-    "ner_result",
+    "ExtractionResult",
+    "ExtractionContext",
+    "ExtractionResults",
+    "Extractor",
+    "make_ner_result",
+    "normalize_label",
     "test_name",
     "validate_person_name",
-    "extract_spacy",
-    "extract_flair",
-    "extract_bert",
-    "extract_gliner",
+    "TAG_PER",
+    "TAG_ORG",
+    "TAG_LOC",
+    "TAG_EMAIL",
+    "TAG_PHONE",
+    "TAG_IBAN",
+    "TAG_OTHER",
+    "NER_LABEL_MAP",
+    "TAG_TO_PROP",
+    "SpacyExtractor",
+    "FlairExtractor",
+    "BertExtractor",
+    "GlinerExtractor",
+    "PatternExtractor",
 ]
