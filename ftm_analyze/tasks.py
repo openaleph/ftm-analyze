@@ -16,10 +16,14 @@ def should_geocode(e: EntityProxy) -> bool:
         return True
     return bool(e.get_type_values(registry.address))
 
+def should_translate(e: EntityProxy) -> bool:
+    return e.schema.is_a("Document") and e.has("detectedLanguage") and e.has("bodyText")
+
 
 @task(app=app)
 def analyze(job: DatasetJob) -> None:
     entities: list[EntityProxy] = list(job.load_entities())
+    to_translate: list[EntityProxy] = []
     to_geocode: list[EntityProxy] = []
     to_index: list[EntityProxy] = []
     with job.get_writer() as bulk:
@@ -29,7 +33,11 @@ def analyze(job: DatasetJob) -> None:
                 to_index.append(result)
                 if should_geocode(result):
                     to_geocode.append(result)
+                if should_translate(result):
+                    to_translate.append(result)
     if to_index:
         defer.index(app, job.dataset, to_index, batch=job.batch, **job.context)
     if to_geocode:
-        defer.geocode(app, job.dataset, entities, batch=job.batch, **job.context)
+        defer.geocode(app, job.dataset, to_geocode, batch=job.batch, **job.context)
+    if to_translate:
+        defer.translate(app, job.dataset, to_translate, batch=job.batch, **job.context)
