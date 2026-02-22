@@ -1,6 +1,6 @@
 import typing
+from functools import cache
 
-from anystore.functools import weakref_cache as cache
 from ftmq.util import EntityProxy
 
 from ftm_analyze.analysis.extract.base import NERs, ner_result

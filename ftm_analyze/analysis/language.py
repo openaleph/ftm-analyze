@@ -1,5 +1,6 @@
+from functools import cache
+
 import fasttext
-from anystore.functools import weakref_cache as cache
 from anystore.logging import get_logger
 
 from ftm_analyze.settings import Settings
