@@ -77,6 +77,10 @@ FROM builder AS deps-builder
 # Install pre-built pyicu wheel
 RUN pip install /wheels/*.whl
 
+RUN apt-get update -qq \
+    && apt-get install -qq -y --no-install-recommends libleveldb-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install frozen dependencies with git available for VCS deps
 COPY requirements.txt /app/requirements.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -208,11 +212,18 @@ COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/el_core_news_sm
 COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/lt_core_news_sm /usr/local/lib/python3.13/site-packages/lt_core_news_sm
 COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/nb_core_news_sm /usr/local/lib/python3.13/site-packages/nb_core_news_sm
 COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/da_core_news_sm /usr/local/lib/python3.13/site-packages/da_core_news_sm
+
 # Copy dist-info directories and additional model dependencies (e.g., pymorphy3 for Russian)
 RUN --mount=from=spacy-models,source=/usr/local/lib/python3.13/site-packages,target=/mnt \
     cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.13/site-packages/ \
     && cp -r /mnt/pymorphy3* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true \
     && cp -r /mnt/dawg* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true
+
+# Copy .so files necessary for plyvel (juditha)
+COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libleveldb.so.1d /usr/lib/x86_64-linux-gnu/libleveldb.so.1d
+COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libsnappy.so.1 /usr/lib/x86_64-linux-gnu/libsnappy.so.1
+# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libleveldb.so.1d /usr/lib/aarch64-linux-gnu/libleveldb.so.1d
+# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libsnappy.so.1 /usr/lib/aarch64-linux-gnu/libsnappy.so.1
 
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
@@ -232,6 +243,12 @@ COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/es_core_ne
 # Copy dist-info directories for package recognition
 RUN --mount=from=spacy-models-slim,source=/usr/local/lib/python3.13/site-packages,target=/mnt \
     cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.13/site-packages/
+
+# Copy .so files necessary for plyvel (juditha)
+COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libleveldb.so.1d /usr/lib/x86_64-linux-gnu/libleveldb.so.1d
+COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libsnappy.so.1 /usr/lib/x86_64-linux-gnu/libsnappy.so.1
+# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libleveldb.so.1d /usr/lib/aarch64-linux-gnu/libleveldb.so.1d
+# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libsnappy.so.1 /usr/lib/aarch64-linux-gnu/libsnappy.so.1
 
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
