@@ -16,10 +16,14 @@ def should_geocode(e: EntityProxy) -> bool:
         return True
     return bool(e.get_type_values(registry.address))
 
-def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
-    return e.schema.is_a("Document") and e.has("detectedLanguage") and e_origin_ingest.has("indexText")
 
-@task(app=app)
+def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
+    if e.schema.is_a("Document") and e.has("detectedLanguage"):
+        return e_origin_ingest.has("indexText") or e_origin_ingest.has("bodyText")
+    return False
+
+
+@task(app=app, retries=defer.tasks.analyze.retries)
 def analyze(job: DatasetJob) -> None:
     entities: list[EntityProxy] = list(job.load_entities())
     to_translate: list[EntityProxy] = []
