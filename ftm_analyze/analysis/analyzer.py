@@ -292,7 +292,8 @@ class Analyzer:
                 self.entity.id,
             )
 
-            yield self.entity
+        # always get the base entity, it might has detectedLanguage patched
+        yield self.entity
 
     def make_bankaccount(self, value: str, country: str) -> EntityProxy:
         bank_account = model.make_entity("BankAccount")
