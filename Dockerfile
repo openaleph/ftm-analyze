@@ -122,10 +122,11 @@ COPY pyproject.toml setup.py VERSION README.md /app/
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models
 
-# Install app without deps (already installed) and add psycopg binary
+# Install app without deps (already installed) and add psycopg binary and procrastinate
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-deps --no-compile ".[openaleph]" \
-    && pip install --no-compile "psycopg[binary]"
+    && pip install --no-compile "psycopg[binary]" \
+    && pip install procrastinate
 
 # Final cleanup - remove pip/setuptools (not needed at runtime)
 RUN pip uninstall -y pip setuptools 2>/dev/null || true \
