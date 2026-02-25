@@ -24,7 +24,7 @@ def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
     return False
 
 
-@task(app=app, retries=defer.tasks.analyze.retries)
+@task(app=app, retry=defer.tasks.analyze.retries)
 def analyze(job: DatasetJob) -> None:
     to_translate: list[EntityProxy] = []
     to_geocode: list[EntityProxy] = []
