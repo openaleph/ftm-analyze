@@ -123,6 +123,11 @@ COPY pyproject.toml setup.py VERSION README.md /app/
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models
 
+# Copy .so files necessary for plyvel (juditha) - glob handles both x86_64 and aarch64
+RUN --mount=from=deps-builder,target=/mnt \
+    cp /mnt/usr/lib/*-linux-gnu/libleveldb.so.1d /usr/lib/*-linux-gnu/ \
+    && cp /mnt/usr/lib/*-linux-gnu/libsnappy.so.1 /usr/lib/*-linux-gnu/
+
 # Install app without deps (already installed from requirements-openaleph.txt)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-deps --no-compile .
@@ -219,12 +224,6 @@ RUN --mount=from=spacy-models,source=/usr/local/lib/python3.13/site-packages,tar
     && cp -r /mnt/pymorphy3* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true \
     && cp -r /mnt/dawg* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true
 
-# Copy .so files necessary for plyvel (juditha)
-COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libleveldb.so.1d /usr/lib/x86_64-linux-gnu/libleveldb.so.1d
-COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libsnappy.so.1 /usr/lib/x86_64-linux-gnu/libsnappy.so.1
-# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libleveldb.so.1d /usr/lib/aarch64-linux-gnu/libleveldb.so.1d
-# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libsnappy.so.1 /usr/lib/aarch64-linux-gnu/libsnappy.so.1
-
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
 
@@ -243,12 +242,6 @@ COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/es_core_ne
 # Copy dist-info directories for package recognition
 RUN --mount=from=spacy-models-slim,source=/usr/local/lib/python3.13/site-packages,target=/mnt \
     cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.13/site-packages/
-
-# Copy .so files necessary for plyvel (juditha)
-COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libleveldb.so.1d /usr/lib/x86_64-linux-gnu/libleveldb.so.1d
-COPY --from=deps-builder /usr/lib/x86_64-linux-gnu/libsnappy.so.1 /usr/lib/x86_64-linux-gnu/libsnappy.so.1
-# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libleveldb.so.1d /usr/lib/aarch64-linux-gnu/libleveldb.so.1d
-# COPY --from=deps-builder /usr/lib/aarch64-linux-gnu/libsnappy.so.1 /usr/lib/aarch64-linux-gnu/libsnappy.so.1
 
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
