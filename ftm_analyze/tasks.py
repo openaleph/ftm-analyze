@@ -4,6 +4,7 @@ from openaleph_procrastinate import defer
 from openaleph_procrastinate.app import make_app
 from openaleph_procrastinate.model import DatasetJob
 from openaleph_procrastinate.tasks import task
+from openaleph_procrastinate.util import make_stub_entity
 
 from ftm_analyze.logic import analyze_entity
 
@@ -25,19 +26,18 @@ def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
 
 @task(app=app, retries=defer.tasks.analyze.retries)
 def analyze(job: DatasetJob) -> None:
-    entities: list[EntityProxy] = list(job.load_entities())
     to_translate: list[EntityProxy] = []
     to_geocode: list[EntityProxy] = []
     to_index: list[EntityProxy] = []
     with job.get_writer() as bulk:
-        for entity in entities:
+        for entity in job.load_entities():
             for result in analyze_entity(entity):
                 bulk.put(result, origin=ORIGIN, fragment=entity.id)
-                to_index.append(result)
+                to_index.append(make_stub_entity(result))
                 if should_geocode(result):
-                    to_geocode.append(result)
+                    to_geocode.append(make_stub_entity(result))
                 if should_translate(result, entity):
-                    to_translate.append(result)
+                    to_translate.append(make_stub_entity(result))
     if to_index:
         defer.index(app, job.dataset, to_index, batch=job.batch, **job.context)
     if to_geocode:
