@@ -1,6 +1,6 @@
 [project]
 name = "ftm-analyze"
-version = "5.2.0-rc2"
+version = "5.2.0-rc3"
 description = "Analyze FollowTheMoney entities"
 authors = [
     { name = "Friedrich Lindenberg", email = "friedrich@pudo.org" },
