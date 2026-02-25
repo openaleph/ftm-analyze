@@ -82,9 +82,10 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install frozen dependencies with git available for VCS deps
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt requirements-openaleph.txt /app/
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile -r requirements.txt
+    pip install --no-compile -r requirements-openaleph.txt \
+    && pip install --no-compile "psycopg[binary]"
 
 # Strip debug symbols from compiled extensions (~20-40MB savings)
 RUN find /usr/local/lib/python*/site-packages -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true
@@ -122,11 +123,9 @@ COPY pyproject.toml setup.py VERSION README.md /app/
 COPY ftm_analyze /app/ftm_analyze
 COPY models /app/models
 
-# Install app without deps (already installed) and add psycopg binary and procrastinate
+# Install app without deps (already installed from requirements-openaleph.txt)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-deps --no-compile ".[openaleph]" \
-    && pip install --no-compile "psycopg[binary]" \
-    && pip install procrastinate
+    pip install --no-deps --no-compile .
 
 # Final cleanup - remove pip/setuptools (not needed at runtime)
 RUN pip uninstall -y pip setuptools 2>/dev/null || true \

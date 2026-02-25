@@ -84,3 +84,12 @@ repos:
       - id: poetry-export
         args:
           ["--without-hashes", "--only", "dev", "-o", "requirements-dev.txt"]
+      - id: poetry-export
+        args:
+          [
+            "--without-hashes",
+            "--extras",
+            "openaleph",
+            "-o",
+            "requirements-openaleph.txt",
+          ]
