@@ -32,6 +32,7 @@ dependencies = [
     "cachetools (<6)",
     "geonames-tagger (>=1.0.2,<2.0.0)",
     "spacy (>=3.8.11,<4.0.0)",
+    "openaleph-procrastinate (>=5.2.0,<6.0.0)",
 ]
 
 [project.optional-dependencies]
