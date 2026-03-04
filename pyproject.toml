@@ -36,7 +36,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate @ git+https://github.com/openaleph/openaleph-procrastinate.git"]
+openaleph = ["openaleph-procrastinate (>=5.2.1,<6.0.0)"]
 ner-flair = ["flair (>=0.15.1,<0.16.0)"]
 ner-gliner = ["gliner (>=0.2,<1.0)"]
 ner-spacy = ["spacy (>=3.8.7,<4.0.0)"]
