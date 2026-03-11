@@ -106,3 +106,27 @@ def test_analyze_extract_location():
     entity = _analyze_entity(entity)
     assert entity.first("locationMentioned", "New York City")
     assert "lives in [New York City](LOC)"
+
+def test_analyze_language_preservation():
+    text = "C'est le caniche d'Emmanuel Macron. " * 2
+    entity = model.make_entity("PlainText")
+    entity.id = "test2"
+    entity.add("bodyText", text)
+
+    entity.set("language", "eng")
+    # do not overwrite the detectedLanguage
+    entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
+    # if the property is not set, it should be empty
+    assert not entity.get("detectedLanguage")
+    
+    entity.set("detectedLanguage", "ron")
+    # do not overwrite the detectedLanguage
+    entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
+    # if the property is set, it should be preserved
+    assert entity.get("detectedLanguage") == ["ron"]
+    
+    entity.set("detectedLanguage", "ron")
+    # finally, overwrite the detectedLanguage
+    entity = [e for e in logic.analyze_entity(entity, overwrite_lang=True)][-1]
+    # the property should be corrected
+    assert entity.get("detectedLanguage") == ["fra"]
