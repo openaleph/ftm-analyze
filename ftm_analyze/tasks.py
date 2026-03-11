@@ -29,9 +29,11 @@ def analyze(job: DatasetJob) -> None:
     to_translate: list[EntityProxy] = []
     to_geocode: list[EntityProxy] = []
     to_index: list[EntityProxy] = []
+
+    overwrite_lang = job.context.get("overwrite_lang", False)
     with job.get_writer() as bulk:
         for entity in job.load_entities():
-            for result in analyze_entity(entity):
+            for result in analyze_entity(entity, overwrite_lang=overwrite_lang):
                 bulk.put(result, origin=ORIGIN, fragment=entity.id)
                 to_index.append(make_stub_entity(result))
                 if should_geocode(result):

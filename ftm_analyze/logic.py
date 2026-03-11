@@ -20,6 +20,7 @@ def analyze_entity(
     validate_names: bool | None = settings.validate_names,
     refine_mentions: bool | None = settings.refine_mentions,
     refine_locations: bool | None = settings.refine_locations,
+    overwrite_lang : bool = False
 ) -> Generator[EntityProxy, None, None]:
     """
     Analyze an Entity.
@@ -41,7 +42,7 @@ def analyze_entity(
         refine_mentions,
         refine_locations,
     )
-    analyzer.feed(entity)
+    analyzer.feed(entity, overwrite_lang=overwrite_lang)
     yield from analyzer.flush()
 
 

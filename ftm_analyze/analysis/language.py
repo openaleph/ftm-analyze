@@ -16,9 +16,9 @@ def get_lid_model():
     return fasttext.load_model(str(settings.lid_model_path))
 
 
-def detect_languages(entity, text, k=1):
+def detect_languages(entity, text, overwrite_lang, k=1):
     """Given a list of lines, return a list of (line, lang)"""
-    if entity.has("language", quiet=True) or entity.has("detectedLanguage"):
+    if not overwrite_lang and (entity.has("language", quiet=True) or entity.has("detectedLanguage")):
         # Don't detect if a language is hard-coded.
         return
     entity.pop("detectedLanguage")

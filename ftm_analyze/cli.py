@@ -77,6 +77,9 @@ def cli_analyze(
     refine_locations: Annotated[
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
+    overwrite_lang: Annotated[
+        bool, typer.Option(help="Ignore the language property, overwrite the detectedLanguage property")
+    ] = False,
 ):
     """
     Analyze a stream of entities.
@@ -134,5 +137,6 @@ def cli_analyze_text(
             validate_names,
             refine_mentions,
             refine_locations,
+            overwrite_lang,
         )
         smart_write_proxies(out_uri, results)
