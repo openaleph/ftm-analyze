@@ -93,6 +93,7 @@ def cli_analyze(
             validate_names,
             refine_mentions,
             refine_locations,
+            overwrite_lang,
         )
         smart_write_proxies(out_uri, results)
 
@@ -137,6 +138,5 @@ def cli_analyze_text(
             validate_names,
             refine_mentions,
             refine_locations,
-            overwrite_lang,
         )
         smart_write_proxies(out_uri, results)

@@ -53,6 +53,7 @@ def analyze_entities(
     validate_names: bool | None = settings.validate_names,
     refine_mentions: bool | None = settings.refine_mentions,
     refine_locations: bool | None = settings.refine_locations,
+    overwrite_lang : bool = False
 ) -> Generator[EntityProxy, None, None]:
     for e in logged_items(entities, "Analyze", 1000, item_name="Entity", logger=log):
         yield from analyze_entity(
@@ -62,4 +63,5 @@ def analyze_entities(
             validate_names,
             refine_mentions,
             refine_locations,
+            overwrite_lang,
         )
