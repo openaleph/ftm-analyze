@@ -1,4 +1,5 @@
 import logging
+import textwrap
 from typing import Generator
 
 import juditha
@@ -203,12 +204,16 @@ class Analyzer:
         if not entity.schema.is_a(ANALYZABLE):
             return
         texts = entity.get_type_values(registry.text)
+        # overwrite_lang to completely delete all detectedLanguage values?
+        if overwrite_lang and (entity.has("language", quiet=True) or entity.has("detectedLanguage")):
+            entity.pop("detectedLanguage")
         for text in text_chunks(texts):
-            detect_languages(self.entity, text, overwrite_lang)
-            for prop, tag in self.ner_extract(self.entity, text):
-                self.aggregator_entities.add(prop, tag)
-            for prop, tag in extract_patterns(self.entity, text):
-                self.aggregator_patterns.add(prop, tag)
+            for subsection in textwrap.wrap(text, width=1024):
+                detect_languages(self.entity, subsection, overwrite_lang)
+                for prop, tag in self.ner_extract(self.entity, text):
+                    self.aggregator_entities.add(prop, tag)
+                for prop, tag in extract_patterns(self.entity, text):
+                    self.aggregator_patterns.add(prop, tag)
 
     def flush(self) -> Generator[EntityProxy, None, None]:
         countries = set()

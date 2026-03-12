@@ -18,10 +18,6 @@ def get_lid_model():
 
 def detect_languages(entity, text, overwrite_lang, k=1):
     """Given a list of lines, return a list of (line, lang)"""
-    if not overwrite_lang and (entity.has("language", quiet=True) or entity.has("detectedLanguage")):
-        # Don't detect if a language is hard-coded.
-        return
-    entity.pop("detectedLanguage")
     langs = get_lid_model().predict(text, k=k)
     for lang, score in zip(*langs):
         if score <= THRESHOLD:
