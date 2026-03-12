@@ -124,3 +124,6 @@ class Settings(BaseSettings):
 
     validate_names: bool = False
     """Validate NER results against known name tokens via `juditha`"""
+
+    overwrite_lang: bool = False
+    """Ignore the language property, overwrite the detectedLanguage property"""

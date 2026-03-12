@@ -79,7 +79,7 @@ def cli_analyze(
     ] = settings.refine_locations,
     overwrite_lang: Annotated[
         bool, typer.Option(help="Ignore the language property, overwrite the detectedLanguage property")
-    ] = False,
+    ] = settings.overwrite_lang,
 ):
     """
     Analyze a stream of entities.
