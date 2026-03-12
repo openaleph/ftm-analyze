@@ -1,4 +1,5 @@
 import logging
+import textwrap
 from typing import Generator
 
 import juditha
@@ -178,6 +179,10 @@ class Analyzer:
     ):
         self.entity = model.make_entity(entity.schema)
         self.entity.id = entity.id
+        if entity.get("language"):
+            self.entity.set("language", entity.get("language"))
+        if entity.get("detectedLanguage"):
+            self.entity.set("detectedLanguage", entity.get("detectedLanguage"))
         self.aggregator_entities = TagAggregatorFasttext()
         self.aggregator_patterns = TagAggregator()
         self.validate_names = validate_names
@@ -195,16 +200,20 @@ class Analyzer:
         else:
             self.ner_extract = extract_spacy
 
-    def feed(self, entity):
+    def feed(self, entity, overwrite_lang=False):
         if not entity.schema.is_a(ANALYZABLE):
             return
         texts = entity.get_type_values(registry.text)
+        # overwrite_lang to completely delete all detectedLanguage values?
+        if overwrite_lang and (entity.has("language", quiet=True) or entity.has("detectedLanguage")):
+            entity.pop("detectedLanguage")
         for text in text_chunks(texts):
-            detect_languages(self.entity, text)
-            for prop, tag in self.ner_extract(self.entity, text):
-                self.aggregator_entities.add(prop, tag)
-            for prop, tag in extract_patterns(self.entity, text):
-                self.aggregator_patterns.add(prop, tag)
+            for subsection in textwrap.wrap(text, width=1024):
+                detect_languages(self.entity, subsection, overwrite_lang)
+                for prop, tag in self.ner_extract(self.entity, text):
+                    self.aggregator_entities.add(prop, tag)
+                for prop, tag in extract_patterns(self.entity, text):
+                    self.aggregator_patterns.add(prop, tag)
 
     def flush(self) -> Generator[EntityProxy, None, None]:
         countries = set()
