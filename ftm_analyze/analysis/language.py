@@ -16,7 +16,7 @@ def get_lid_model():
     return fasttext.load_model(str(settings.lid_model_path))
 
 
-def detect_languages(entity, text, overwrite_lang, k=1):
+def detect_languages(entity, text, k=1):
     """Given a list of lines, return a list of (line, lang)"""
     langs = get_lid_model().predict(text, k=k)
     for lang, score in zip(*langs):
