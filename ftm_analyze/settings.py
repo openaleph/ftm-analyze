@@ -127,3 +127,6 @@ class Settings(BaseSettings):
 
     overwrite_lang: bool = False
     """Ignore the language property, overwrite the detectedLanguage property"""
+
+    translation_chunk_size: int = 512
+    """A text is chunked into substrings of this size, for language detection"""

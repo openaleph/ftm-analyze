@@ -208,7 +208,8 @@ class Analyzer:
         if overwrite_lang and entity.has("detectedLanguage", quiet=True):
             self.entity.pop("detectedLanguage")
         for text in text_chunks(texts):
-            for subsection in textwrap.wrap(text, width=512):
+            # TODO add chunk length in the settings
+            for subsection in textwrap.wrap(text, settings.translation_chunk_size):
                 detect_languages(self.entity, subsection)
             for prop, tag in self.ner_extract(self.entity, text):
                 self.aggregator_entities.add(prop, tag)
