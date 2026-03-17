@@ -116,16 +116,12 @@ def test_analyze_language_preservation():
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
     # if the detectedLanguage property is not set, it should be detected
     assert entity.get("detectedLanguage") == ["fra"]
-
-    entity.pop("detectedLanguage")
     
     entity.set("detectedLanguage", "ron")
     # do not overwrite the detectedLanguage
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
     # if the property is set, it should be preserved
     assert entity.get("detectedLanguage") == ["ron", "fra"]
-
-    entity.pop("detectedLanguage")
     
     entity.set("detectedLanguage", "ron")
     # finally, overwrite the detectedLanguage
