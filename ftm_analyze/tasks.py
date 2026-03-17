@@ -7,10 +7,10 @@ from openaleph_procrastinate.tasks import task
 from openaleph_procrastinate.util import make_stub_entity
 
 from ftm_analyze.logic import analyze_entity
+from ftm_analyze.settings import target_lang
 
 app = make_app(__loader__.name)
 ORIGIN = "analyze"
-
 
 def should_geocode(e: EntityProxy) -> bool:
     if e.schema.is_a("Address") or e.schema.is_a("RealEstate"):
@@ -19,8 +19,10 @@ def should_geocode(e: EntityProxy) -> bool:
 
 
 def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
-    if e.schema.is_a("Document") and e.has("detectedLanguage"):
-        return e_origin_ingest.has("indexText") or e_origin_ingest.has("bodyText")
+    if e.schema.is_a("Document") and e.has("detectedLanguage") and target_lang:
+        # at least one of the detected languages must be different from the target
+        if any([lang != target_lang for lang in e.get("detectedLanguage")]):
+            return e_origin_ingest.has("indexText") or e_origin_ingest.has("bodyText")
     return False
 
 
@@ -38,6 +40,7 @@ def analyze(job: DatasetJob) -> None:
                     to_geocode.append(make_stub_entity(result))
                 if should_translate(result, entity):
                     to_translate.append(make_stub_entity(result))
+
     if to_index:
         defer.index(app, job.dataset, to_index, batch=job.batch, **job.context)
     if to_geocode:

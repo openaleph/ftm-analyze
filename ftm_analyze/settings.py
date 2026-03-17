@@ -1,3 +1,4 @@
+from os import environ
 from pathlib import Path
 from typing import Literal
 
@@ -124,3 +125,5 @@ class Settings(BaseSettings):
 
     validate_names: bool = False
     """Validate NER results against known name tokens via `juditha`"""
+
+target_lang = str(environ.get("FTM_TRANSLATE_TARGET_LANGUAGE", None))
