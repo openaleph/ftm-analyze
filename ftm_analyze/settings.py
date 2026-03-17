@@ -126,4 +126,11 @@ class Settings(BaseSettings):
     validate_names: bool = False
     """Validate NER results against known name tokens via `juditha`"""
 
+    overwrite_lang: bool = False
+    """Ignore the language property, overwrite the detectedLanguage property"""
+
+    translation_chunk_size: int = 512
+    """A text is chunked into substrings of this size, for language detection"""
+
+
 target_lang = str(environ.get("FTM_TRANSLATE_TARGET_LANGUAGE", None))
