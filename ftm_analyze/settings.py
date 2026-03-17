@@ -1,3 +1,4 @@
+from os import environ
 from pathlib import Path
 from typing import Literal
 
@@ -130,3 +131,6 @@ class Settings(BaseSettings):
 
     translation_chunk_size: int = 512
     """A text is chunked into substrings of this size, for language detection"""
+
+
+target_lang = str(environ.get("FTM_TRANSLATE_TARGET_LANGUAGE", None))
