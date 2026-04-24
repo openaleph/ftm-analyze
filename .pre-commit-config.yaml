@@ -34,7 +34,7 @@ repos:
       - id: absolufy-imports
 
   - repo: https://github.com/pycqa/isort
-    rev: 8.0.1
+    rev: 9.0.0a2
     hooks:
       - id: isort
         args: ["--profile", "black"]
