@@ -1,15 +1,23 @@
 """
-Annotate names for use with
-https://www.elastic.co/docs/reference/elasticsearch/plugins/mapper-annotated-text-usage
+Annotate entity mentions as per-word ZWJ markers in indexText.
+
+See ``annotations.md`` for the full spec and rationale. Short version:
+
+    Jane‍__PER__‍__doejane__ Doe‍__PER__‍__doejane__
+
+Each surface word of an annotated span carries the annotation markers, joined
+by ZWJ (U+200D) characters. ``openaleph-search`` tokenizes this back into
+same-position terms via a ``pattern_capture`` filter so proximity queries like
+``"crime __PER__"~5`` work while phrase queries on surface text are unaffected.
 """
 
 import re
 from typing import Self
 
-from anystore.types import StrGenerator
 from followthemoney import E, EntityProxy, Property, Schema, model, registry
-from normality import collapse_spaces
+from normality import collapse_spaces, slugify
 from pydantic import BaseModel
+from rigour.names import normalize_name, pick_name
 
 from ftm_analyze.analysis.util import (
     TAG_COMPANY,
@@ -22,8 +30,8 @@ from ftm_analyze.analysis.util import (
 )
 from ftm_analyze.annotate.symbols import get_symbol_annotations
 
-ANNOTATED = "__annotated__"
-MENTION_PROPS = {
+ZWJ = "‍"
+MENTION_TYPES = {
     TAG_NAME.name: "LEG",
     TAG_PERSON.name: "PER",
     TAG_COMPANY.name: "ORG",
@@ -36,23 +44,33 @@ PER = "Person"
 ORG = "Organization"
 LEG = "LegalEntity"
 NAMED = {TAG_COMPANY.name, TAG_PERSON.name, TAG_NAME.name}
-SKIP_CHARS = "()[]"
-PATTERN_RE = r"(?<!\[)(?:\b|:|\+){value}\b(?![^\[\]]*\])"
 HTML_TAG_RE = r"<[^>]*>"
 
 
 def clean_text(text: str) -> str:
-    """Clean the text before annotation: Remove [...](...) patterns and strip html tags"""
-    for c in SKIP_CHARS:
-        text = text.replace(c, " ")
+    """Strip HTML tags and collapse whitespace."""
     text = re.sub(HTML_TAG_RE, " ", text)
     return collapse_spaces(text) or ""
 
 
+def _entity_id(value: str) -> str | None:
+    normalized = normalize_name(value)
+    if not normalized:
+        return None
+    slug = slugify(normalized, sep="")
+    return slug or None
+
+
 class Annotation(BaseModel):
-    """lorem ipsum [Mrs. Jane Doe](LEG&PER&Q1682564) dolor sit"""
+    """A single annotated surface form and its markers.
+
+    Emits ZWJ-joined per-word markers on ``annotate``:
+
+        Jane‍__PER__‍__doejane__ Doe‍__PER__‍__doejane__
+    """
 
     value: str
+    canonical: str | None = None
     names: set[str] = set()
     props: set[str] = set()
 
@@ -73,11 +91,17 @@ class Annotation(BaseModel):
         return set()
 
     @property
-    def _props(self) -> set[str]:
-        props = {MENTION_PROPS[p] for p in self.props if p in MENTION_PROPS}
+    def _type_codes(self) -> set[str]:
+        codes = {MENTION_TYPES[p] for p in self.props if p in MENTION_TYPES}
         if self.is_name:
-            props.add(MENTION_PROPS[TAG_NAME.name])
-        return props
+            codes.add(MENTION_TYPES[TAG_NAME.name])
+        return codes
+
+    @property
+    def entity_id(self) -> str | None:
+        if not self.is_name:
+            return None
+        return _entity_id(self.canonical or self.value)
 
     @property
     def _schema(self) -> Schema | None:
@@ -88,30 +112,45 @@ class Annotation(BaseModel):
                 return model[ORG]
             return model[LEG]
 
-    def get_query(self) -> str:
-        return "&".join(sorted(self._props | self.symbols))
+    @property
+    def tokens(self) -> list[str]:
+        """Marker codes (unwrapped) in stable order for per-word decoration."""
+        codes: list[str] = sorted(self._type_codes)
+        eid = self.entity_id
+        if eid:
+            codes.append(eid)
+        codes.extend(sorted(self.symbols))
+        return codes
 
     @property
-    def repl(self) -> str | None:
-        query = self.get_query()
-        if query:
-            return f"[{self.value}]({query})"
+    def suffix(self) -> str:
+        codes = self.tokens
+        if not codes:
+            return ""
+        return ZWJ + ZWJ.join(f"__{c}__" for c in codes)
 
     def annotate(self, text: str) -> str:
-        repl = self.repl
-        if repl:
-            try:
-                pat = PATTERN_RE.format(value=re.escape(self.value))
-                return re.sub(pat, repl, text)
-            except Exception:
-                pass
-        return text
+        suffix = self.suffix
+        if not suffix or not self.value.strip():
+            return text
+        surface_words = self.value.split()
+        replacement = " ".join(w + suffix for w in surface_words)
+        # Skip surface words that are already followed by a ZWJ marker so
+        # overlapping annotations (e.g. "Jane" and "Jane Doe") and repeated
+        # passes stay idempotent.
+        pattern = rf"(?<!{ZWJ}){re.escape(self.value)}(?!{ZWJ})"
+        try:
+            return re.sub(pattern, replacement, text)
+        except Exception:
+            return text
 
     def update(self, a: Self) -> None:
         if self.value != a.value:
             raise ValueError(f"Invalid value from update annotation: `{a.value}`")
         self.names.update(a.names)
         self.props.update(a.props)
+        if self.canonical is None and a.canonical is not None:
+            self.canonical = a.canonical
 
     @classmethod
     def from_entity(cls, value: str, e: EntityProxy) -> Self:
@@ -122,9 +161,12 @@ class Annotation(BaseModel):
             props.add(TAG_COMPANY.name)
         if e.schema.is_a(PER):
             props.add(TAG_PERSON.name)
+        names = set(e.get_type_values(registry.name, matchable=True))
+        canonical = e.caption or pick_name(list(names)) or value
         return cls(
             value=value,
-            names=set(e.get_type_values(registry.name, matchable=True)),
+            canonical=canonical,
+            names=names,
             props=props,
         )
 
@@ -135,7 +177,7 @@ class Annotator:
         self.annotations: dict[str, Annotation] = {}
 
     def add(self, a: Annotation) -> None:
-        if not a.props & set(MENTION_PROPS):
+        if not a.props & set(MENTION_TYPES):
             # skip non mentions
             return
         if a.value in self.annotations:
@@ -154,16 +196,30 @@ class Annotator:
         self.add(a)
 
     def annotate_text(self, text: str) -> str:
-        for a in self.annotations.values():
+        # Decorate longer surface forms first so "Jane Doe" is matched before
+        # "Jane" alone; the lookaround in Annotation.annotate then leaves the
+        # already-tagged words untouched on subsequent passes.
+        for a in sorted(
+            self.annotations.values(), key=lambda a: len(a.value), reverse=True
+        ):
             text = a.annotate(text)
         return text
 
-    def get_texts(self) -> StrGenerator:
-        for text in self.entity.get_type_values(registry.text):
-            text = clean_text(text)
-            annotated = self.annotate_text(text)
+    def patch_entity(self, target: EntityProxy) -> None:
+        """Replace each text-typed property on ``target`` with the annotated
+        version of its values read from ``self.entity``. Writes per-property
+        so bodyText stays bodyText, summary stays summary, etc."""
+        for prop in self.entity.iterprops():
+            if prop.type != registry.text:
+                continue
+            annotated: list[str] = []
+            for value in self.entity.get(prop):
+                cleaned = clean_text(value)
+                patched = self.annotate_text(cleaned)
+                if patched:
+                    annotated.append(patched)
             if annotated:
-                yield annotated
+                target.set(prop, annotated, cleaned=True, quiet=True)
 
 
 def annotate_entity(e: E) -> E:
@@ -174,6 +230,5 @@ def annotate_entity(e: E) -> E:
     for prop in schema.properties:
         for value in e.get(prop):
             annotator.add_tag(prop, value)
-    for text in annotator.get_texts():
-        e.add("indexText", f"{ANNOTATED} {text}")
+    annotator.patch_entity(e)
     return e

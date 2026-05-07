@@ -36,8 +36,8 @@ If extracted as a mentioned `Person`, Mrs. Jane Doe would actually look like thi
 [Mrs. Jane Doe](f_doe+jane&f_mrs+jane+doe&s_Person&s_LegalEntity&p_namesMentioned&p_peopleMentioned)
 ```
 
-## Disable
+## Enable
 
-Annotating into `indexText` is the default behaviour.
+Annotating into `indexText` is an optional behaviour.
 
-To disable this feature, set env var `FTM_ANALYZE_ANNOTATE=0` or use the command-line flag (see [reference](./reference/cli.md))
+To enable this feature, set env var `FTM_ANALYZE_ANNOTATE=0` or use the command-line flag (see [reference](./reference/cli.md))

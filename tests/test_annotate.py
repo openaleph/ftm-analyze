@@ -1,4 +1,4 @@
-from followthemoney import model
+from followthemoney import model, registry
 
 from ftm_analyze.analysis.util import TAG_COUNTRY, TAG_EMAIL, TAG_NAME, TAG_PERSON
 from ftm_analyze.annotate import (
@@ -7,31 +7,46 @@ from ftm_analyze.annotate import (
     clean_text,
     get_symbol_annotations,
 )
+from ftm_analyze.annotate.annotator import ZWJ
+
+
+def _marker(code: str) -> str:
+    return f"{ZWJ}__{code}__"
 
 
 def test_annotate(documents):
+    # clean_text now only strips HTML and collapses whitespace; brackets pass through
     assert (
         clean_text("lorem [foo. x](bar) \n <div class='1'>ipsum</div>")
-        == "lorem foo. x bar ipsum"
+        == "lorem [foo. x](bar) ipsum"
     )
 
     a = Annotation(value="Mrs. Jane Doe")
     assert a.value == "Mrs. Jane Doe"
-    assert not a.repl
+    assert a.suffix == ""
     assert a.annotate("Mrs. Jane Doe") == "Mrs. Jane Doe"
+
     a = Annotation(value="Mrs. Jane Doe", props={TAG_NAME.name})
-    assert a.repl == "[Mrs. Jane Doe](LEG&Q12573029&Q12791967&Q1682564&Q37110043)"
-    a = Annotation(value="Mrs. Jane Doe", props={TAG_PERSON.name})
-    annotated = "[Mrs. Jane Doe](LEG&PER&Q12573029&Q12791967&Q1682564&Q37110043)"
-    assert a.repl == annotated
-    assert annotated in a.annotate("lorem ipsum Mrs. Jane Doe dolor")
+    # TAG_NAME alone: LEG type + entity id derived from slug(normalize_name(value))
+    assert a.suffix == _marker("LEG") + _marker("mrsjanedoe")
+
+    a = Annotation(value="Jane Doe", props={TAG_PERSON.name})
+    suffix = _marker("LEG") + _marker("PER") + _marker("janedoe")
+    assert a.suffix == suffix
+    # each surface word carries the full suffix
+    out = a.annotate("lorem ipsum Jane Doe dolor")
+    assert f"Jane{suffix} Doe{suffix}" in out
 
     doc = documents[0]
     annotator = Annotator(doc)
     annotator.add_tag(TAG_EMAIL, "info@fooddrinkeurope.eu")
+    # patch_entity writes the annotated text back onto the same text properties
+    target = model.make_entity(doc.schema)
+    target.id = doc.id
+    annotator.patch_entity(target)
     tested = False
-    for text in annotator.get_texts():
-        if "[info@fooddrinkeurope.eu](EMAIL)" in text:
+    for text in target.get_type_values(registry.text):
+        if f"info@fooddrinkeurope.eu{_marker('EMAIL')}" in text:
             tested = True
     assert tested
 
@@ -44,20 +59,39 @@ def test_annotate(documents):
 def test_annotate_symbols():
     JANE = "Mrs. Jane Doe"
     DARC = "IDIO Daten Import Export GmbH"
-    assert get_symbol_annotations(model["Person"], JANE) == {
-        "Q1682564",
-        "Q12791967",
-        "Q37110043",
-        "Q12573029",
-    }
+    # NAME-category (Q...) symbols are no longer emitted
+    assert get_symbol_annotations(model["Person"], JANE) == set()
+    # ORG_CLASS codes lose the 'ORG_' prefix; SYMBOL codes keep 'SYM_'.
+    # rigour maps GmbH to the generic LLC org-class.
     assert get_symbol_annotations(model["Company"], DARC) == {
         "SYM_EXPORT",
         "SYM_IMPORT",
-        "ORG_LLC",
+        "LLC",
     }
 
 
 def test_annotate_invalid():
-    text = "foo [Jane Doe](bar)"
-    a = Annotation(value="Jane", props={TAG_NAME.name})
-    assert a.annotate(text) == text
+    # applying an annotation on already-decorated text must be a no-op
+    # (guarded by the ZWJ lookaround in Annotation.annotate)
+    a = Annotation(value="Jane Doe", props={TAG_PERSON.name})
+    once = a.annotate("foo Jane Doe bar")
+    twice = a.annotate(once)
+    assert once == twice
+
+
+def test_annotate_cross_script():
+    # standard tokenizer / whitespace split must handle non-Latin scripts
+    a = Annotation(value="Владимир Путин", props={TAG_PERSON.name})
+    out = a.annotate("лорем Владимир Путин ипсум")
+    suffix = a.suffix
+    assert f"Владимир{suffix} Путин{suffix}" in out
+
+
+def test_annotate_overlapping_surface_forms(documents):
+    # longer surface forms decorate first; shorter ones only match standalone
+    annotator = Annotator(documents[0])
+    annotator.add(Annotation(value="Jane Doe", props={TAG_PERSON.name}))
+    annotator.add(Annotation(value="Jane", props={TAG_PERSON.name}))
+    out = annotator.annotate_text("Jane Doe met Jane alone")
+    assert f"Jane{_marker('LEG')}{_marker('PER')}{_marker('janedoe')} Doe" in out
+    assert f"Jane{_marker('LEG')}{_marker('PER')}{_marker('jane')} alone" in out

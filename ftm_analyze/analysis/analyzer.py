@@ -38,7 +38,7 @@ from ftm_analyze.analysis.util import (
     TAG_PERSON,
     text_chunks,
 )
-from ftm_analyze.annotate.annotator import ANNOTATED, Annotator
+from ftm_analyze.annotate.annotator import Annotator
 from ftm_analyze.settings import Settings
 
 log = logging.getLogger(__name__)
@@ -288,8 +288,7 @@ class Analyzer:
             results += 1
 
         if self.annotate:
-            for text in self.annotator.get_texts():
-                self.entity.add("indexText", f"{ANNOTATED} {text}")
+            self.annotator.patch_entity(self.entity)
 
         if results:
             log.debug(

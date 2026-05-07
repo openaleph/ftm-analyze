@@ -4,6 +4,7 @@ from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
+from ftm_analyze.annotate.annotator import ZWJ
 
 
 def _analyze_entity(entity):
@@ -33,12 +34,18 @@ def test_analyze_convert_mentions(fixtures_path, documents, monkeypatch, tmp_pat
     org = res[resolved_id]
     assert org.schema.is_a("Organization")
     doc = res[org.first("proof")]
-    assert "[Circular Plastics Alliance](LEG&ORG&SYM_ALLIANCE)" in str(
-        doc.first("indexText")
+    body_text = str(doc.first("bodyText"))
+    circ_suffix = (
+        f"{ZWJ}__LEG__{ZWJ}__ORG__"
+        f"{ZWJ}__circularplasticsalliance__{ZWJ}__SYM_ALLIANCE__"
+    )
+    assert (
+        f"Circular{circ_suffix} Plastics{circ_suffix} Alliance{circ_suffix}"
+        in body_text
     )
 
     doc = res[documents[0].id]
-    assert "[info@fooddrinkeurope.eu](EMAIL)" in str(doc.first("indexText"))
+    assert f"info@fooddrinkeurope.eu{ZWJ}__EMAIL__" in str(doc.first("bodyText"))
 
 
 def test_analyze_ner_extract():
@@ -75,7 +82,7 @@ def test_analyze_pattern_extract():
     assert "+919988111222" in phones
     countries = entity.get_type_values(registry.country)
     assert "in" in countries
-    assert "[+919988111222](PHONE)" in str(entity.first("indexText"))
+    assert f"+919988111222{ZWJ}__PHONE__" in str(entity.first("bodyText"))
 
 
 def test_analyze_extract_iban():
@@ -95,7 +102,7 @@ def test_analyze_extract_iban():
     assert bank_account.first("proof") == "test"
     assert "ch" in bank_account.countries
     doc = results["PlainText"]
-    assert "[CH5604835012345678009](IBAN)" in doc.first("indexText")
+    assert f"CH5604835012345678009{ZWJ}__IBAN__" in doc.first("bodyText")
 
 
 def test_analyze_extract_location():
@@ -107,6 +114,7 @@ def test_analyze_extract_location():
     assert entity.first("locationMentioned", "New York City")
     assert "lives in [New York City](LOC)"
 
+
 def test_analyze_language_preservation():
     text = "C'est le caniche d'Emmanuel Macron. " * 2
     entity = model.make_entity("PlainText")
@@ -116,13 +124,13 @@ def test_analyze_language_preservation():
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
     # if the detectedLanguage property is not set, it should be detected
     assert entity.get("detectedLanguage") == ["fra"]
-    
+
     entity.set("detectedLanguage", "ron")
     # do not overwrite the detectedLanguage
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=False)][-1]
     # if the property is set, it should be preserved
     assert entity.get("detectedLanguage") == ["ron", "fra"]
-    
+
     entity.set("detectedLanguage", "ron")
     # finally, overwrite the detectedLanguage
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=True)][-1]
