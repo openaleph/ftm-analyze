@@ -66,7 +66,7 @@ mkdocs-autorefs = "^1.4.3"
 mkdocstrings-python = "^1.16.11"
 griffe-pydantic = "^1.1.6"
 mkdocs = "^1.6.1"
-mkdocs-typer2 = "^0.1.4"
+mkdocs-typer2 = "^0.3.0"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
