@@ -1,20 +1,21 @@
 from followthemoney.schema import Schema
-
-from ftm_analyze.annotate.tagger import ORG_TAGGER, get_name_symbols
-
-ORG_SYMBOLS: dict = {}
-# e.g. LLC, CORP (ORG_CLASS) and SYM_TECH, SYM_EXPORT (SYMBOL)
-for _symbols in ORG_TAGGER._symbols:
-    for _s in _symbols:
-        if _s.category.name == "ORG_CLASS":
-            ORG_SYMBOLS[_s] = str(_s.id)
-        elif _s.category.name == "SYMBOL":
-            ORG_SYMBOLS[_s] = f"SYM_{_s.id}"
+from ftmq.util import get_name_symbols
+from rigour.names import SymbolCategory
 
 
 def get_symbol_annotations(schema: Schema, *names: str) -> set[str]:
-    symbols: set[str] = set()
+    """Map rigour name-symbols to the short codes carried by the per-word
+    ZWJ annotations (see ``annotations.md``).
+
+    ORG_CLASS symbols are emitted as bare ids (e.g. ``LLC``, ``CORP``);
+    SYMBOL-category symbols carry the ``SYM_`` prefix (e.g. ``SYM_EXPORT``).
+    rigour 2 dropped the per-tagger ``_symbols`` enumeration that previously
+    let us prebuild the lookup table, so we filter at call time.
+    """
+    annotations: set[str] = set()
     for symbol in get_name_symbols(schema, *names):
-        if symbol in ORG_SYMBOLS:
-            symbols.add(ORG_SYMBOLS[symbol])
-    return symbols
+        if symbol.category == SymbolCategory.ORG_CLASS:
+            annotations.add(str(symbol.id))
+        elif symbol.category == SymbolCategory.SYMBOL:
+            annotations.add(f"SYM_{symbol.id}")
+    return annotations

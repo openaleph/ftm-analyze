@@ -4,11 +4,10 @@ from anystore.logging import get_logger
 from followthemoney import Property
 from ftmq.util import clean_name
 from rigour.names import (
-    Name,
-    normalize_name,
+    NameTypeTag,
+    analyze_names,
     remove_org_prefixes,
     remove_person_prefixes,
-    tag_person_name,
 )
 
 from ftm_analyze.analysis.country import location_country
@@ -76,6 +75,10 @@ def ner_result(prop: str, value: str, engine: str) -> NERs:
 
 def validate_person_name(name: str) -> bool:
     """Validate a person name if it contains at least one name symbol"""
-    for _ in tag_person_name(Name(name), normalize_name).symbols:
-        return True
+    # rigour 2: tag_person_name → analyze_names(NameTypeTag.PER, ...). One
+    # tagged Name with any symbol is enough to call the input a plausible
+    # person name.
+    for tagged in analyze_names(NameTypeTag.PER, [name]):
+        if tagged.symbols:
+            return True
     return False

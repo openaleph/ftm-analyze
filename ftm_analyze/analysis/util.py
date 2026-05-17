@@ -1,3 +1,5 @@
+from typing import Literal, TypeAlias
+
 from followthemoney import model
 from normality import collapse_spaces
 
@@ -12,6 +14,21 @@ TAG_EMAIL = ANALYZABLE.properties["emailMentioned"]
 TAG_PHONE = ANALYZABLE.properties["phoneMentioned"]
 TAG_IBAN = ANALYZABLE.properties["ibanMentioned"]
 TAG_LOCATION = ANALYZABLE.properties["locationMentioned"]
+
+# Used to be `juditha.model.NER_TAG`; juditha dropped this in its 4.x cleanup.
+NER_TAG: TypeAlias = Literal["PER", "ORG", "LOC", "OTHER"]
+
+# Map FTM common-schema names to our coarse NER tag. Used to project
+# `juditha.lookup` results (which carry a `common_schema`) back onto the
+# four-way NER tag space the analyzer uses.
+SCHEMA_NER: dict[str, NER_TAG] = {
+    "LegalEntity": "OTHER",
+    "PublicBody": "ORG",
+    "Company": "ORG",
+    "Organization": "ORG",
+    "Person": "PER",
+    "Address": "LOC",
+}
 
 
 def text_chunks(texts, sep=" ", max_chunk=25000):

@@ -1,7 +1,7 @@
 """
 This tries to refine NER labels from spacy against some more data we know of,
 mainly rigour name tagging and optionally reference name datasets via `juditha`.
-It is a mix of hard-coded heuristics and a classifier fasttext model (if
+It is a mix of hard-coded heuristics and a juditha-backed lookup (if
 configured), and results seem to be slightly better than pure spacy output
 """
 
@@ -9,24 +9,29 @@ from functools import lru_cache
 from typing import Callable
 
 import jellyfish
+import juditha
 from anystore.logging import get_logger
 from followthemoney import Property
 from geonames_tagger.tagger import Location, tag_locations
 from geonames_tagger.util import text_norm
-from juditha.model import NER_TAG
-from juditha.predict import predict_schema
 from rigour.names import (
-    Name,
-    normalize_name,
+    NameTypeTag,
+    SymbolCategory,
+    analyze_names,
     remove_obj_prefixes,
     remove_org_prefixes,
     remove_person_prefixes,
-    tag_org_name,
-    tag_person_name,
     tokenize_name,
 )
 
-from ftm_analyze.analysis.util import TAG_COMPANY, TAG_LOCATION, TAG_NAME, TAG_PERSON
+from ftm_analyze.analysis.util import (
+    NER_TAG,
+    SCHEMA_NER,
+    TAG_COMPANY,
+    TAG_LOCATION,
+    TAG_NAME,
+    TAG_PERSON,
+)
 
 log = get_logger(__name__)
 LRU = 10_000
@@ -48,15 +53,19 @@ def classify_mention(name: str, ner_tag: NER_TAG) -> NER_TAG:
         return "ORG"
     if ner_tag == "LOC" and refine_location(name):
         return "LOC"
-    for result in predict_schema(name):
-        if result.score > 0.9:
-            if result.ner_tag in ("LOC", "OTHER"):
-                if ner_tag != "LOC":  # original was not loc
-                    return "OTHER"
-            if ner_tag == "ORG" and result.ner_tag == "PER":
-                if len(name) > 20:  # FIXME keep ORG label for longer names
-                    return "ORG"
-            return result.ner_tag
+    # juditha 4.x replaced the standalone `predict_schema` fasttext classifier
+    # with `juditha.lookup`, which returns a single Result whose `common_schema`
+    # we project back into our coarse NER tag space.
+    result = juditha.lookup(name)
+    if result is not None and result.score > 0.9:
+        guess_ner = SCHEMA_NER.get(result.common_schema, "OTHER")
+        if guess_ner in ("LOC", "OTHER"):
+            if ner_tag != "LOC":  # original was not loc
+                return "OTHER"
+        if ner_tag == "ORG" and guess_ner == "PER":
+            if len(name) > 20:  # FIXME keep ORG label for longer names
+                return "ORG"
+        return guess_ner
     guess = classify_name_rigour(name)
     if guess == "ORG":
         return "ORG"
@@ -77,10 +86,11 @@ def classify_name_rigour(name: str) -> NER_TAG:
     # for part in n.parts:
     #     if seen >= required:
     #         return "PER"
-    #     for symbol in tag_person_name(Name(part.form), normalize_name).symbols:
-    #         if symbol.category.name == "NAME":
-    #             seen += 1
-    #             break
+    #     for tagged in analyze_names(NameTypeTag.PER, [part.form]):
+    #         for symbol in tagged.symbols:
+    #             if symbol.category == SymbolCategory.NAME:
+    #                 seen += 1
+    #                 break
     return "OTHER"
 
 
@@ -94,19 +104,25 @@ def is_rigour_person(name: str) -> bool:
         return False
     seen = 0
     for token in tokens:
-        for symbol in tag_person_name(Name(token), normalize_name).symbols:
-            if symbol.category.name == "NAME":
-                seen += 1
-                break
+        # rigour 2: `tag_person_name` is gone; `analyze_names` is the unified
+        # entry point and returns a set of tagged `Name` objects per batch.
+        # Single-token inputs collapse to a single Name, so the `for tagged`
+        # loop runs at most once.
+        for tagged in analyze_names(NameTypeTag.PER, [token]):
+            for symbol in tagged.symbols:
+                if symbol.category == SymbolCategory.NAME:
+                    seen += 1
+                    break
     return seen == len(tokens)
 
 
 @lru_cache(LRU)
 def is_rigour_org(name: str) -> bool:
     """Test if a name contains org type symbols"""
-    for symbol in tag_org_name(Name(name), normalize_name).symbols:
-        if symbol.category.name == "ORG_CLASS":
-            return True
+    for tagged in analyze_names(NameTypeTag.ORG, [name]):
+        for symbol in tagged.symbols:
+            if symbol.category == SymbolCategory.ORG_CLASS:
+                return True
     return False
 
 

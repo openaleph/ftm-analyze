@@ -8,7 +8,6 @@ from followthemoney.proxy import EntityProxy
 from followthemoney.types import registry
 from followthemoney.util import make_entity_id
 from ftmq.util import make_entity
-from juditha.model import NER_TAG, SCHEMA_NER
 from normality import slugify
 from pydantic import BaseModel, ConfigDict, computed_field
 from rigour.names import normalize_name, pick_name
@@ -32,6 +31,8 @@ from ftm_analyze.analysis.refine import (
 )
 from ftm_analyze.analysis.util import (
     ANALYZABLE,
+    NER_TAG,
+    SCHEMA_NER,
     TAG_COMPANY,
     TAG_IBAN,
     TAG_NAME,
@@ -124,20 +125,24 @@ class Mention(BaseModel):
             if location is not None:
                 self.canonized_value = location.name
 
-        # 3. skip this mention if it is not valid according to juditha
-        if validate_names:
-            self.is_valid = any(
-                juditha.validate_name(n, self.ner_tag) for n in self.resolved_values
-            )
-
-        # 4. resolve to actual entity via juditha
-        if resolve_mentions:
+        # 3. juditha lookup: drives both full resolution and validation.
+        # juditha 4.x dropped the standalone `validate_name` helper, so the
+        # validate_names path now goes through `juditha.lookup` too. We do
+        # one pass over the resolved values: when `resolve_mentions` is on
+        # the first hit becomes the resolved entity; otherwise (validate_names
+        # only) a hit whose common_schema maps back to our NER tag keeps the
+        # mention.
+        if resolve_mentions or validate_names:
+            matched = False
             for name in self.resolved_values:
                 result = juditha.lookup(name)
-                if result is not None:
+                if result is None:
+                    continue
+                result_ner = SCHEMA_NER.get(result.common_schema, "OTHER")
+                if resolve_mentions:
                     self.canonized_value = result.caption
                     self.schema_name = result.common_schema
-                    self.ner_tag = SCHEMA_NER.get(result.common_schema, "OTHER")
+                    self.ner_tag = result_ner
                     self.resolved_values = set(
                         [
                             clean_name(v, self.ner_tag, normalize_name)
@@ -145,6 +150,11 @@ class Mention(BaseModel):
                         ]
                     )
                     return
+                if result_ner == self.ner_tag:
+                    matched = True
+                    break
+            if validate_names:
+                self.is_valid = matched
 
     def to_entity(self) -> EntityProxy | None:
         if self.schema_name:
