@@ -8,7 +8,7 @@ After extracting patterns, names and mentions from an Entity's text fields,
 annotation markers. The format is consumed by
 [`openaleph-search`](https://github.com/openaleph/openaleph-search) so that
 proximity queries can combine free-text and entity-type predicates such as
-`"crime __PER__"~5`.
+`"crime __PER__"~5`. (_find me persons in text close to the word "crime"_)
 
 The full search-side spec (Lucene token positions, `pattern_capture` filter,
 query syntax) lives in [`annotations.md`](https://github.com/dataresearchcenter/ftm-analyze/blob/main/annotations.md)
