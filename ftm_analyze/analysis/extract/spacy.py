@@ -11,7 +11,10 @@ settings = Settings()
 SPACY_MODELS = settings.spacy_models.model_dump()
 
 
-@lru_cache(maxsize=5)
+# Cache every distinct configured model, so multilingual corpora never evict
+# and reload models (reloading ru_core_news_sm re-reads the pymorphy3
+# dictionaries every time).
+@lru_cache(maxsize=len(set(SPACY_MODELS.values())))
 def _load_model(model):
     """Load the spaCy model for the specified language"""
     import spacy
