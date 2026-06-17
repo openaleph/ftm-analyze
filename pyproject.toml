@@ -62,7 +62,7 @@ flake8 = ">=6.1,<8.0"
 ipdb = "^0.13.13"
 bump2version = "^1.0.1"
 griffe-pydantic = "^1.1.6"
-zensical = "^0.0.43"
+zensical = "^0.0.45"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
