@@ -154,8 +154,13 @@ ENTRYPOINT []
 # =============================================================================
 FROM python-base AS spacy-models
 
+# spaCy's CLI imports click directly (spacy/cli/_util.py), but typer >=0.26 dropped
+# click as a transitive dependency, so a bare `pip install spacy` no longer pulls it in
+# and `python -m spacy download` fails with ModuleNotFoundError: No module named 'click'.
+# Constrain spacy to the same major (3.x) as requirements.txt so downloaded model versions
+# stay compatible with the spacy in the final image.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install spacy
+    pip install "spacy<4" "click<9"
 
 # Download models - grouped by region for granular layer caching
 # Western European (most common)
@@ -187,8 +192,9 @@ RUN python -m spacy download el_core_news_sm \
 # =============================================================================
 FROM python-base AS spacy-models-slim
 
+# See spacy-models stage: typer >=0.26 dropped click, which spaCy's CLI still needs.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install spacy
+    pip install "spacy<4" "click<9"
 
 RUN python -m spacy download en_core_web_sm \
     && python -m spacy download de_core_news_sm \
