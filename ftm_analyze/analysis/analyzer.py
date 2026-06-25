@@ -37,6 +37,7 @@ from ftm_analyze.analysis.util import (
     TAG_IBAN,
     TAG_NAME,
     TAG_PERSON,
+    is_numeric,
     text_chunks,
 )
 from ftm_analyze.annotate.annotator import Annotator
@@ -217,6 +218,11 @@ class Analyzer:
         # overwrite_lang to completely delete all detectedLanguage values?
         if overwrite_lang and entity.has("detectedLanguage", quiet=True):
             self.entity.pop("detectedLanguage")
+        if entity.schema.is_a("Table"):
+            # case for Tables: "texts" is an endless list of cell values, need
+            # to sort out numbers, concat to chunk larger
+            texts = [" ".join({t for t in texts if not is_numeric(t)})]
+
         for text in text_chunks(texts):
             for subsection in textwrap.wrap(text, settings.translation_chunk_size):
                 detect_languages(self.entity, subsection)

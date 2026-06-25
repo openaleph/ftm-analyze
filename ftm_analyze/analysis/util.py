@@ -43,3 +43,11 @@ def text_chunks(texts, sep=" ", max_chunk=25000):
         # something weird is happening in the first place.
         for idx in range(0, len(text), max_chunk):
             yield text[idx : idx + max_chunk]
+
+
+def is_numeric(value: str) -> bool:
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False

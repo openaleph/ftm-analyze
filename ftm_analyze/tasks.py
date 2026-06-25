@@ -12,6 +12,7 @@ from ftm_analyze.settings import target_lang
 app = make_app(__loader__.name)
 ORIGIN = "analyze"
 
+
 def should_geocode(e: EntityProxy) -> bool:
     if e.schema.is_a("Address") or e.schema.is_a("RealEstate"):
         return True
