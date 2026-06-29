@@ -366,10 +366,9 @@ sql = ["sqlalchemy (>=2.0.51,<3.0.0)"]
 name = "asgiref"
 version = "3.11.1"
 description = "ASGI specs, helper code, and adapters"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "asgiref-3.11.1-py3-none-any.whl", hash = "sha256:e8667a091e69529631969fd45dc268fa79b99c92c5fcdda727757e52146ec133"},
     {file = "asgiref-3.11.1.tar.gz", hash = "sha256:5f184dc43b7e763efe848065441eac62229c9f7b0475f41f80e207a114eda4ce"},
@@ -1226,10 +1225,9 @@ toml = ["tomli ; python_full_version <= \"3.11.0a6\""]
 name = "croniter"
 version = "6.2.2"
 description = "croniter provides iteration for datetime object with cron like format"
-optional = true
+optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "croniter-6.2.2-py3-none-any.whl", hash = "sha256:a5d17b1060974d36251ea4faf388233eca8acf0d09cbd92d35f4c4ac8f279960"},
     {file = "croniter-6.2.2.tar.gz", hash = "sha256:ba60832a5ec8e12e51b8691c3309a113d1cf6526bdf1a48150ce8ec7a532d0ab"},
@@ -4398,25 +4396,28 @@ symbolic = ["sympy"]
 name = "openaleph-procrastinate"
 version = "5.3.0"
 description = "Task queue logic for OpenAleph built upon procrastinate"
-optional = true
-python-versions = "<3.14,>=3.11"
+optional = false
+python-versions = ">=3.11,<3.14"
 groups = ["main"]
-markers = "extra == \"openaleph\""
-files = [
-    {file = "openaleph_procrastinate-5.3.0-py3-none-any.whl", hash = "sha256:2ec078c4f7b0de33c6901a2706136bbf1e4122d897c2b18dce55fc33d8519ba0"},
-    {file = "openaleph_procrastinate-5.3.0.tar.gz", hash = "sha256:cc04289c389c967e4919f6965efee61dda0c3def568028e1818165a0e16d6bd6"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-anystore = ">=1.2.0,<2.0.0"
+anystore = ">=1.2.2,<2.0.0"
 cachetools = "<6"
-followthemoney = ">=4.8.2,<5.0.0"
-ftmq = ">=4.8.2,<5.0.0"
-procrastinate = ">=3.8.1,<4.0.0"
-psycopg = ">=3.3.3,<4.0.0"
-psycopg-pool = ">=3.3.0,<4.0.0"
+followthemoney = ">=4.9.2,<5.0.0"
+ftmq = ">=4.9.2,<5.0.0"
+procrastinate = ">=3.9.0,<4.0.0"
+psycopg = ">=3.3.4,<4.0.0"
+psycopg-pool = ">=3.3.1,<4.0.0"
 pydantic = ">=2.11.7,<3.0.0"
-pydantic-settings = ">=2.10.1,<3.0.0"
+pydantic-settings = ">=2.14.2,<3.0.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/openaleph/openaleph-procrastinate.git"
+reference = "HEAD"
+resolved_reference = "4a1510c217ff675ae488630560aa8290aabd379e"
 
 [[package]]
 name = "openpyxl"
@@ -4865,10 +4866,9 @@ murmurhash = ">=0.28.0,<1.1.0"
 name = "procrastinate"
 version = "3.9.0"
 description = "Postgres-based distributed task processing library"
-optional = true
+optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "procrastinate-3.9.0-py3-none-any.whl", hash = "sha256:af4b9ccaeebbf2a1439e02ae1e8ce327f8436a81e9d68a0b1bd26d5e7ac697bd"},
     {file = "procrastinate-3.9.0.tar.gz", hash = "sha256:5805ab2af35eab12befa700ecd49e572c4f655d654151df9e5ce1ca07efb5e6e"},
@@ -5095,10 +5095,9 @@ test = ["psleak", "pytest", "pytest-instafail", "pytest-xdist", "pywin32 ; os_na
 name = "psycopg"
 version = "3.3.4"
 description = "PostgreSQL database adapter for Python"
-optional = true
+optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg-3.3.4-py3-none-any.whl", hash = "sha256:b6bbc25ccf05c8fad3b061d9db2ef0909a555171b84b07f29458a447253d679a"},
     {file = "psycopg-3.3.4.tar.gz", hash = "sha256:e21207764952cff81b6b8bdacad9a3939f2793367fdac2987b3aac36a651b5bc"},
@@ -5121,10 +5120,9 @@ test = ["anyio (>=4.0)", "mypy (>=1.19.0) ; implementation_name != \"pypy\"", "p
 name = "psycopg-pool"
 version = "3.3.1"
 description = "Connection Pool for Psycopg"
-optional = true
+optional = false
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"openaleph\""
 files = [
     {file = "psycopg_pool-3.3.1-py3-none-any.whl", hash = "sha256:2af5b432941c4c9ad5c87b3fa410aec910ec8f7c122855897983a06c45f2e4b5"},
     {file = "psycopg_pool-3.3.1.tar.gz", hash = "sha256:b10b10b7a175d5cc1592147dc5b7eec8a9e0834eb3ed2c4a92c858e2f51eb63c"},
@@ -7532,7 +7530,7 @@ description = "Provider of IANA time zone data"
 optional = false
 python-versions = ">=2"
 groups = ["main"]
-markers = "extra == \"openaleph\" and sys_platform == \"win32\" or platform_system == \"Windows\""
+markers = "platform_system == \"Windows\" or sys_platform == \"win32\""
 files = [
     {file = "tzdata-2026.2-py2.py3-none-any.whl", hash = "sha256:bbe9af844f658da81a5f95019480da3a89415801f6cc966806612cc7169bffe7"},
     {file = "tzdata-2026.2.tar.gz", hash = "sha256:9173fde7d80d9018e02a662e168e5a2d04f87c41ea174b139fbef642eda62d10"},
@@ -7963,4 +7961,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "eae656bd41174da85cb92d649edce6c14022f68b0becb5030f6ab0c1d1704699"
+content-hash = "4b8600c1709990290d47e4535d5a16a46a0aaf185efe6ce316112e7127d910ef"
