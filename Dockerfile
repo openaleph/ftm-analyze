@@ -20,9 +20,12 @@ ARG PYTHON_VERSION=3.13
 # =============================================================================
 FROM python:${PYTHON_VERSION}-slim AS python-base
 
+# PIP_NO_CACHE_DIR is deliberately NOT set: every pip install below uses a BuildKit
+# `--mount=type=cache,target=/root/.cache/pip` mount, which keeps the cache out of the
+# image layers while making downloads reusable across rebuilds. Setting PIP_NO_CACHE_DIR=1
+# would disable those mounts (pip treats any value, even 0, as "disable"), so leave it unset.
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Runtime dependencies only - libicu for pyicu
@@ -258,9 +261,15 @@ ENTRYPOINT []
 # =============================================================================
 FROM app-base AS flair
 
-RUN python -m ensurepip 2>/dev/null || true \
-    && pip install --no-compile "flair>=0.15.1,<0.16.0" \
-    && pip uninstall -y pip setuptools 2>/dev/null || true \
+# ensurepip only recreates pip3 / pip3.13 (not an unqualified `pip`) after app-base
+# uninstalled pip, so invoke pip via `python -m pip`. Install the CPU-only torch build
+# explicitly from the pytorch index first: otherwise flair pulls the default PyPI torch
+# wheel, which on Linux is the CUDA build and drags in multi-GB nvidia-* packages.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile --index-url https://download.pytorch.org/whl/cpu torch \
+    && python -m pip install --no-compile "flair>=0.15.1,<0.16.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
 
@@ -273,9 +282,13 @@ ENTRYPOINT []
 # =============================================================================
 FROM app-base AS gliner
 
-RUN python -m ensurepip 2>/dev/null || true \
-    && pip install --no-compile "gliner>=0.2,<1.0" \
-    && pip uninstall -y pip setuptools 2>/dev/null || true \
+# See the flair stage: `python -m pip` (ensurepip drops the unqualified `pip`) and an
+# explicit CPU-only torch install first to avoid the CUDA wheel + nvidia-* packages.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile --index-url https://download.pytorch.org/whl/cpu torch \
+    && python -m pip install --no-compile "gliner>=0.2,<1.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
 
@@ -288,9 +301,14 @@ ENTRYPOINT []
 # =============================================================================
 FROM app-base AS transformers
 
-RUN python -m ensurepip 2>/dev/null || true \
-    && pip install --no-compile "transformers>=4.57.1,<5.0.0" \
-    && pip uninstall -y pip setuptools 2>/dev/null || true \
+# See the flair stage for the `python -m pip` + CPU-torch rationale. transformers does
+# not depend on torch, but the BERT NER pipeline needs it at runtime, so torch is
+# installed explicitly here (CPU build).
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile --index-url https://download.pytorch.org/whl/cpu torch \
+    && python -m pip install --no-compile "transformers>=4.57.1,<5.0.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
 
