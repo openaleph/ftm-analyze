@@ -48,7 +48,7 @@ pymdown-extensions==11.0.1 ; python_version >= "3.11" and python_version < "3.14
 pytest-cov==7.1.0 ; python_version >= "3.11" and python_version < "3.14"
 pytest-env==1.6.0 ; python_version >= "3.11" and python_version < "3.14"
 pytest==9.1.1 ; python_version >= "3.11" and python_version < "3.14"
-python-discovery==1.4.2 ; python_version >= "3.11" and python_version < "3.14"
+python-discovery==1.4.3 ; python_version >= "3.11" and python_version < "3.14"
 python-dotenv==1.2.2 ; python_version >= "3.11" and python_version < "3.14"
 pytokens==0.4.1 ; python_version >= "3.11" and python_version < "3.14"
 pyyaml==6.0.3 ; python_version >= "3.11" and python_version < "3.14"
