@@ -6269,14 +6269,14 @@ torch = ["safetensors[numpy]", "torch (>=2.4)"]
 
 [[package]]
 name = "schwifty"
-version = "2026.7.0"
+version = "2026.7.1"
 description = "IBAN parsing and validation"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "schwifty-2026.7.0-py3-none-any.whl", hash = "sha256:20e711fbf9d1d055dfc49659f427ec31ea3b79b1af0e82b8036141991c430791"},
-    {file = "schwifty-2026.7.0.tar.gz", hash = "sha256:7a3fe64a30025aa3359e6f331a181278ec421476ab965df0097500d9ddbe57c6"},
+    {file = "schwifty-2026.7.1-py3-none-any.whl", hash = "sha256:80bb2c9d7c9fb76ec6d5129e5313675e1194fe5250d8e8b1115506da3cda64c2"},
+    {file = "schwifty-2026.7.1.tar.gz", hash = "sha256:46ec749b93101b9681ac48900048da97175b69b616014df7a854ae37eadd7440"},
 ]
 
 [package.dependencies]
@@ -7964,4 +7964,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "a2af364419d7843534cd1a6910c4815fdffc6d47145155e53960e6e640b61e51"
+content-hash = "dc445cf0bbddb7069821cfab3fafcc706675e2802ea0c840f0619d10b85a0348"
