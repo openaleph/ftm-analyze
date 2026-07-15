@@ -1731,14 +1731,14 @@ files = [
 
 [[package]]
 name = "followthemoney"
-version = "4.9.2"
+version = "4.10.0"
 description = "A data model for anti corruption data modeling and analysis."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "followthemoney-4.9.2-py3-none-any.whl", hash = "sha256:2427b6bf7765b23877f330a1fd25889c3371dd10a5c923530e64ab0c63d8b838"},
-    {file = "followthemoney-4.9.2.tar.gz", hash = "sha256:d7fbf24b94ddb3fe8d94e49c7552711741b59e1d4041e7a2accdccfa36e1d674"},
+    {file = "followthemoney-4.10.0-py3-none-any.whl", hash = "sha256:122945f44643d5d4207dc43b5d57c7b3004d77bf8e30173ee4da8250d4eb6d19"},
+    {file = "followthemoney-4.10.0.tar.gz", hash = "sha256:ea18e8650ea5f269e317e4f483456e1e87a8da5dbdc055b6bc14e95d2b127639"},
 ]
 
 [package.dependencies]
@@ -1756,7 +1756,7 @@ pytz = ">=2021.1"
 pyyaml = ">=5.0.0,<7.0.0"
 rdflib = ">=6.2.0,<7.7.0"
 requests = ">=2.21.0,<3.0.0"
-rich = ">=13.0.0,<15.0.0"
+rich = ">=13.0.0,<16.0.0"
 rigour = ">=2.0.0,<3.0.0"
 sqlalchemy = {version = ">=2.0.0,<3.0.0", extras = ["mypy"]}
 
@@ -7964,4 +7964,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "dc445cf0bbddb7069821cfab3fafcc706675e2802ea0c840f0619d10b85a0348"
+content-hash = "c8e69923621d6679fd7e4d86aadcb70e00139d677fb373a1bfadda6d35e64987"
