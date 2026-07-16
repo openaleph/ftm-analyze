@@ -47,6 +47,11 @@ log = logging.getLogger(__name__)
 settings = Settings()
 
 MENTIONS = {TAG_COMPANY: "Organization", TAG_PERSON: "Person"}
+SKIP_NER = ("Folder", "Package", "Table", "Workbook")
+
+
+def should_ner(e: EntityProxy) -> bool:
+    return e.schema.is_a("Analyzable") and e.schema.name not in SKIP_NER
 
 
 class Mention(BaseModel):
@@ -202,14 +207,16 @@ class Analyzer:
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
         self.annotator = Annotator(entity)
-        if settings.ner_engine == "bert":
-            self.ner_extract = extract_bert
-        elif settings.ner_engine == "flair":
-            self.ner_extract = extract_flair
-        elif settings.ner_engine == "gliner":
-            self.ner_extract = extract_gliner
-        else:
-            self.ner_extract = extract_spacy
+        self.ner_extract = None
+        if should_ner(entity):
+            if settings.ner_engine == "bert":
+                self.ner_extract = extract_bert
+            elif settings.ner_engine == "flair":
+                self.ner_extract = extract_flair
+            elif settings.ner_engine == "gliner":
+                self.ner_extract = extract_gliner
+            else:
+                self.ner_extract = extract_spacy
 
     def feed(self, entity, overwrite_lang=False):
         if not entity.schema.is_a(ANALYZABLE):
@@ -226,8 +233,9 @@ class Analyzer:
         for text in text_chunks(texts):
             for subsection in textwrap.wrap(text, settings.translation_chunk_size):
                 detect_languages(self.entity, subsection)
-            for prop, tag in self.ner_extract(self.entity, text):
-                self.aggregator_entities.add(prop, tag)
+            if self.ner_extract:
+                for prop, tag in self.ner_extract(self.entity, text):
+                    self.aggregator_entities.add(prop, tag)
             for prop, tag in extract_patterns(self.entity, text):
                 self.aggregator_patterns.add(prop, tag)
 
