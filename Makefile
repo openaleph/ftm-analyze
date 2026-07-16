@@ -1,7 +1,12 @@
 all: clean install test
 
+# All extras except gpu: --all-extras would select the gpu extra and flip torch
+# to the CUDA build (see pyproject.toml), local installs stay CPU-only by default
 install:
-	poetry install --with dev --all-extras
+	poetry install --with dev --extras "openaleph ner-flair ner-gliner ner-spacy ner-transformers"
+
+install-gpu:
+	poetry install --with dev --extras "openaleph ner-flair ner-gliner ner-spacy ner-transformers gpu"
 
 lint:
 	poetry run flake8 ftm_analyze --count --select=E9,F63,F7,F82 --show-source --statistics
@@ -46,6 +51,19 @@ build-docker-transformers:
 build-docker-minimal:
 	docker build --target minimal -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):minimal .
 
+# GPU (nvidia/cuda) flavors, deliberately not part of build-docker: the default
+# variants stay CPU-only, these pull the multi-GB CUDA torch build
+build-docker-gpu: build-docker-flair-gpu build-docker-gliner-gpu build-docker-transformers-gpu
+
+build-docker-flair-gpu:
+	docker build --target flair-gpu -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):flair-gpu .
+
+build-docker-gliner-gpu:
+	docker build --target gliner-gpu -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):gliner-gpu .
+
+build-docker-transformers-gpu:
+	docker build --target transformers-gpu -t $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):transformers-gpu .
+
 # Push all variants
 push-docker: push-docker-spacy push-docker-spacy-slim push-docker-flair push-docker-gliner push-docker-transformers push-docker-minimal
 
@@ -67,6 +85,18 @@ push-docker-transformers:
 
 push-docker-minimal:
 	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):minimal
+
+# GPU flavors, see build-docker-gpu
+push-docker-gpu: push-docker-flair-gpu push-docker-gliner-gpu push-docker-transformers-gpu
+
+push-docker-flair-gpu:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):flair-gpu
+
+push-docker-gliner-gpu:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):gliner-gpu
+
+push-docker-transformers-gpu:
+	docker push $(DOCKER_REGISTRY)/$(DOCKER_IMAGE):transformers-gpu
 
 clean:
 	rm -fr build/

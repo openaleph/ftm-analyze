@@ -10,9 +10,16 @@
 #   docker build --target transformers -t ftm-analyze:transformers .
 #   docker build --target minimal -t ftm-analyze:minimal .
 #
+# GPU (nvidia/cuda) flavors of the torch-based backends. The default targets above
+# are CPU-only; these install the CUDA torch build instead (several GB larger) and
+# need the host nvidia driver + nvidia-container-toolkit at runtime (--gpus all):
+#   docker build --target flair-gpu -t ftm-analyze:flair-gpu .
+#   docker build --target gliner-gpu -t ftm-analyze:gliner-gpu .
+#   docker build --target transformers-gpu -t ftm-analyze:transformers-gpu .
+#
 # Default target is 'spacy'
 
-ARG PYTHON_VERSION=3.13
+ARG PYTHON_VERSION=3.14
 
 # =============================================================================
 # Stage: python-base
@@ -109,7 +116,7 @@ RUN find /usr/local/lib/python*/site-packages -type d -name "tests" -exec rm -rf
 FROM python-base AS deps-base
 
 # Copy cleaned site-packages from builder
-COPY --from=deps-builder /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
+COPY --from=deps-builder /usr/local/lib/python3.14/site-packages /usr/local/lib/python3.14/site-packages
 COPY --from=deps-builder /usr/local/bin /usr/local/bin
 
 # =============================================================================
@@ -161,9 +168,10 @@ FROM python-base AS spacy-models
 # click as a transitive dependency, so a bare `pip install spacy` no longer pulls it in
 # and `python -m spacy download` fails with ModuleNotFoundError: No module named 'click'.
 # Constrain spacy to the same major (3.x) as requirements.txt so downloaded model versions
-# stay compatible with the spacy in the final image.
+# stay compatible with the spacy in the final image. 3.8.14 is excluded (as in
+# pyproject.toml): that release ships no cp314 wheels, so it cannot install on python 3.14.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install "spacy<4" "click<9"
+    pip install "spacy<4,!=3.8.14" "click<9"
 
 # Download models - grouped by region for granular layer caching
 # Western European (most common)
@@ -195,9 +203,10 @@ RUN python -m spacy download el_core_news_sm \
 # =============================================================================
 FROM python-base AS spacy-models-slim
 
-# See spacy-models stage: typer >=0.26 dropped click, which spaCy's CLI still needs.
+# See spacy-models stage: typer >=0.26 dropped click, which spaCy's CLI still needs,
+# and spacy 3.8.14 ships no cp314 wheels.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install "spacy<4" "click<9"
+    pip install "spacy<4,!=3.8.14" "click<9"
 
 RUN python -m spacy download en_core_web_sm \
     && python -m spacy download de_core_news_sm \
@@ -211,27 +220,27 @@ RUN python -m spacy download en_core_web_sm \
 FROM app-base AS spacy
 
 # Copy spaCy model packages with dist-info from models stage
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/en_core_web_sm /usr/local/lib/python3.13/site-packages/en_core_web_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/de_core_news_sm /usr/local/lib/python3.13/site-packages/de_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/fr_core_news_sm /usr/local/lib/python3.13/site-packages/fr_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/es_core_news_sm /usr/local/lib/python3.13/site-packages/es_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/pt_core_news_sm /usr/local/lib/python3.13/site-packages/pt_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/it_core_news_sm /usr/local/lib/python3.13/site-packages/it_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/nl_core_news_sm /usr/local/lib/python3.13/site-packages/nl_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/ru_core_news_sm /usr/local/lib/python3.13/site-packages/ru_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/pl_core_news_sm /usr/local/lib/python3.13/site-packages/pl_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/ro_core_news_sm /usr/local/lib/python3.13/site-packages/ro_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/mk_core_news_sm /usr/local/lib/python3.13/site-packages/mk_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/el_core_news_sm /usr/local/lib/python3.13/site-packages/el_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/lt_core_news_sm /usr/local/lib/python3.13/site-packages/lt_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/nb_core_news_sm /usr/local/lib/python3.13/site-packages/nb_core_news_sm
-COPY --from=spacy-models /usr/local/lib/python3.13/site-packages/da_core_news_sm /usr/local/lib/python3.13/site-packages/da_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/en_core_web_sm /usr/local/lib/python3.14/site-packages/en_core_web_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/de_core_news_sm /usr/local/lib/python3.14/site-packages/de_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/fr_core_news_sm /usr/local/lib/python3.14/site-packages/fr_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/es_core_news_sm /usr/local/lib/python3.14/site-packages/es_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/pt_core_news_sm /usr/local/lib/python3.14/site-packages/pt_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/it_core_news_sm /usr/local/lib/python3.14/site-packages/it_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/nl_core_news_sm /usr/local/lib/python3.14/site-packages/nl_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/ru_core_news_sm /usr/local/lib/python3.14/site-packages/ru_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/pl_core_news_sm /usr/local/lib/python3.14/site-packages/pl_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/ro_core_news_sm /usr/local/lib/python3.14/site-packages/ro_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/mk_core_news_sm /usr/local/lib/python3.14/site-packages/mk_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/el_core_news_sm /usr/local/lib/python3.14/site-packages/el_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/lt_core_news_sm /usr/local/lib/python3.14/site-packages/lt_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/nb_core_news_sm /usr/local/lib/python3.14/site-packages/nb_core_news_sm
+COPY --from=spacy-models /usr/local/lib/python3.14/site-packages/da_core_news_sm /usr/local/lib/python3.14/site-packages/da_core_news_sm
 
 # Copy dist-info directories and additional model dependencies (e.g., pymorphy3 for Russian)
-RUN --mount=from=spacy-models,source=/usr/local/lib/python3.13/site-packages,target=/mnt \
-    cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.13/site-packages/ \
-    && cp -r /mnt/pymorphy3* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true \
-    && cp -r /mnt/dawg* /usr/local/lib/python3.13/site-packages/ 2>/dev/null || true
+RUN --mount=from=spacy-models,source=/usr/local/lib/python3.14/site-packages,target=/mnt \
+    cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.14/site-packages/ \
+    && cp -r /mnt/pymorphy3* /usr/local/lib/python3.14/site-packages/ 2>/dev/null || true \
+    && cp -r /mnt/dawg* /usr/local/lib/python3.14/site-packages/ 2>/dev/null || true
 
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
@@ -244,13 +253,13 @@ ENTRYPOINT []
 FROM app-base AS spacy-slim
 
 # Copy spaCy model packages with dist-info from slim models stage
-COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/en_core_web_sm /usr/local/lib/python3.13/site-packages/en_core_web_sm
-COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/de_core_news_sm /usr/local/lib/python3.13/site-packages/de_core_news_sm
-COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/fr_core_news_sm /usr/local/lib/python3.13/site-packages/fr_core_news_sm
-COPY --from=spacy-models-slim /usr/local/lib/python3.13/site-packages/es_core_news_sm /usr/local/lib/python3.13/site-packages/es_core_news_sm
+COPY --from=spacy-models-slim /usr/local/lib/python3.14/site-packages/en_core_web_sm /usr/local/lib/python3.14/site-packages/en_core_web_sm
+COPY --from=spacy-models-slim /usr/local/lib/python3.14/site-packages/de_core_news_sm /usr/local/lib/python3.14/site-packages/de_core_news_sm
+COPY --from=spacy-models-slim /usr/local/lib/python3.14/site-packages/fr_core_news_sm /usr/local/lib/python3.14/site-packages/fr_core_news_sm
+COPY --from=spacy-models-slim /usr/local/lib/python3.14/site-packages/es_core_news_sm /usr/local/lib/python3.14/site-packages/es_core_news_sm
 # Copy dist-info directories for package recognition
-RUN --mount=from=spacy-models-slim,source=/usr/local/lib/python3.13/site-packages,target=/mnt \
-    cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.13/site-packages/
+RUN --mount=from=spacy-models-slim,source=/usr/local/lib/python3.14/site-packages,target=/mnt \
+    cp -r /mnt/*_core_*_sm*.dist-info /usr/local/lib/python3.14/site-packages/
 
 ENV FTM_ANALYZE_NER_ENGINE=spacy
 ENTRYPOINT []
@@ -261,7 +270,7 @@ ENTRYPOINT []
 # =============================================================================
 FROM app-base AS flair
 
-# ensurepip only recreates pip3 / pip3.13 (not an unqualified `pip`) after app-base
+# ensurepip only recreates pip3 / pip3.14 (not an unqualified `pip`) after app-base
 # uninstalled pip, so invoke pip via `python -m pip`. Install the CPU-only torch build
 # explicitly from the pytorch index first: otherwise flair pulls the default PyPI torch
 # wheel, which on Linux is the CUDA build and drags in multi-GB nvidia-* packages.
@@ -307,6 +316,65 @@ FROM app-base AS transformers
 RUN --mount=type=cache,target=/root/.cache/pip \
     python -m ensurepip 2>/dev/null || true \
     && python -m pip install --no-compile --index-url https://download.pytorch.org/whl/cpu torch \
+    && python -m pip install --no-compile "transformers>=4.57.1,<5.0.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
+
+ENV FTM_ANALYZE_NER_ENGINE=bert
+ENTRYPOINT []
+
+# =============================================================================
+# Stage: flair-gpu
+# Flair NER backend with CUDA torch (nvidia "gpu" flavor)
+# =============================================================================
+FROM app-base AS flair-gpu
+
+# GPU flavor: install torch from the default PyPI index, which on linux is the CUDA
+# build and pulls the bundled nvidia-* runtime wheels (several GB). No CUDA base image
+# is needed since the wheels ship their own CUDA runtime; the host only needs the
+# nvidia driver + nvidia-container-toolkit (docker run --gpus all). See the flair
+# stage for the `python -m pip` (ensurepip) rationale.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile torch \
+    && python -m pip install --no-compile "flair>=0.15.1,<0.16.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
+
+ENV FTM_ANALYZE_NER_ENGINE=flair
+ENTRYPOINT []
+
+# =============================================================================
+# Stage: gliner-gpu
+# GLiNER zero-shot NER backend with CUDA torch (nvidia "gpu" flavor)
+# =============================================================================
+FROM app-base AS gliner-gpu
+
+# See the flair-gpu stage: default PyPI torch is the CUDA build on linux.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile torch \
+    && python -m pip install --no-compile "gliner>=0.2,<1.0" \
+    && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr/local/lib/python*/site-packages -name "*.pyc" -delete 2>/dev/null || true
+
+ENV FTM_ANALYZE_NER_ENGINE=gliner
+ENTRYPOINT []
+
+# =============================================================================
+# Stage: transformers-gpu
+# Hugging Face transformers NER backend with CUDA torch (nvidia "gpu" flavor)
+# =============================================================================
+FROM app-base AS transformers-gpu
+
+# See the flair-gpu stage: default PyPI torch is the CUDA build on linux. transformers
+# does not depend on torch, but the BERT NER pipeline needs it at runtime.
+RUN --mount=type=cache,target=/root/.cache/pip \
+    python -m ensurepip 2>/dev/null || true \
+    && python -m pip install --no-compile torch \
     && python -m pip install --no-compile "transformers>=4.57.1,<5.0.0" \
     && python -m pip uninstall -y pip setuptools 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \

@@ -7,7 +7,7 @@ authors = [
     { name = "OCCRP Data Team", email = "data@occrp.org" },
     { name = "Data and Research Center", email = "hi@dataresearchcenter.org" },
 ]
-license = "AGPLv3+"
+license = "AGPL-3.0-or-later"
 classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
@@ -39,6 +39,9 @@ ner-flair = ["flair (>=0.15.1,<0.16.0)", "torch (>=2.9.0,<3.0.0)"]
 ner-gliner = ["gliner (>=0.2,<1.0)", "torch (>=2.9.0,<3.0.0)"]
 ner-spacy = ["spacy (>=3.8.13,!=3.8.14,<4.0.0)"]
 ner-transformers = ["transformers (>=4.57.1,<5.0.0)", "torch (>=2.9.0,<3.0.0)"]
+# nvidia/"gpu" flavor: switches torch to the CUDA build (the ner-flair, ner-gliner
+# and ner-transformers extras default to the CPU-only build otherwise)
+gpu = ["torch (>=2.9.0,<3.0.0)"]
 
 [project.scripts]
 ftm-analyze = "ftm_analyze.cli:cli"
@@ -49,15 +52,21 @@ Documentation = "https://docs.investigraph.dev/lib/ftm-analyze"
 Repository = "https://github.com/dataresearchcenter/ftm-analyze"
 Issues = "https://github.com/dataresearchcenter/ftm-analyze/issues"
 
-# CPU-only torch: the regular PyPI linux wheels depend on the full nvidia/cuda
-# stack; the +cpu builds only exist on pytorch's own index.
+# CPU-only torch by default: the regular PyPI linux wheels depend on the full
+# nvidia/cuda stack; the +cpu builds only exist on pytorch's own index. Selecting
+# the gpu extra flips torch (and its nvidia-* deps) back to the CUDA build from PyPI.
 [[tool.poetry.source]]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
 
 [tool.poetry.dependencies]
-torch = { source = "pytorch-cpu" }
+# "PyPI" must be capitalized exactly like this: poetry check validates the source
+# name case-sensitively against the canonical repository name
+torch = [
+    { source = "pytorch-cpu", markers = "extra != 'gpu'" },
+    { source = "PyPI", markers = "extra == 'gpu'" },
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"

@@ -69,8 +69,26 @@ jobs:
           - name: minimal
             target: minimal
             is_default: false
+          # nvidia/"gpu" flavors: CUDA torch instead of the CPU-only default build
+          - name: flair-gpu
+            target: flair-gpu
+            is_default: false
+          - name: gliner-gpu
+            target: gliner-gpu
+            is_default: false
+          - name: transformers-gpu
+            target: transformers-gpu
+            is_default: false
     steps:
       - uses: actions/checkout@v7
+
+      # The CUDA torch + nvidia-* wheels need far more disk than the default
+      # runner has free; drop unused preinstalled toolchains for gpu variants.
+      - name: Free disk space (gpu variants)
+        if: endsWith(matrix.variant.name, '-gpu')
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune -af
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4

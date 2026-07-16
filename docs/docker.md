@@ -20,6 +20,9 @@ ghcr.io/openaleph/ftm-analyze:<tag>
 | **gliner** | `gliner` | GLiNER zero-shot NER | ~650MB |
 | **transformers** | `transformers` | HuggingFace transformers (BERT) | ~750MB |
 | **minimal** | `minimal` | No NER backend (for testing/custom setups) | ~550MB |
+| **flair-gpu** | `flair-gpu` | Flair NER with CUDA torch (nvidia runtime required) | ~6.5GB |
+| **gliner-gpu** | `gliner-gpu` | GLiNER zero-shot NER with CUDA torch (nvidia runtime required) | ~6GB |
+| **transformers-gpu** | `transformers-gpu` | HuggingFace transformers (BERT) with CUDA torch (nvidia runtime required) | ~6GB |
 
 ### Pulling Images
 
@@ -55,6 +58,11 @@ docker build --target gliner -t ftm-analyze:gliner .
 docker build --target transformers -t ftm-analyze:transformers .
 docker build --target minimal -t ftm-analyze:minimal .
 
+# GPU (nvidia/cuda) flavors of the torch-based backends
+docker build --target flair-gpu -t ftm-analyze:flair-gpu .
+docker build --target gliner-gpu -t ftm-analyze:gliner-gpu .
+docker build --target transformers-gpu -t ftm-analyze:transformers-gpu .
+
 # Or use make targets
 make build-docker-spacy
 make build-docker-spacy-slim
@@ -65,7 +73,7 @@ make build-docker          # builds all variants
 
 | Argument | Default | Description |
 |----------|---------|-------------|
-| `PYTHON_VERSION` | `3.13` | Python version for base image |
+| `PYTHON_VERSION` | `3.14` | Python version for base image |
 
 ```bash
 docker build --target spacy --build-arg PYTHON_VERSION=3.12 -t ftm-analyze:py312 .
@@ -136,6 +144,18 @@ No NER backend included. Useful for:
 ```bash
 docker run ghcr.io/openaleph/ftm-analyze:minimal ftm-analyze --help
 ```
+
+### GPU variants (flair-gpu, gliner-gpu, transformers-gpu)
+
+The default images are strictly CPU-only: they install the `+cpu` torch build from the [PyTorch package index](https://download.pytorch.org/whl/cpu), which keeps them free of the multi-GB `nvidia-*` CUDA packages. The `-gpu` flavors install the regular PyPI torch build instead, which bundles its own CUDA runtime, so no CUDA base image is needed.
+
+Running them requires an nvidia GPU on the host with the nvidia driver and the [nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/) installed:
+
+```bash
+docker run --gpus all -v flair-cache:/root/.flair ghcr.io/openaleph/ftm-analyze:flair-gpu ftm-analyze --help
+```
+
+Without `--gpus all` (or on a host without a GPU) the images still work, torch just falls back to CPU execution.
 
 ## Running with Docker
 
@@ -283,7 +303,7 @@ flowchart TB
         spacy-models-slim["spacy-models-slim\n(4 language models)"]
     end
 
-    python-base["python-base\n(python:3.13-slim + libicu)"]
+    python-base["python-base\n(python:3.14-slim + libicu)"]
 
     python-base --> builder
     python-base --> models-ftm
