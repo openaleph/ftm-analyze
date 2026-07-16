@@ -78,7 +78,10 @@ def cli_analyze(
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
     overwrite_lang: Annotated[
-        bool, typer.Option(help="Ignore the language property, overwrite the detectedLanguage property")
+        bool,
+        typer.Option(
+            help="Ignore the language property, overwrite the detectedLanguage property"
+        ),
     ] = settings.overwrite_lang,
 ):
     """
