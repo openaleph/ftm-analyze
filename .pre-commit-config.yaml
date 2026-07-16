@@ -34,7 +34,7 @@ repos:
       - id: absolufy-imports
 
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.0a3
+    rev: 9.0.0b1
     hooks:
       - id: isort
         args: ["--profile", "black"]
@@ -53,7 +53,7 @@ repos:
         exclude: (test_[\w]+\.py|\.csv|\.json|\.lock)$
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.2
+    rev: v2.4.3
     hooks:
       - id: codespell
         exclude: (test_[\w]+\.py|\.csv|\.i?json|\.lock)$
@@ -79,8 +79,11 @@ repos:
   - repo: https://github.com/python-poetry/poetry-plugin-export
     rev: 1.10.0
     hooks:
+      # spacy lives in the ner-spacy extra now, but the docker spacy/spacy-slim
+      # targets install it via these exports, so keep it in both requirements files.
       - id: poetry-export
-        args: ["--without-hashes", "-o", "requirements.txt"]
+        args:
+          ["--without-hashes", "--extras", "ner-spacy", "-o", "requirements.txt"]
       - id: poetry-export
         args:
           ["--without-hashes", "--only", "dev", "-o", "requirements-dev.txt"]
@@ -90,6 +93,8 @@ repos:
             "--without-hashes",
             "--extras",
             "openaleph",
+            "--extras",
+            "ner-spacy",
             "-o",
             "requirements-openaleph.txt",
           ]

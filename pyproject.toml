@@ -17,30 +17,28 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
-requires-python = ">=3.11,<3.14"
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "anystore (>=1.2.5,<2.0.0)",
-    "ftmq (>=4.9.2,<5.0.0)",
+    "ftmq (>=4.10.0,<5.0.0)",
     "pydantic (>=2.11.7,<3.0.0)",
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "countrytagger (>=0.1.2,<0.2.0)",
     "fasttext-numpy2 (>=0.10.4,<0.11.0)",
-    "juditha (>=4.4.0,<5.0.0)",
+    "juditha (>=4.5.0,<5.0.0)",
     "rigour (>=2.1.2,<3.0.0)",
     "followthemoney (>=4.10.0,<5.0.0)",
     "schwifty (>=2026.7.1,<2027.0.0)",
     "cachetools (<6)",
-    "geonames-tagger (>=1.0.2,<2.0.0)",
-    "spacy (>=3.8.11,<4.0.0)",
-    "openaleph-procrastinate @ git+https://github.com/openaleph/openaleph-procrastinate.git",
+    "geonames-tagger (>=1.1.0,<2.0.0)",
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate (>=5.3.0,<6.0.0)"]
-ner-flair = ["flair (>=0.15.1,<0.16.0)"]
-ner-gliner = ["gliner (>=0.2,<1.0)"]
-ner-spacy = ["spacy (>=3.8.7,<4.0.0)"]
-ner-transformers = ["transformers (>=4.57.1,<5.0.0)"]
+openaleph = ["openaleph-procrastinate (>=5.3.1,<6.0.0)"]
+ner-flair = ["flair (>=0.15.1,<0.16.0)", "torch (>=2.9.0,<3.0.0)"]
+ner-gliner = ["gliner (>=0.2,<1.0)", "torch (>=2.9.0,<3.0.0)"]
+ner-spacy = ["spacy (>=3.8.13,!=3.8.14,<4.0.0)"]
+ner-transformers = ["transformers (>=4.57.1,<5.0.0)", "torch (>=2.9.0,<3.0.0)"]
 
 [project.scripts]
 ftm-analyze = "ftm_analyze.cli:cli"
@@ -50,6 +48,16 @@ Homepage = "https://docs.investigraph.dev/lib/ftm-analyze"
 Documentation = "https://docs.investigraph.dev/lib/ftm-analyze"
 Repository = "https://github.com/dataresearchcenter/ftm-analyze"
 Issues = "https://github.com/dataresearchcenter/ftm-analyze/issues"
+
+# CPU-only torch: the regular PyPI linux wheels depend on the full nvidia/cuda
+# stack; the +cpu builds only exist on pytorch's own index.
+[[tool.poetry.source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[tool.poetry.dependencies]
+torch = { source = "pytorch-cpu" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.1.1"
