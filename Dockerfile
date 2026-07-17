@@ -60,6 +60,15 @@ RUN apt-get update -qq \
         binutils \
     && rm -rf /var/lib/apt/lists/*
 
+# The interpreter in python:slim was compiled without a C++ compiler, so its baked-in
+# sysconfig records CXX=gcc. setuptools links C++ extensions with that driver, which
+# silently drops the implicit -lstdc++ and produces .so files with unresolved C++ ABI
+# symbols at import time (e.g. fasttext_pybind: undefined symbol
+# _ZTVN10__cxxabiv120__function_type_infoE). Point the C++ toolchain at g++ so sdist
+# builds (fasttext-numpy2, plyvel, pyicu have no cp314 wheels) link correctly.
+ENV CXX=g++ \
+    LDCXXSHARED="g++ -shared"
+
 # Build pyicu wheel (requires compilation)
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip wheel --no-binary=:pyicu: --wheel-dir=/wheels pyicu
@@ -109,6 +118,11 @@ RUN find /usr/local/lib/python*/site-packages -type d -name "tests" -exec rm -rf
     && find /usr/local/lib/python*/site-packages -name "*.pyo" -delete 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr/local/lib/python*/site-packages -type d -name "doc" -exec rm -rf {} + 2>/dev/null || true
+
+# Smoke test: import the C++ extensions built from sdist above (after strip/cleanup,
+# so the final artifacts are validated). A mislinked extension only explodes at import
+# time, this catches it at build time instead of in the running service.
+RUN python -c "import fasttext, icu, plyvel"
 
 # =============================================================================
 # Stage: deps-base (clean runtime without build tools)
