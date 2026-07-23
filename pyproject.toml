@@ -28,7 +28,7 @@ dependencies = [
     "juditha (>=4.5.0,<5.0.0)",
     "rigour (>=2.2.3,<3.0.0)",
     "followthemoney (>=4.10.0,<5.0.0)",
-    "schwifty (>=2026.7.1,<2027.0.0)",
+    "schwifty (>=2026.7.3,<2027.0.0)",
     "cachetools (<6)",
     "geonames-tagger (>=1.1.0,<2.0.0)",
 ]
