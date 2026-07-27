@@ -2097,15 +2097,15 @@ wordfreq = ">=3.1.1,<4.0.0"
 
 [[package]]
 name = "gliner"
-version = "0.2.27"
+version = "0.2.28"
 description = "Generalist model for NER (Extract any entity types from texts)"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "extra == \"ner-gliner\""
 files = [
-    {file = "gliner-0.2.27-py3-none-any.whl", hash = "sha256:90373a3f6166977d4ca807c5daf6e3ea1fa21a5c40d862f3e63764cba442abae"},
-    {file = "gliner-0.2.27.tar.gz", hash = "sha256:071de0819d83c34468ede02f75a38f618bc0c69262582127dccf3bb787db4c0c"},
+    {file = "gliner-0.2.28-py3-none-any.whl", hash = "sha256:734e333ebf8a48c135aac5c05599f51051037513030127cbaf676ae71ca501c5"},
+    {file = "gliner-0.2.28.tar.gz", hash = "sha256:b1637afb5cf4235fc871f1e21498831775b7bd19cefbda6dc5fe08ee88cb07a0"},
 ]
 
 [package.dependencies]
@@ -2114,7 +2114,7 @@ onnxruntime = "*"
 sentencepiece = "*"
 torch = ">=2.0.0"
 tqdm = "*"
-transformers = ">=4.51.3,<5.7.0"
+transformers = ">=4.51.3,<5.14.0"
 
 [package.extras]
 gpu = ["onnxruntime-gpu"]
@@ -8201,4 +8201,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.15"
-content-hash = "d70c9ba6bc438059a804034e665b02fe5385396bed6fdaf5f0e784566d2be600"
+content-hash = "66e3c5ad2fc60873cf221842d97fe3d348a38caae6a8c30a66d8a341440d643c"
