@@ -110,7 +110,7 @@ textual==8.2.8 ; python_version >= "3.11" and python_version < "3.15"
 thinc==8.3.13 ; python_version >= "3.11" and python_version < "3.15"
 threadpoolctl==3.6.0 ; python_version >= "3.11" and python_version < "3.15"
 tqdm==4.70.0 ; python_version >= "3.11" and python_version < "3.15"
-typer==0.27.0 ; python_version >= "3.11" and python_version < "3.15"
+typer==0.27.1 ; python_version >= "3.11" and python_version < "3.15"
 typing-extensions==4.16.0 ; python_version >= "3.11" and python_version < "3.15"
 typing-inspection==0.4.2 ; python_version >= "3.11" and python_version < "3.15"
 tzdata==2026.3 ; python_version >= "3.11" and python_version < "3.15" and (sys_platform == "win32" or platform_system == "Windows")
