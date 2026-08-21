@@ -3,6 +3,7 @@ from followthemoney.proxy import EntityProxy
 from openaleph_procrastinate import defer
 from openaleph_procrastinate.app import make_app
 from openaleph_procrastinate.model import DatasetJob
+from openaleph_procrastinate.settings import OpenAlephSettings
 from openaleph_procrastinate.tasks import task
 from openaleph_procrastinate.util import make_stub_entity
 
@@ -10,6 +11,7 @@ from ftm_analyze.logic import analyze_entity
 from ftm_analyze.settings import target_lang
 
 app = make_app(__loader__.name)
+settings = OpenAlephSettings()
 ORIGIN = "analyze"
 
 
@@ -27,7 +29,7 @@ def should_translate(e: EntityProxy, e_origin_ingest: EntityProxy) -> bool:
     return False
 
 
-@task(app=app, retry=defer.tasks.analyze.retries)
+@task(app=app, retry=defer.tasks.analyze.retries, tracer_uri=settings.redis_url)
 def analyze(job: DatasetJob) -> None:
     to_translate: list[EntityProxy] = []
     to_geocode: list[EntityProxy] = []
