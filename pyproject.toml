@@ -37,7 +37,14 @@ dependencies = [
 openaleph = ["openaleph-procrastinate @ git+https://github.com/openaleph/openaleph-procrastinate.git"]
 ner-flair = ["flair (>=0.15.1,<0.16.0)", "torch (>=2.9.0,<3.0.0)"]
 ner-gliner = ["gliner (>=0.2.28,<0.3.0)", "torch (>=2.9.0,<3.0.0)"]
-ner-spacy = ["spacy (>=3.8.15,<4.0.0)"]
+# spacy 3.8.14 and 3.8.15 published neither a cp314 wheel nor an sdist
+# (explosion/spaCy#13949), so there is nothing installable on python 3.14. Hold that
+# interpreter back to 3.8.13, the last release that shipped cp314. Remove the split
+# once upstream publishes cp314 wheels again.
+ner-spacy = [
+    "spacy (>=3.8.15,<4.0.0) ; python_version < '3.14'",
+    "spacy (>=3.8.13,!=3.8.14,!=3.8.15,<4.0.0) ; python_version >= '3.14'",
+]
 ner-transformers = ["transformers (>=4.57.1,<5.0.0)", "torch (>=2.9.0,<3.0.0)"]
 # nvidia/"gpu" flavor: switches torch to the CUDA build (the ner-flair, ner-gliner
 # and ner-transformers extras default to the CPU-only build otherwise)
