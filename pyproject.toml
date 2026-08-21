@@ -19,15 +19,15 @@ classifiers = [
 ]
 requires-python = ">=3.11,<3.15"
 dependencies = [
-    "anystore (>=1.2.5,<2.0.0)",
-    "ftmq (>=4.10.0,<5.0.0)",
+    "anystore (>=1.2.6,<2.0.0)",
+    "ftmq (>=4.10.1,<5.0.0)",
     "pydantic (>=2.11.7,<3.0.0)",
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "countrytagger (>=0.1.2,<0.2.0)",
     "fasttext-numpy2 (>=0.10.4,<0.11.0)",
     "juditha (>=4.5.0,<5.0.0)",
     "rigour (>=2.2.3,<3.0.0)",
-    "followthemoney (>=4.10.0,<5.0.0)",
+    "followthemoney (>=4.10.2,<5.0.0)",
     "schwifty (>=2026.7.3,<2027.0.0)",
     "cachetools (<6)",
     "geonames-tagger (>=1.1.0,<2.0.0)",
