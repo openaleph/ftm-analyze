@@ -25,7 +25,7 @@ dependencies = [
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "countrytagger (>=0.1.2,<0.2.0)",
     "fasttext-numpy2 (>=0.10.4,<0.11.0)",
-    "juditha (>=4.5.0,<5.0.0)",
+    "juditha @ git+https://github.com/dataresearchcenter/juditha",
     "rigour (>=2.2.3,<3.0.0)",
     "followthemoney (>=4.10.2,<5.0.0)",
     "schwifty (>=2026.7.3,<2027.0.0)",
@@ -34,7 +34,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-openaleph = ["openaleph-procrastinate (>=5.3.1,<6.0.0)"]
+openaleph = ["openaleph-procrastinate @ git+https://github.com/openaleph/openaleph-procrastinate.git"]
 ner-flair = ["flair (>=0.15.1,<0.16.0)", "torch (>=2.9.0,<3.0.0)"]
 ner-gliner = ["gliner (>=0.2.28,<0.3.0)", "torch (>=2.9.0,<3.0.0)"]
 ner-spacy = ["spacy (>=3.8.13,!=3.8.14,<4.0.0)"]
