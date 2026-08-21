@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+1. Don’t assume. Don’t hide confusion. Surface tradeoffs.
+2. Minimum code that solves the problem. Nothing speculative.
+3. Touch only what you must. Clean up only your own mess.
+4. Define success criteria. Loop until verified.
+
 ## Editing conventions
 
 - **Preserve existing inline comments.** When editing a file, do not remove inline comments or docstrings that are already there. If you rewrite the surrounding code, carry the comment over and adapt it to the new context. The default behavior of stripping comments you consider redundant does not apply to this repo – the author keeps them intentionally.
