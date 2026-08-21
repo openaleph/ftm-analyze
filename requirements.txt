@@ -34,7 +34,7 @@ greenlet==3.5.4 ; python_version >= "3.11" and python_version < "3.15" and (sys_
 h11==0.16.0 ; python_version >= "3.11" and python_version < "3.15"
 httpcore==1.0.9 ; python_version >= "3.11" and python_version < "3.15"
 httpx==0.28.1 ; python_version >= "3.11" and python_version < "3.15"
-idna==3.18 ; python_version >= "3.11" and python_version < "3.15"
+idna==3.19 ; python_version >= "3.11" and python_version < "3.15"
 imohash==1.1.0 ; python_version >= "3.11" and python_version < "3.15"
 importlib-resources==7.1.0 ; python_version == "3.11"
 jellyfish==1.2.1 ; python_version >= "3.11" and python_version < "3.15"
