@@ -103,7 +103,7 @@ RUN apt-get update -qq \
 # Install frozen dependencies with git available for VCS deps
 COPY requirements.txt requirements-openaleph.txt /app/
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-compile -r requirements-openaleph.txt \
+    pip install --no-deps --no-compile -r requirements-openaleph.txt \
     && pip install --no-compile "psycopg[binary]"
 
 # Strip debug symbols from compiled extensions (~20-40MB savings)
