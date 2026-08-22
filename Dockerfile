@@ -101,10 +101,22 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/*
 
 # Install frozen dependencies with git available for VCS deps
+#
+# importlib-resources and colorama are installed on top of the export: when a package
+# is reachable both through an extra and through a non-extra marker, `poetry export`
+# drops the `extra == "..."` branch instead of widening the marker to "any", so the
+# exported marker is too narrow for this image (python 3.14, linux):
+#   adbc-driver-postgresql -> importlib-resources (unconditional) exported as python_version == "3.11"
+#   openaleph-servicelayer -> colorama (unconditional)             exported as Windows only
+# --no-deps means nothing backfills them, and the missing importlib_resources only
+# surfaces at runtime, when ftm-lakehouse connects its postgres journal via adbc.
+# Versions mirror poetry.lock. The `pip check` fails the build if the export loses
+# another transitive dependency this way.
 COPY requirements.txt requirements-openaleph.txt /app/
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-deps --no-compile -r requirements-openaleph.txt \
-    && pip install --no-compile "psycopg[binary]"
+    && pip install --no-compile "psycopg[binary]" "importlib-resources==7.1.0" "colorama==0.4.6" \
+    && pip check
 
 # Strip debug symbols from compiled extensions (~20-40MB savings)
 RUN find /usr/local/lib/python*/site-packages -name "*.so" -exec strip --strip-unneeded {} + 2>/dev/null || true

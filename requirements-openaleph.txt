@@ -45,7 +45,7 @@ followthemoney==4.10.2 ; python_version >= "3.11" and python_version < "3.15"
 frozenlist==1.8.0 ; python_version >= "3.11" and python_version < "3.15"
 fsspec==2026.7.0 ; python_version >= "3.11" and python_version < "3.15"
 ftfy==6.3.1 ; python_version >= "3.11" and python_version < "3.15"
-ftm-lakehouse @ git+https://github.com/openaleph/ftm-lakehouse.git@f145273711f41982c3d2104caf5028bff1abe582 ; python_version >= "3.11" and python_version < "3.15"
+ftm-lakehouse @ git+https://github.com/openaleph/ftm-lakehouse.git@a1bde604220be7701e16aa2542d69ef65614733b ; python_version >= "3.11" and python_version < "3.15"
 ftmq @ git+https://github.com/dataresearchcenter/ftmq.git@99d5e7864046bef36705e39bcc4166f3a643e4b3 ; python_version >= "3.11" and python_version < "3.15"
 geonames-tagger==1.1.0 ; python_version >= "3.11" and python_version < "3.15"
 greenlet==3.5.5 ; python_version >= "3.11" and python_version < "3.15" and (platform_machine == "aarch64" or platform_machine == "ppc64le" or platform_machine == "x86_64" or platform_machine == "amd64" or platform_machine == "AMD64" or platform_machine == "win32" or platform_machine == "WIN32")
