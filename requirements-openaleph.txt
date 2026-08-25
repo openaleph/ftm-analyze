@@ -25,7 +25,7 @@ catalogue==2.0.10 ; python_version >= "3.11" and python_version < "3.15"
 certifi==2026.7.22 ; python_version >= "3.11" and python_version < "3.15"
 chardet==7.6.0 ; python_version >= "3.11" and python_version < "3.15"
 charset-normalizer==3.5.1 ; python_version >= "3.11" and python_version < "3.15"
-click==8.4.1 ; python_version >= "3.11" and python_version < "3.15"
+click==8.4.2 ; python_version >= "3.11" and python_version < "3.15"
 cloudpathlib==0.25.0 ; python_version >= "3.11" and python_version < "3.15"
 cloudpickle==3.1.2 ; python_version >= "3.11" and python_version < "3.15"
 colorama==0.4.6 ; python_version >= "3.11" and python_version < "3.15" and (platform_system == "Windows" or sys_platform == "win32")
