@@ -2480,15 +2480,15 @@ wcwidth = "*"
 
 [[package]]
 name = "ftm-lakehouse"
-version = "0.5.0"
+version = "0.6.0"
 description = "Data standard, storage and retrieval for structured and unstructured FollowTheMoney data"
 optional = true
 python-versions = "<3.15,>=3.11"
 groups = ["main"]
 markers = "extra == \"openaleph\""
 files = [
-    {file = "ftm_lakehouse-0.5.0-py3-none-any.whl", hash = "sha256:c820fa89f45fb847def343168d562d3c79a545de0e9661cbaf8be972270fd128"},
-    {file = "ftm_lakehouse-0.5.0.tar.gz", hash = "sha256:3bc1e5de2a2c45b44be28f0f5f14f5d21d01570504232f286d95924e184cd8e2"},
+    {file = "ftm_lakehouse-0.6.0-py3-none-any.whl", hash = "sha256:56189a8bd7bcbc85ce2c61d80ec30dce1fd2efa64ff04c9a0d034f4172c6e71c"},
+    {file = "ftm_lakehouse-0.6.0.tar.gz", hash = "sha256:75ab6c7dcb848cd5499cc4348a6b2cf98b7761feeeffe37ea6725a8761a9c5e1"},
 ]
 
 [package.dependencies]
@@ -5298,22 +5298,20 @@ symbolic = ["sympy"]
 
 [[package]]
 name = "openaleph-procrastinate"
-version = "5.3.2"
+version = "5.3.3"
 description = "Task queue logic for OpenAleph built upon procrastinate"
 optional = true
-python-versions = "<3.15,>=3.11"
+python-versions = ">=3.11,<3.15"
 groups = ["main"]
 markers = "extra == \"openaleph\""
-files = [
-    {file = "openaleph_procrastinate-5.3.2-py3-none-any.whl", hash = "sha256:941c7b1ec8bb96af0109c7d1b1e88bae8ed73aa0df69de53915a2eb1f5a8e63e"},
-    {file = "openaleph_procrastinate-5.3.2.tar.gz", hash = "sha256:2b4e9fc9f07d3a36eb281c74819b5a16faf1cbd3bc4be25f3954d52d8673d77a"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 anystore = {version = ">=1.2.7,<2.0.0", extras = ["http", "s3"]}
 cachetools = "<6"
 followthemoney = ">=4.10.1,<5.0.0"
-ftm-lakehouse = {version = ">=0.5.0,<0.6.0", extras = ["postgres"]}
+ftm-lakehouse = {version = ">=0.6.0,<0.7.0", extras = ["postgres"]}
 ftmq = ">=5.0.0,<6.0.0"
 openaleph-servicelayer = ">=1.24.0,<2.0.0"
 procrastinate = ">=3.9.0,<4.0.0"
@@ -5321,6 +5319,12 @@ psycopg = ">=3.3.4,<4.0.0"
 psycopg-pool = ">=3.3.1,<4.0.0"
 pydantic = ">=2.11.7,<3.0.0"
 pydantic-settings = ">=2.15.0,<3.0.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/openaleph/openaleph-procrastinate.git"
+reference = "HEAD"
+resolved_reference = "51a6efb0718f5abf9d6b67186b6be6299d1c3f95"
 
 [[package]]
 name = "openaleph-servicelayer"
@@ -9361,4 +9365,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.15"
-content-hash = "1e7c9757af1625d948c410c14ddccdeec8cffe6621428a187f51f08e40975a6c"
+content-hash = "802165f9e78363cc055ceafe091796c1aa9594c70b28abea0eeb5d4aa8ba31c8"
