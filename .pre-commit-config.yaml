@@ -34,7 +34,7 @@ repos:
       - id: absolufy-imports
 
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.0b5
+    rev: 9.0.1
     hooks:
       - id: isort
         args: ["--profile", "black"]
@@ -71,13 +71,13 @@ repos:
       - id: rst-inline-touching-normal
 
   - repo: https://github.com/python-poetry/poetry
-    rev: 2.4.1
+    rev: 2.5.1
     hooks:
       - id: poetry-check
       - id: poetry-lock
 
   - repo: https://github.com/python-poetry/poetry-plugin-export
-    rev: 1.10.0
+    rev: 1.10.1
     hooks:
       # spacy lives in the ner-spacy extra now, but the docker spacy/spacy-slim
       # targets install it via these exports, so keep it in both requirements files.
