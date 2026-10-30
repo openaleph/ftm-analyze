@@ -77,6 +77,9 @@ def cli_analyze(
     refine_locations: Annotated[
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
+    extract_known_names: Annotated[
+        bool, typer.Option(help="Extract known names via the `juditha` automaton")
+    ] = settings.extract_known_names,
     overwrite_lang: Annotated[
         bool,
         typer.Option(
@@ -97,6 +100,7 @@ def cli_analyze(
             refine_mentions,
             refine_locations,
             overwrite_lang,
+            extract_known_names=extract_known_names,
         )
         smart_write_proxies(out_uri, results)
 
@@ -120,6 +124,9 @@ def cli_analyze_text(
     refine_locations: Annotated[
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
+    extract_known_names: Annotated[
+        bool, typer.Option(help="Extract known names via the `juditha` automaton")
+    ] = settings.extract_known_names,
 ):
     """
     Analyze a text string (for debugging purposes).
@@ -141,5 +148,6 @@ def cli_analyze_text(
             validate_names,
             refine_mentions,
             refine_locations,
+            extract_known_names=extract_known_names,
         )
         smart_write_proxies(out_uri, results)
