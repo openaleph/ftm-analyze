@@ -41,7 +41,7 @@ ner-gliner = ["gliner (>=0.2.29,<0.3.0)", "torch (>=2.9.0,<3.0.0)"]
 # interpreter back to 3.8.13, the last release that shipped cp314. Remove the split
 # once upstream publishes cp314 wheels again.
 ner-spacy = [
-    "spacy (>=3.8.16,<4.0.0)",
+    "spacy (>=3.8.18,<4.0.0)",
     "spacy (>=3.8.13,!=3.8.14,!=3.8.15,<4.0.0) ; python_version >= '3.14'",
 ]
 ner-transformers = ["transformers (>=4.57.1,<5.0.0)", "torch (>=2.9.0,<3.0.0)"]
