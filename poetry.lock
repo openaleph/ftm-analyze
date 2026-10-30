@@ -674,7 +674,7 @@ description = "Classes Without Boilerplate"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\""
 files = [
     {file = "attrs-26.1.0-py3-none-any.whl", hash = "sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"},
     {file = "attrs-26.1.0.tar.gz", hash = "sha256:d03ceb89cb322a8fd706d4fb91940737b6642aa36998fe130a9bc96c985eff32"},
@@ -1013,7 +1013,7 @@ description = "Low-level, data-driven core of boto 3."
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\""
 files = [
     {file = "botocore-1.43.117-py3-none-any.whl", hash = "sha256:5920ef9b3002e1361846549078549d9154a6e0004c22853c01ce7b279d05d495"},
     {file = "botocore-1.43.117.tar.gz", hash = "sha256:71993702832cc37c2495048b9945f2929d306fccb3fb767e9964e437e637fa6c"},
@@ -1380,7 +1380,7 @@ files = [
     {file = "colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6"},
     {file = "colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44"},
 ]
-markers = {main = "platform_system == \"Windows\" or sys_platform == \"win32\" and (extra == \"openaleph\" or extra == \"ner-spacy\") or extra == \"openaleph\"", dev = "sys_platform == \"win32\""}
+markers = {main = "(platform_system == \"Windows\" or sys_platform == \"win32\" or extra == \"openaleph\") and (platform_system == \"Windows\" or platform_machine == \"AMD64\" or extra == \"openaleph\" or extra == \"ner-spacy\") and (platform_system == \"Windows\" or extra == \"ner-spacy\" or extra == \"openaleph\")", dev = "sys_platform == \"win32\""}
 
 [[package]]
 name = "confection"
@@ -1667,7 +1667,7 @@ description = "Python bindings for CUDA"
 optional = true
 python-versions = ">=3.10"
 groups = ["main"]
-markers = "platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\")"
+markers = "platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\")"
 files = [
     {file = "cuda_bindings-13.4.4-cp310-cp310-manylinux_2_24_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:90f85a00fc89dd4a8f7c4beb0a2f3f788b845c8496fe84adc1217830206db9e0"},
     {file = "cuda_bindings-13.4.4-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:85d961133658fff3167cfcf69de1beac8e46453c15fd4bcaa4a96d3ef1110c69"},
@@ -1715,7 +1715,7 @@ description = "Pathfinder for CUDA components"
 optional = true
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\")"
+markers = "platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\")"
 files = [
     {file = "cuda_pathfinder-1.8.5-py3-none-any.whl", hash = "sha256:16d1026fdd78ac0222b966441de53dec3f0dbe6b1e2c43d19d92eb29bfd81e67"},
 ]
@@ -1727,7 +1727,7 @@ description = "CUDA Toolkit meta-package"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "cuda_toolkit-13.2.2-py2.py3-none-any.whl", hash = "sha256:d12edc1aad1356236a2ee10c0d794b1aff5d3e79bfeca54867c3bb8e5afd87b0"},
 ]
@@ -1960,7 +1960,7 @@ description = "Python @deprecated decorator to deprecate old python classes, fun
 optional = true
 python-versions = ">=3.12"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\""
 files = [
     {file = "deprecated-3.0.1-py3-none-any.whl", hash = "sha256:eda314c115e8bc0fe52b90a6869e19240ac3cedb7449adfdba5981cf9ef693e1"},
     {file = "deprecated-3.0.1.tar.gz", hash = "sha256:2f5a9fecc9961e26462846cf1e57f73a612b1d0b79c27dceeed8de647beadcee"},
@@ -2138,7 +2138,7 @@ files = [
     {file = "filelock-4.2.4-py3-none-any.whl", hash = "sha256:301241438c57936ef93f4243a94f2559022268bfcf9b375a9a72eb0f8db8358e"},
     {file = "filelock-4.2.4.tar.gz", hash = "sha256:c6d8663535e1650ee430507b4ffbac7b464dd64b7647ea0112a9f406499d163d"},
 ]
-markers = {main = "extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\" or extra == \"gpu\""}
+markers = {main = "extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\""}
 
 [[package]]
 name = "fingerprints"
@@ -2905,7 +2905,7 @@ description = "A pure-Python, bring-your-own-I/O implementation of HTTP/1.1"
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\" or extra == \"ner-spacy\""
+markers = "extra == \"ner-flair\" or extra == \"ner-spacy\" or extra == \"openaleph\""
 files = [
     {file = "h11-0.16.0-py3-none-any.whl", hash = "sha256:63cf8bbe7522de3bf65932fda1d9c2772064ffb3dae62d55932da54b31cb6c86"},
     {file = "h11-0.16.0.tar.gz", hash = "sha256:4e35b956cf45792e4caa5885e69fba00bdbc6ffafbfa020300e549b208ee5ff1"},
@@ -2918,7 +2918,7 @@ description = "Fast transfer of large files with the Hugging Face Hub."
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\") and (platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\")"
+markers = "(extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\") and (sys_platform == \"linux\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\" or platform_machine == \"aarch64\") and (platform_machine == \"aarch64\" or platform_machine == \"x86_64\" or platform_machine == \"amd64\" or platform_machine == \"arm64\")"
 files = [
     {file = "hf_xet-1.8.0-cp314-cp314t-macosx_10_12_x86_64.whl", hash = "sha256:c74e3751cbcdae9222c5170e8d788e83201a03dc5e5f4308a20f17a5b6023b56"},
     {file = "hf_xet-1.8.0-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:56735c2d4f416d7473fc986586b26a8756e067832ca4b7fdaad32a0d6f2ce740"},
@@ -2949,7 +2949,7 @@ description = "A minimal low-level HTTP client."
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\" or extra == \"ner-spacy\""
+markers = "extra == \"ner-flair\" or extra == \"ner-spacy\" or extra == \"openaleph\""
 files = [
     {file = "httpcore-1.0.9-py3-none-any.whl", hash = "sha256:2d400746a40668fc9dec9810239072b40b4484b640a8c38fd654a024c7a1bf55"},
     {file = "httpcore-1.0.9.tar.gz", hash = "sha256:6e34463af53fd2ab5d807f399a9b45ea31c3dfa2276f15a2c3f00afff6e176e8"},
@@ -2972,7 +2972,7 @@ description = "The next generation HTTP client."
 optional = true
 python-versions = ">=3.8"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\" or extra == \"ner-spacy\""
+markers = "extra == \"ner-flair\" or extra == \"ner-spacy\" or extra == \"openaleph\""
 files = [
     {file = "httpx-0.28.1-py3-none-any.whl", hash = "sha256:d909fcccc110f8c7faf814ca82a9a4d816bc5a6dbfea25d6591d6985b8ba59ad"},
     {file = "httpx-0.28.1.tar.gz", hash = "sha256:75e98c5f16b0f35b567856f597f06ff2270a374470a5c2392242528e3e3e42fc"},
@@ -3301,7 +3301,7 @@ description = "JSON Matching Expressions"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\""
 files = [
     {file = "jmespath-1.1.0-py3-none-any.whl", hash = "sha256:a5663118de4908c91729bea0acadca56526eb2698e83de10cd116ae0f4e97c64"},
     {file = "jmespath-1.1.0.tar.gz", hash = "sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d"},
@@ -4475,7 +4475,7 @@ description = "Python library for arbitrary-precision floating-point arithmetic"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"gpu\" or extra == \"ner-transformers\""
+markers = "extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\""
 files = [
     {file = "mpmath-1.3.0-py3-none-any.whl", hash = "sha256:a0b2b9fe80bbcd81a6647ff13108738cfb482d481d826cc0e02f5b35e5c88d2c"},
     {file = "mpmath-1.3.0.tar.gz", hash = "sha256:7a28eb2a9774d00c7bc92411c19a89209d5da7c4c9a9e227be8330a23a25b91f"},
@@ -5145,7 +5145,7 @@ description = "CUBLAS native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cublas-13.4.1.3-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:4eb1472bf92b741e7cf24da7978dde251b58ddec2092d9f6a04f3623eb4e9a15"},
     {file = "nvidia_cublas-13.4.1.3-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:a5917cb642cfb07f4a0231ee16aec7e2e0357d8cb8b1b78a0c9c68dba3e6afc7"},
@@ -5162,7 +5162,7 @@ description = "CUBLAS native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cublas-13.8.2.12-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:8740b0e5b502b93537aea93738a0649426746fa001071365cc756c7173b5a801"},
     {file = "nvidia_cublas-13.8.2.12-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:21721774d8e7044debec3034ecc1a8cd22e173eb6dae5d7f5f8a014852382894"},
@@ -5178,7 +5178,7 @@ description = "CUDA CCCL"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cuda_cccl-13.3.4.3.1-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:cd47e7823e3ab369a3e3df3a4c6dbb4cb02176cb85b251eec5f7c9cdfa528ec4"},
     {file = "nvidia_cuda_cccl-13.3.4.3.1-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:48ba8e44a1162face51306d5bfd67604d9949be5acb9105dbb93734d2df8b3a4"},
@@ -5193,7 +5193,7 @@ description = "CUDA profiling tools runtime libs."
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cuda_cupti-13.2.86-py3-none-manylinux_2_25_aarch64.whl", hash = "sha256:d9a5c133f73fcb9013f3ada0da6fb54d4117618d81f3f5a0419417ea6ee829d4"},
     {file = "nvidia_cuda_cupti-13.2.86-py3-none-manylinux_2_25_x86_64.whl", hash = "sha256:8fa29f15dd8336181f961764d9d95236fc6b931dd0c8fcf8cd70aab0c310b586"},
@@ -5207,7 +5207,7 @@ description = "NVRTC native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cuda_nvrtc-13.2.86-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:8111c5130e967b78222ea2124145f8efe9ce201b752b2579a2513100a53be1c5"},
     {file = "nvidia_cuda_nvrtc-13.2.86-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:1e5d7b411a2eb83f5c71c98d58133a763fc9fa86a4241ee320c5c4782d9ad1fd"},
@@ -5221,7 +5221,7 @@ description = "NVRTC native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cuda_nvrtc-13.4.92-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:5ce8c97b00b232c4f50c8c4b5a3b68cafee08bdb82ea86f2052ff01d03194f4a"},
     {file = "nvidia_cuda_nvrtc-13.4.92-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:24b9f5eccc6a5a19779038cf468aecb7cecfa8716269beaef5640bd989d21c28"},
@@ -5236,7 +5236,7 @@ description = "CUDA Runtime native Libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cuda_runtime-13.2.86-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:37844957894bfdecf90243568d21a2cb251b66106915b71459a23c8e6ef2da69"},
     {file = "nvidia_cuda_runtime-13.2.86-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:3498247680dfddce31bad102af7e3e26fc795342a3cac64722bb0fa95e7f60f0"},
@@ -5250,7 +5250,7 @@ description = "cuDNN runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cudnn_cu13-9.26.0.51-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:8e5b4f5eccff721416f70ecf4353172fc4d5cdd8ca869fe6f983a4a5b0147b20"},
     {file = "nvidia_cudnn_cu13-9.26.0.51-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:9c976d539786698c71d6bcdbe2053b7485fae062ff7e1215d2f2ff67b1a2149a"},
@@ -5267,7 +5267,7 @@ description = "CUFFT native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cufft-12.2.0.57-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:1ed438568ae1088ba2c25789d10205d4104b8b140b7bd942e39a787947a0fb74"},
     {file = "nvidia_cufft-12.2.0.57-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:34da27fadf3979b0b042c43823f0530be8408b86df31ee0108e1ca0b621d4ef6"},
@@ -5284,7 +5284,7 @@ description = "cuFile GPUDirect libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "sys_platform == \"linux\" and (platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "sys_platform == \"linux\" and (platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cufile-1.17.1.22-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:bec33d7f1f12691dce330275246587569c2ed90b1ce43b0f94b3e1ce9268744b"},
     {file = "nvidia_cufile-1.17.1.22-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:87feaf8c3ad20d3d03a01933181801ff6892bace5c8f0b1e4b48f319d3e62d36"},
@@ -5297,7 +5297,7 @@ description = "CUDA solver native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or sys_platform == \"linux\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cusolver-12.2.0.11-py3-none-manylinux_2_27_aarch64.whl", hash = "sha256:8be097fca28de6be0990ab216ee9b804dd51077e1d1d83acf6c9850650bdc64d"},
     {file = "nvidia_cusolver-12.2.0.11-py3-none-manylinux_2_27_x86_64.whl", hash = "sha256:fab5778f6769947389a1a6abc07e635576825a08c0ffc68c3ae7f1392c794b42"},
@@ -5316,7 +5316,7 @@ description = "CUSPARSE native runtime libraries"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_cusparse-12.7.10.12-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:597eff2cd83e3ab1d1e3a0dce9c9c879d77cf64ec2659bfdb5af6a5d02e7aaa9"},
     {file = "nvidia_cusparse-12.7.10.12-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:25907c75e4db1581685f06f61cc6cdecc04611765516a52373e0a18ebd69fa00"},
@@ -5333,7 +5333,7 @@ description = "NVIDIA cuSPARSELt"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_aarch64.whl", hash = "sha256:4dca476c50bf4780d46cd0bfbd82e2bc10a08e4fef7950917ce8d7578d22a23f"},
     {file = "nvidia_cusparselt_cu13-0.8.1-py3-none-manylinux2014_x86_64.whl", hash = "sha256:786ce87568c303fadb5afcc7102d454cd3040d75f6f8626f5db460d1871f4dd0"},
@@ -5347,7 +5347,7 @@ description = "NVIDIA Collective Communication Library (NCCL) Runtime"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_nccl_cu13-2.30.7-py3-none-manylinux_2_18_aarch64.whl", hash = "sha256:ca786ffa5a647c75d4d1f5cc72a6c4f537947e2ba8823d7c8aaf768e7a7b9f77"},
     {file = "nvidia_nccl_cu13-2.30.7-py3-none-manylinux_2_18_x86_64.whl", hash = "sha256:cefa7fdb9710efd0f39c5f1be1d61ff6fc9a996c451265bd7fbdcf9455ed4b50"},
@@ -5360,7 +5360,7 @@ description = "Nvidia JIT LTO Library"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_nvjitlink-13.4.92-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl", hash = "sha256:e0391f24ed94ec879b84e3da4d4ec320c879aff681f2c7a638462f7199284323"},
     {file = "nvidia_nvjitlink-13.4.92-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:25f74fad0d654271c921ac4dca614bd6258bc21791242fc7b2289dad7ae9c099"},
@@ -5375,7 +5375,7 @@ description = "NVSHMEM creates a global address space that provides efficient an
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
+markers = "(extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and platform_system == \"Linux\""
 files = [
     {file = "nvidia_nvshmem_cu13-3.7.2-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:0e748308b9e0a8a8d81859353f3e6c98fbe85a85f652a915a2ba60149a0bd124"},
     {file = "nvidia_nvshmem_cu13-3.7.2-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:b9a4f843c62b5dded8ad33fd6d220e007dcd39f06cee549292f5ba14ce4c235c"},
@@ -5391,7 +5391,7 @@ description = "NVIDIA Tools Extension"
 optional = true
 python-versions = ">=3"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
+markers = "(sys_platform == \"win32\" or sys_platform == \"linux\") and (sys_platform == \"win32\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\") and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\") and (sys_platform == \"linux\" or platform_machine == \"AMD64\") and platform_system == \"Linux\" and (platform_machine == \"AMD64\" or platform_machine == \"aarch64\" or platform_machine == \"x86_64\")"
 files = [
     {file = "nvidia_nvtx-13.2.86-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:968ce72baee2a01791c7d3254000eac81f24677b0b91c62d21b449a1f309c245"},
     {file = "nvidia_nvtx-13.2.86-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:1c6ae1be92fba569dd271f7b9b3056f99f5642726dc6c53d1b93ae4110c398fb"},
@@ -5551,7 +5551,7 @@ files = [
     {file = "packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c"},
     {file = "packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79"},
 ]
-markers = {main = "extra == \"openaleph\" or extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\" or extra == \"ner-spacy\""}
+markers = {main = "extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\" or extra == \"ner-spacy\" or extra == \"openaleph\""}
 
 [[package]]
 name = "pandas"
@@ -8015,7 +8015,7 @@ description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
 optional = true
 python-versions = "*"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\""
 files = [
     {file = "sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0"},
     {file = "sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88"},
@@ -8447,7 +8447,7 @@ description = "Computer algebra system (CAS) in Python"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"gpu\" or extra == \"ner-transformers\""
+markers = "extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\" or extra == \"ner-transformers\""
 files = [
     {file = "sympy-1.14.0-py3-none-any.whl", hash = "sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5"},
     {file = "sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517"},
@@ -8772,7 +8772,7 @@ description = "Tensors and Dynamic neural networks in Python with strong GPU acc
 optional = true
 python-versions = ">=3.11"
 groups = ["main"]
-markers = "extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\""
+markers = "extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\""
 files = [
     {file = "torch-2.15.0-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:e808b63d616a43b326e1a5677d45a2e5babe7a8ce27edb03ddb48e7dd9b6d663"},
     {file = "torch-2.15.0-cp311-cp311-manylinux_2_28_aarch64.whl", hash = "sha256:58ce2ebfb3430941353109a85be63ee8e941da22f13daa2c43344eeb51c81e06"},
@@ -9025,7 +9025,7 @@ description = "A language and compiler for custom Deep Learning operations"
 optional = true
 python-versions = "<3.16,>=3.11"
 groups = ["main"]
-markers = "platform_system == \"Linux\" and (extra == \"ner-flair\" or extra == \"gpu\" or extra == \"ner-gliner\")"
+markers = "platform_system == \"Linux\" and (extra == \"gpu\" or extra == \"ner-flair\" or extra == \"ner-gliner\")"
 files = [
     {file = "triton-3.9.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:feaaec13578ca84301d561d034cb08b3ae293d7f0b7ab6b8ddbb2d6796363716"},
     {file = "triton-3.9.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:1622118a038b0c6e16fa4a0305da62c8b3c15904ee1cc4d4e65846a25969e41e"},
@@ -9101,7 +9101,7 @@ description = "Provider of IANA time zone data"
 optional = false
 python-versions = ">=2"
 groups = ["main"]
-markers = "(sys_platform == \"win32\" or sys_platform == \"emscripten\") and extra == \"openaleph\" or platform_system == \"Windows\""
+markers = "platform_system == \"Windows\" or (sys_platform == \"win32\" or sys_platform == \"emscripten\") and extra == \"openaleph\""
 files = [
     {file = "tzdata-2026.6-py2.py3-none-any.whl", hash = "sha256:0a10eec6e13ef16b627fabed9a5f2ba61a62b1c67f327305f4e7e412a70b4aec"},
     {file = "tzdata-2026.6.tar.gz", hash = "sha256:85d2cd9c09f81f0bb29db27759fc83af4f1e620efb814f8c5bf8b4cc4feece6d"},
@@ -9380,7 +9380,7 @@ description = "Module for decorators, wrappers and monkey patching."
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
-markers = "extra == \"openaleph\" or extra == \"ner-flair\" or extra == \"ner-spacy\""
+markers = "extra == \"ner-flair\" or extra == \"openaleph\" or extra == \"ner-spacy\""
 files = [
     {file = "wrapt-2.5.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9c0e0342eba94829491985516e951d1b6a2de402ae4a44d1ea0debbd929cb7a9"},
     {file = "wrapt-2.5.2-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:244d57e361833389278820e5242f4a364305f633572d9500d3a85f40417aefee"},
@@ -9644,20 +9644,21 @@ propcache = ">=0.2.1"
 
 [[package]]
 name = "zensical"
-version = "0.0.56"
+version = "0.0.73"
 description = "A modern static site generator built by the creators of Material for MkDocs"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.11"
 groups = ["dev"]
 files = [
-    {file = "zensical-0.0.56-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:5135ea3aa5d1358503fc1903e866c191873b138028bc1ab170abac3a4b537ffe"},
-    {file = "zensical-0.0.56-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:a22ae2329ba755c6e58e1fe5967ca429d580d346a73cf467ad5185377e2cf809"},
-    {file = "zensical-0.0.56-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:03c70ef328e31cce0e31739acdd6679e9272bc7a3016ca5eafaa16dcfda460c9"},
-    {file = "zensical-0.0.56-cp310-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8b7a37f6ac38ac218e3e0dd311b58c468603963e38ee23f2e25672dcd6e9c17b"},
-    {file = "zensical-0.0.56-cp310-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:5f6d850bce3184422b37b9d98ef4d123047a47446844793251cabc04bd55f8f0"},
-    {file = "zensical-0.0.56-cp310-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:346a1cdbad157633d185f79039a97c8b4f8c2b40be7d7efd56d72622f40247b0"},
-    {file = "zensical-0.0.56-cp310-abi3-win_amd64.whl", hash = "sha256:c557985f12d042c15dcb7d577543d81ceee9281f96d591d265310b673437a325"},
-    {file = "zensical-0.0.56.tar.gz", hash = "sha256:c359163800d1c3a8c39af48f4e2869fcfc2b4fc00d28652bd2a5b0330c36530c"},
+    {file = "zensical-0.0.73-cp311-abi3-macosx_10_12_x86_64.whl", hash = "sha256:7bf70ebdb80628e17b5597d5da5669514df37b9e983b2c40e814b65c0f1bd9e1"},
+    {file = "zensical-0.0.73-cp311-abi3-macosx_11_0_arm64.whl", hash = "sha256:8411c5c16cefd04e139dedbdc38ae59cf503e4cc83b03613a790bbab64e2aace"},
+    {file = "zensical-0.0.73-cp311-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9e27878c515ef1695b3587b762c2738c93dee1a0412c4c9b240583a968535e45"},
+    {file = "zensical-0.0.73-cp311-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:78b45462e8925f8eb1d45aeed09dea1450c57d2533bfc28214af4a4a9e910e9e"},
+    {file = "zensical-0.0.73-cp311-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:5c79302dec347e1d2c7b3e0961ac56c97134f59c6f5cff786b81accf50b3bbb2"},
+    {file = "zensical-0.0.73-cp311-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:02a20d9cce5a5b976671d02550a8e65fcea49230a12978bf3c13b497f542ea16"},
+    {file = "zensical-0.0.73-cp311-abi3-win_amd64.whl", hash = "sha256:d8f7b9e03a6280f67f55afd1a9a17937778d77ba7490124b11393bb79220a60d"},
+    {file = "zensical-0.0.73-cp311-abi3-win_arm64.whl", hash = "sha256:a68b0d23b9de360a1f1867c56c786d77947616eca42195c4cc1f18a1e1686bbf"},
+    {file = "zensical-0.0.73.tar.gz", hash = "sha256:ddeca0695e1015a4fbd09b9a9e50e77a2bb43753bf7479dfb23255f35fd14450"},
 ]
 
 [package.dependencies]
@@ -9665,6 +9666,7 @@ click = ">=8.1.8"
 deepmerge = ">=2.0"
 jinja2 = ">=3.1"
 markdown = ">=3.7"
+pathspec = ">=1.0.4"
 pygments = ">=2.20"
 pymdown-extensions = ">=11.0"
 pyyaml = ">=6.0.2"
@@ -9694,4 +9696,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.15"
-content-hash = "dd1166265f81cde43d1e813cccb8f1f9c5db2c4df54d0d27b2007faf47b6119d"
+content-hash = "4caab8d527034d5435428e5beb62f2f2b880f83bd4285b009e3269046794d671"
