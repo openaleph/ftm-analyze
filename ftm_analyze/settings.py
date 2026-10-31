@@ -114,6 +114,9 @@ class Settings(BaseSettings):
     resolve_mentions: bool = False
     """Resolve known mentions via `juditha`"""
 
+    extract_known_names: bool = False
+    """Extract known names in one pass via the `juditha` Aho-Corasick automaton"""
+
     refine_mentions: bool = False
     """Refine schema classification for mentions via `juditha` fasttext model"""
 

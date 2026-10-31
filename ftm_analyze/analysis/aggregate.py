@@ -3,6 +3,7 @@ from typing import Generator, Iterable, TypeAlias
 
 from anystore.logging import get_logger
 from followthemoney import Property
+from juditha.model import get_common_schema
 from rigour.names import normalize_name
 
 from ftm_analyze.analysis.extract import test_name
@@ -34,21 +35,34 @@ class TagAggregatorFasttext(object):
         confidence: float | None = settings.ner_type_model_confidence,
     ):
         self.values = defaultdict(set)
+        # known names (from the juditha automaton) with their schemata, these
+        # skip the confidence filter
+        self.schemata: defaultdict[tuple[str, Property], set[str]] = defaultdict(set)
         self.model = FTTypeModel(str(model_path))
         self.confidence = confidence
 
-    def add(self, prop, value):
+    def add(self, prop: Property, value: str, schema: str | None = None) -> None:
         if not test_name(value):
             return
         key = normalize_name(prop.type.node_id_safe(value))
         self.values[(key, prop)].add(value)
+        if key and schema is not None:
+            self.schemata[(key, prop)].add(schema)
+
+    def get_schema(self, key: str, prop: Property) -> str | None:
+        """The schema of a known name, or `None` if it is not known"""
+        schemata = self.schemata.get((key, prop))
+        if schemata:
+            schema: str = get_common_schema(*sorted(schemata))
+            return schema
+        return None
 
     def results(self) -> Results:
         for (key, prop), values in self.values.items():
             values.discard(None)
             if not values:
                 continue
-            if not self.confidence:
+            if not self.confidence or (key, prop) in self.schemata:
                 # very messy
                 yield (key, prop, values)
             else:

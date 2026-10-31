@@ -1,9 +1,13 @@
+import json
+
 from followthemoney import model
 from followthemoney.types import registry
 from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
+from ftm_analyze.analysis.extract import extract_juditha
+from ftm_analyze.analysis.util import TAG_COMPANY
 from ftm_analyze.annotate.annotator import ZWJ
 
 
@@ -46,6 +50,68 @@ def test_analyze_convert_mentions(fixtures_path, documents, monkeypatch, tmp_pat
 
     doc = res[documents[0].id]
     assert f"info@fooddrinkeurope.eu{ZWJ}__EMAIL__" in str(doc.first("bodyText"))
+
+
+def test_analyze_extract_known_names(monkeypatch, tmp_path):
+    monkeypatch.setenv("JUDITHA_URI", str(tmp_path / "juditha.db"))
+    get_store.cache_clear()
+    known = tmp_path / "known.ftm.json"
+    known.write_text(
+        json.dumps(
+            {
+                "id": "bfv",
+                "schema": "PublicBody",
+                "properties": {"name": ["Bundesamt für Verfassungsschutz"]},
+            }
+        )
+    )
+    load_proxies(known, sync=True)
+
+    text = "Das Bundesamt für Verfassungsschutz hat heute den Bericht vorgestellt."
+    assert list(extract_juditha(text)) == [
+        (TAG_COMPANY, "Bundesamt für Verfassungsschutz", "PublicBody")
+    ]
+
+    def _analyze(extract_known_names):
+        entity = model.make_entity("PlainText")
+        entity.id = "test-known"
+        entity.add("bodyText", text * 2)
+        return list(
+            logic.analyze_entity(
+                entity, annotate=True, extract_known_names=extract_known_names
+            )
+        )
+
+    # spacy finds it, but the fasttext confidence filter drops it
+    res = _analyze(extract_known_names=False)
+    assert [e.schema.name for e in res] == ["PlainText"]
+    assert not res[-1].get("companiesMentioned")
+
+    # known names skip the confidence filter and become entities, not mentions
+    res = _analyze(extract_known_names=True)
+    assert [e.schema.name for e in res] == ["PublicBody", "PlainText"]
+    public_body, doc = res
+    assert public_body.first("proof") == "test-known"
+    assert "bundesamt für verfassungsschutz" in public_body.get("name")
+    assert "bundesamt für verfassungsschutz" in doc.get("companiesMentioned")
+    assert f"Bundesamt{ZWJ}__LEG__{ZWJ}__ORG__" in doc.first("bodyText")
+
+    def _analyze_table(*cells):
+        table = model.make_entity("Table")
+        table.id = "test-table"
+        table.add("indexText", cells)
+        return list(logic.analyze_entity(table, extract_known_names=True))
+
+    # tables are not NER'd, but known names are extracted from their cells
+    res = _analyze_table("Bundesamt für Verfassungsschutz", "Köln", "2023")
+    assert [e.schema.name for e in res] == ["PublicBody", "Table"]
+    public_body, table = res
+    assert public_body.first("proof") == "test-table"
+    assert "bundesamt für verfassungsschutz" in table.get("companiesMentioned")
+
+    # names don't match across cells
+    res = _analyze_table("Bundesamt für", "Verfassungsschutz")
+    assert [e.schema.name for e in res] == ["Table"]
 
 
 def test_analyze_ner_extract():
