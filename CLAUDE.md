@@ -154,6 +154,7 @@ Settings via environment variables with `FTM_ANALYZE_` prefix (see `settings.py`
 | `FTM_ANALYZE_VALIDATE_NAMES` | `false` | Enable JudithaValidatorStage |
 | `FTM_ANALYZE_REFINE_LOCATIONS` | `false` | Enable GeonamesStage |
 | `FTM_ANALYZE_RESOLVE_MENTIONS` | `false` | Enable JudithaLookupStage |
+| `FTM_ANALYZE_EXTRACT_KNOWN_NAMES` | `false` | Extract known names via the juditha Aho-Corasick automaton (local store, or a `juditha serve` gRPC server via `JUDITHA_URI=grpc://…`), emitted as entities (not Mentions) |
 | `FTM_ANALYZE_ANNOTATE` | `false` | Rewrite text properties with ZWJ per-word entity markers (see Annotate Module) |
 
 Spacy model overrides: `FTM_ANALYZE_SPACY_MODELS_DEU=de_core_news_lg`
