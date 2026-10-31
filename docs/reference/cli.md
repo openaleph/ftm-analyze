@@ -53,6 +53,7 @@ Analyze a stream of FollowTheMoney entities. Reads entities from `-i` and writes
 | `--validate-names / --no-validate-names` | from [`FTM_ANALYZE_VALIDATE_NAMES`](./settings.md#validate_names) | Drop mentions that `juditha` cannot validate against known name tokens. |
 | `--refine-mentions / --no-refine-mentions` | from [`FTM_ANALYZE_REFINE_MENTIONS`](./settings.md#refine_mentions) | Refine NER tag for each mention using extra heuristics + `juditha.lookup`. |
 | `--refine-locations / --no-refine-locations` | from [`FTM_ANALYZE_REFINE_LOCATIONS`](./settings.md#refine_locations) | Canonicalize location mentions via `geonames_tagger`. |
+| `--extract-known-names / --no-extract-known-names` | from [`FTM_ANALYZE_EXTRACT_KNOWN_NAMES`](./settings.md#extract_known_names) | Extract known names via the `juditha` automaton and emit them as entities. |
 | `--overwrite-lang / --no-overwrite-lang` | from [`FTM_ANALYZE_OVERWRITE_LANG`](./settings.md#overwrite_lang) | Ignore any pre-existing `language` property and rewrite `detectedLanguage`. |
 | `--help` |  | Show help and exit. |
 
@@ -85,6 +86,7 @@ Analyze a single text string. The input is wrapped in a synthetic `PlainText` en
 | `--validate-names / --no-validate-names` | from settings | Drop mentions that `juditha` cannot validate. |
 | `--refine-mentions / --no-refine-mentions` | from settings | Refine NER tag for each mention. |
 | `--refine-locations / --no-refine-locations` | from settings | Canonicalize location mentions. |
+| `--extract-known-names / --no-extract-known-names` | from settings | Extract known names via the `juditha` automaton. |
 | `--help` |  | Show help and exit. |
 
 ### Example

@@ -21,6 +21,15 @@ These flags control which optional resolution stages run. They default to `false
 
 Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. See [NER](../ner.md) for how to populate the juditha index.
 
+### `extract_known_names`
+
+| Env | `FTM_ANALYZE_EXTRACT_KNOWN_NAMES` |
+| --- | --- |
+| Type | `bool` |
+| Default | `false` |
+
+Extract known names in one pass via the Aho-Corasick automaton that `juditha build` writes next to the juditha index. Runs in addition to the configured `ner_engine`. Hits skip the fastText confidence filter and are emitted as entities with the schema juditha knows for them (Person, Company, …) instead of `Mention` entities. See [NER](../ner.md#extract-known-names).
+
 ### `refine_mentions`
 
 | Env | `FTM_ANALYZE_REFINE_MENTIONS` |

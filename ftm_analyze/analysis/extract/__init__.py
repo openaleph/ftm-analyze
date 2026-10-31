@@ -8,6 +8,7 @@ from ftm_analyze.analysis.extract.base import (
 from ftm_analyze.analysis.extract.bert import handle as extract_bert
 from ftm_analyze.analysis.extract.flair import handle as extract_flair
 from ftm_analyze.analysis.extract.gliner import handle as extract_gliner
+from ftm_analyze.analysis.extract.juditha import handle as extract_juditha
 from ftm_analyze.analysis.extract.spacy import handle as extract_spacy
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "extract_flair",
     "extract_bert",
     "extract_gliner",
+    "extract_juditha",
 ]
