@@ -100,13 +100,13 @@ In order to extract names of people, ftm-analyze uses named entities returned by
 
 For each of these named entities it normalizes the text by stripping out common prefixes (e.g. removing "Mr." from "Mr. Sherlock Holmes") or removing possessive suffixes ("’s" in "John’s").
 
-The main reason for extracting names of people from files is to find other references to the same people. For this reason, ftm-analyze also discards very short or very long names, as these are usually not as useful in order to achieve this goal or are often false positives.
+The main reason for extracting names of people from files is to find other references to the same people. For this reason, ftm-analyze also discards very long names (over 100 characters) and names without a letter, as these are usually not as useful in order to achieve this goal or are often false positives.
 
 ### Companies
 
 In order to extract companies, ftm-analyze uses named entities returned by the spaCy model labelled as `ORG` as candidates.
 
-Very short or very long names are discarded for the same reasons that people with very short or long names are discarded.
+Very long names are discarded for the same reasons that very long names of people are discarded.
 
 ### Countries
 
@@ -120,9 +120,7 @@ This way, ftm-analyze can extract countries even if the name of the country isn�
 
 The default spaCy models are trained on generic web content. Depending on the contents of the files you upload to ftm-analyze, the precision of the named entities returned by these models may vary.
 
-To predict whether a named enttiy returned by a spaCy model likely is a false positive, ftm-analyze uses a custom [fastText classifier model](https://github.com/alephdata/followthemoney-typepredict). This model is trained on structured data (for proper names of people and companies) as well as random text samples from documents (for text snippets that are not names of people or companies).
-
-(The model was initially developed for a slightly different purpose and predicts multiple labels for a given text, but ftm-analyze currently only uses the fact whether `trash` is one of the predicted labels.)
+ftm-analyze doesn't filter the named entities beyond the checks above, and keeps the label of the NER model, as the model is the only part that sees the context of a name. The one exception is a legal form in the name (e.g. "GmbH" or "e.V."), which makes it an organization. Earlier versions filtered them with a [fastText classifier model](https://github.com/alephdata/followthemoney-typepredict) and re-classified them with name heuristics, both judged the name alone and removed or mistyped more real names than noise. The fastText filter is still available as opt-in, see [`ner_type_model_confidence`](./reference/settings.md#ner_type_model_confidence). To get fewer false positives, use a more precise NER engine (e.g. `gliner`, with its `gliner_threshold`).
 
 ## Pattern extraction
 

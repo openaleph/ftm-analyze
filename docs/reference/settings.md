@@ -19,7 +19,7 @@ These flags control which optional resolution stages run. They default to `false
 | Type | `bool` |
 | Default | `false` |
 
-Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. See [NER](../ner.md) for how to populate the juditha index.
+Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. Only person and organization mentions are looked up, and only against known entities of the same type, so the lookup never changes the NER label. See [NER](../ner.md) for how to populate the juditha index.
 
 ### `extract_known_names`
 
@@ -28,16 +28,7 @@ Resolve known mentions to real entities via `juditha.lookup`. When the lookup re
 | Type | `bool` |
 | Default | `false` |
 
-Extract known names in one pass via the Aho-Corasick automaton that `juditha build` writes next to the juditha index. Runs in addition to the configured `ner_engine`. Hits skip the fastText confidence filter and are emitted as entities with the schema juditha knows for them (Person, Company, …) instead of `Mention` entities. See [NER](../ner.md#extract-known-names).
-
-### `refine_mentions`
-
-| Env | `FTM_ANALYZE_REFINE_MENTIONS` |
-| --- | --- |
-| Type | `bool` |
-| Default | `false` |
-
-Refine NER tags using extra rigour heuristics plus a `juditha.lookup` pass, so spaCy's PER/ORG/LOC decisions can be corrected before downstream resolution.
+Extract known names in one pass via the Aho-Corasick automaton that `juditha build` writes next to the juditha index. Runs in addition to the configured `ner_engine`, and both results are merged by position. Hits are emitted as entities with the schema juditha knows for them (Person, Company, …) instead of `Mention` entities. See [NER](../ner.md#extract-known-names).
 
 ### `refine_locations`
 
@@ -47,15 +38,6 @@ Refine NER tags using extra rigour heuristics plus a `juditha.lookup` pass, so s
 | Default | `false` |
 
 Canonicalize location mentions against `geonames_tagger`. When enabled, a `LOC` mention whose surface form fuzzy-matches a geonames entry is rewritten to the canonical place name.
-
-### `validate_names`
-
-| Env | `FTM_ANALYZE_VALIDATE_NAMES` |
-| --- | --- |
-| Type | `bool` |
-| Default | `false` |
-
-Drop mentions that `juditha` cannot validate. Effectively a stricter version of `resolve_mentions` – kept around for callers that want to filter without rewriting. Skipped when `resolve_mentions` is also enabled to avoid a duplicate lookup.
 
 ### `annotate`
 
@@ -95,6 +77,15 @@ Selects the named-entity recognition engine. Non-spaCy backends require their re
 
 Fallback language used by the spaCy backend when an entity carries no detected/declared language.
 
+### `ner_type_model_confidence`
+
+| Env | `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE` |
+| --- | --- |
+| Type | `float` |
+| Default | not set (disabled) |
+
+Opt-in: minimum confidence of the [fastText classifier model](https://github.com/alephdata/followthemoney-typepredict) for an NER result to survive filtering (e.g. `0.85`), results labelled `trash` are always dropped. Lower values let more mentions through. Known names (`extract_known_names`) skip the filter. The model judges the name alone, without its context, and in our benchmarks on German documents it removed more real names than noise, so it is disabled by default.
+
 ### `ner_type_model_path`
 
 | Env | `FTM_ANALYZE_NER_TYPE_MODEL_PATH` |
@@ -102,16 +93,7 @@ Fallback language used by the spaCy backend when an entity carries no detected/d
 | Type | `Path` |
 | Default | `./models/model_type_prediction.ftz` |
 
-Path to the fastText classifier used for confidence-based filtering of NER results.
-
-### `ner_type_model_confidence`
-
-| Env | `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE` |
-| --- | --- |
-| Type | `float` |
-| Default | `0.85` |
-
-Minimum classifier confidence for an extracted name to survive filtering. Lower values let more mentions through.
+Path to the fastText classifier used by `ner_type_model_confidence`. The model (about 460 MB) is not part of the Docker images, download it from `https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz`.
 
 ### `lid_model_path`
 
@@ -194,6 +176,15 @@ Model id used when `ner_engine="gliner"`.
 | Default | `0.5` |
 
 GLiNER confidence threshold below which predictions are discarded.
+
+### `device`
+
+| Env | `FTM_ANALYZE_DEVICE` |
+| --- | --- |
+| Type | `str` |
+| Default | `cuda` if available, otherwise `cpu` |
+
+Torch device for the `flair`, `bert` and `gliner` engines, e.g. `cpu`, `cuda` or `cuda:1`. Has no effect on `spacy`.
 
 ## Model cache locations
 

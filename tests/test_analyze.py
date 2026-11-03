@@ -6,7 +6,7 @@ from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
-from ftm_analyze.analysis.extract import extract_juditha
+from ftm_analyze.analysis.extract import Span, extract_juditha
 from ftm_analyze.analysis.util import TAG_COMPANY
 from ftm_analyze.annotate.annotator import ZWJ
 
@@ -31,10 +31,10 @@ def test_analyze_convert_mentions(fixtures_path, documents, monkeypatch, tmp_pat
     assert mention.schema.is_a("Mention")
     resolved_id = mention.first("resolved")
     assert resolved_id not in res
-    assert len(res) == 15
+    assert len(res) == 67
 
     res = {e.id: e for e in logic.analyze_entities(documents, resolve_mentions=True)}
-    assert len(res) == 15
+    assert len(res) == 67
     org = res[resolved_id]
     assert org.schema.is_a("Organization")
     doc = res[org.first("proof")]
@@ -69,7 +69,7 @@ def test_analyze_extract_known_names(monkeypatch, tmp_path):
 
     text = "Das Bundesamt für Verfassungsschutz hat heute den Bericht vorgestellt."
     assert list(extract_juditha(text)) == [
-        (TAG_COMPANY, "Bundesamt für Verfassungsschutz", "PublicBody")
+        Span(TAG_COMPANY, "Bundesamt für Verfassungsschutz", 4, 35, "PublicBody")
     ]
 
     def _analyze(extract_known_names):
@@ -82,12 +82,13 @@ def test_analyze_extract_known_names(monkeypatch, tmp_path):
             )
         )
 
-    # spacy finds it, but the fasttext confidence filter drops it
+    # spacy finds it as an organization mention
     res = _analyze(extract_known_names=False)
-    assert [e.schema.name for e in res] == ["PlainText"]
-    assert not res[-1].get("companiesMentioned")
+    assert [e.schema.name for e in res] == ["Mention", "PlainText"]
+    assert "bundesamt für verfassungsschutz" in res[-1].get("companiesMentioned")
 
-    # known names skip the confidence filter and become entities, not mentions
+    # the known name at the same position wins: it becomes an entity, and no
+    # mention is created from the spacy result
     res = _analyze(extract_known_names=True)
     assert [e.schema.name for e in res] == ["PublicBody", "PlainText"]
     public_body, doc = res
@@ -179,6 +180,32 @@ def test_analyze_extract_location():
     entity = _analyze_entity(entity)
     assert entity.first("locationMentioned", "New York City")
     assert "lives in [New York City](LOC)"
+
+
+def test_analyze_location_countries():
+    # the countries of found locations go to the document, not into the names
+    # or onto the extracted entities
+    text = "Angela Merkel reiste von Berlin nach Paris. " * 3
+    entity = model.make_entity("PlainText")
+    entity.id = "test"
+    entity.add("bodyText", text)
+    *entities, doc = logic.analyze_entity(entity)
+    assert {"de", "fr"} <= set(doc.get("detectedCountry"))
+    assert not {"de", "fr"} & set(doc.get_type_values(registry.name))
+    assert entities
+    for e in entities:
+        assert not e.get_type_values(registry.country)
+
+
+def test_analyze_location_person_names():
+    # places that are also person names (Berlin, Weimar) stay locations
+    text = "Angela Merkel reiste von Berlin nach Weimar. " * 3
+    entity = model.make_entity("PlainText")
+    entity.id = "test"
+    entity.add("bodyText", text)
+    entity = _analyze_entity(entity)
+    assert "berlin" in entity.get("locationMentioned")
+    assert "berlin" not in entity.get("peopleMentioned")
 
 
 def test_analyze_language_preservation():

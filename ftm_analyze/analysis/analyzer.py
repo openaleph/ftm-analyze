@@ -12,7 +12,8 @@ from normality import slugify
 from pydantic import BaseModel, ConfigDict, computed_field
 from rigour.names import normalize_name, pick_name
 
-from ftm_analyze.analysis.aggregate import TagAggregator, TagAggregatorFasttext
+from ftm_analyze.analysis.aggregate import NameAggregator, TagAggregator
+from ftm_analyze.analysis.country import location_country
 from ftm_analyze.analysis.extract import (
     extract_bert,
     extract_flair,
@@ -25,20 +26,19 @@ from ftm_analyze.analysis.patterns import extract_patterns, get_iban_country
 from ftm_analyze.analysis.refine import (
     PROPS_NER_TAGS,
     TYPE_PROPS,
-    classify_mention,
-    classify_name_rigour,
     clean_name,
+    is_rigour_org,
     refine_location,
 )
-from ftm_analyze.analysis.util import (
+from ftm_analyze.analysis.util import (  # is_numeric,
     ANALYZABLE,
     NER_TAG,
     SCHEMA_NER,
     TAG_COMPANY,
+    TAG_COUNTRY,
     TAG_IBAN,
     TAG_NAME,
     TAG_PERSON,
-    is_numeric,
     text_chunks,
 )
 from ftm_analyze.annotate.annotator import Annotator
@@ -66,7 +66,6 @@ class Mention(BaseModel):
     canonized_value: str | None = None
     schema_name: str | None = None
     ner_tag: NER_TAG = "OTHER"
-    is_valid: bool = True
 
     @property
     def resolved_prop(self) -> Property:
@@ -104,69 +103,37 @@ class Mention(BaseModel):
 
     def resolve(
         self,
-        refine_mentions: bool | None = settings.refine_mentions,
-        validate_names: bool | None = settings.validate_names,
         resolve_mentions: bool | None = settings.resolve_mentions,
         refine_locations: bool | None = settings.refine_locations,
     ) -> None:
-        # known names (from the juditha automaton) already carry their schema,
-        # so they skip the heuristic re-classification and validation
-        known = self.schema_name is not None
-
-        # 1. basic NER resolution based on builtin rigour heuristic
-        if not known:
-            refined_ner = classify_name_rigour(self.caption)
-            if refined_ner != "OTHER":
-                self.ner_tag = refined_ner
+        # the NER tag is kept (the model saw the context), only a legal form in
+        # the name (rigour org class symbols, e.g. GmbH, e.V.) makes it an
+        # organization. Known names (from the juditha automaton) already carry
+        # their schema, so they skip this.
+        if self.schema_name is None and is_rigour_org(self.caption):
+            self.ner_tag = "ORG"
         self.resolved_values = set(
             [clean_name(v, self.ner_tag, normalize_name) for v in self.original_values]
         )
 
-        # 2. use juditha NER classify model to refine
-        if refine_mentions and not known:
-            self.ner_tag = classify_mention(self.caption, self.ner_tag)
-            self.resolved_values = set(
-                [
-                    clean_name(v, self.ner_tag, normalize_name)
-                    for v in self.original_values
-                ]
-            )
-        # 2b. geonames_tagger
+        # 1. geonames_tagger
         if refine_locations and self.ner_tag == "LOC":
             location = refine_location(self.caption)
             if location is not None:
                 self.canonized_value = location.name
 
-        # 3. juditha lookup: drives both full resolution and validation.
-        # juditha 4.x dropped the standalone `validate_name` helper, so the
-        # validate_names path now goes through `juditha.lookup` too. We do
-        # one pass over the resolved values: when `resolve_mentions` is on
-        # the first hit becomes the resolved entity; otherwise (validate_names
-        # only) a hit whose common_schema maps back to our NER tag keeps the
-        # mention.
-        if resolve_mentions or (validate_names and not known):
-            matched = False
+        # 2. juditha lookup: links persons and organizations to known entities
+        # of the same type, one pass over the resolved values, the first hit
+        # becomes the resolved entity
+        if resolve_mentions and self.ner_tag in ("PER", "ORG"):
+            schemata = tuple(s for s, tag in SCHEMA_NER.items() if tag == self.ner_tag)
             for name in self.resolved_values:
-                result = juditha.lookup(name)
+                result = juditha.lookup(name, schemata=schemata)
                 if result is None:
                     continue
-                result_ner = SCHEMA_NER.get(result.common_schema, "OTHER")
-                if resolve_mentions:
-                    self.canonized_value = result.caption
-                    self.schema_name = result.common_schema
-                    self.ner_tag = result_ner
-                    self.resolved_values = set(
-                        [
-                            clean_name(v, self.ner_tag, normalize_name)
-                            for v in self.original_values
-                        ]
-                    )
-                    return
-                if result_ner == self.ner_tag:
-                    matched = True
-                    break
-            if validate_names and not known:
-                self.is_valid = matched
+                self.canonized_value = result.caption
+                self.schema_name = result.common_schema
+                return
 
     def to_entity(self) -> EntityProxy | None:
         if self.schema_name:
@@ -178,7 +145,7 @@ class Mention(BaseModel):
                     "properties": {"name": list(self.names), "proof": [self.entity_id]},
                 }
             )
-        schema = MENTIONS.get(self.prop)
+        schema = MENTIONS.get(self.resolved_prop)
         if schema:
             mention = model.make_entity("Mention")
             mention.make_id("mention", self.entity_id, self.prop.name, self.key)
@@ -195,8 +162,6 @@ class Analyzer:
         entity: EntityProxy,
         resolve_mentions: bool | None = settings.resolve_mentions,
         annotate: bool | None = settings.annotate,
-        validate_names: bool | None = settings.validate_names,
-        refine_mentions: bool | None = settings.refine_mentions,
         refine_locations: bool | None = settings.refine_locations,
         extract_known_names: bool | None = settings.extract_known_names,
     ):
@@ -206,10 +171,8 @@ class Analyzer:
             self.entity.set("language", entity.get("language"))
         if entity.get("detectedLanguage", quiet=True):
             self.entity.set("detectedLanguage", entity.get("detectedLanguage"))
-        self.aggregator_entities = TagAggregatorFasttext()
+        self.aggregator_entities = NameAggregator()
         self.aggregator_patterns = TagAggregator()
-        self.validate_names = validate_names
-        self.refine_mentions = refine_mentions
         self.refine_locations = refine_locations
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
@@ -238,27 +201,31 @@ class Analyzer:
         if overwrite_lang and entity.has("detectedLanguage", quiet=True):
             self.entity.pop("detectedLanguage")
         values = texts
-        if entity.schema.is_a("Table"):
-            # case for Tables: "texts" is an endless list of cell values, need
-            # to sort out numbers, concat to chunk larger
-            values = {t for t in texts if not is_numeric(t)}
-            texts = [" ".join(values)]
+        # FIXME table handling
+        # if entity.schema.is_a("Table"):
+        # case for Tables: "texts" is an endless list of cell values, need
+        # to sort out numbers, concat to chunk larger
+        # values = {t for t in texts if not is_numeric(t)}
+        # texts = [" ".join(values)]
 
         for text in text_chunks(texts):
             for subsection in textwrap.wrap(text, settings.translation_chunk_size):
                 detect_languages(self.entity, subsection)
             if self.ner_extract:
-                for prop, tag in self.ner_extract(self.entity, text):
-                    self.aggregator_entities.add(prop, tag)
+                spans = list(self.ner_extract(self.entity, text))
+                if self.extract_known_names:
+                    # known names of the same text, merged with the NER results
+                    # by position
+                    spans.extend(extract_juditha(text))
+                self.aggregator_entities.add_spans(spans)
             for prop, tag in extract_patterns(self.entity, text):
                 self.aggregator_patterns.add(prop, tag)
 
-        if self.extract_known_names:
+        if self.extract_known_names and not self.ner_extract:
             # match per text value: for Tables per cell, as names would match
             # across the (unordered) cells concatenated above
             for text in text_chunks(values):
-                for prop, tag, schema in extract_juditha(text):
-                    self.aggregator_entities.add(prop, tag, schema=schema)
+                self.aggregator_entities.add_spans(extract_juditha(text))
 
     def flush(self) -> Generator[EntityProxy, None, None]:
         countries = set()
@@ -299,13 +266,14 @@ class Analyzer:
                 schema_name=self.aggregator_entities.get_schema(key, prop),
             )
             mention.resolve(
-                refine_mentions=self.refine_mentions,
-                validate_names=self.validate_names,
                 resolve_mentions=self.resolve_mentions,
                 refine_locations=self.refine_locations,
             )
-            if not mention.is_valid:
-                continue
+            if mention.ner_tag == "LOC":
+                for value in values:
+                    self.entity.add(
+                        TAG_COUNTRY, location_country(value), cleaned=True, quiet=True
+                    )
 
             entity = mention.to_entity()
             if entity is not None:

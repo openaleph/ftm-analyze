@@ -74,20 +74,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip wheel --no-binary=:pyicu: --wheel-dir=/wheels pyicu
 
 # =============================================================================
-# Stage: models-ftm
-# Download FTM type prediction model (parallel with other stages)
-# =============================================================================
-FROM python-base AS models-ftm
-
-RUN apt-get update -qq \
-    && apt-get install -qq -y --no-install-recommends wget \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN mkdir -p /app/models \
-    && wget -q -O /app/models/model_type_prediction.ftz \
-        https://cdn.investigativedata.org/ftm-analyze/model_type_prediction.ftz
-
-# =============================================================================
 # Stage: deps-base
 # Install frozen dependencies from requirements.txt
 # =============================================================================
@@ -150,9 +136,6 @@ COPY --from=deps-builder /usr/local/bin /usr/local/bin
 # Application code installation (no NER extras yet)
 # =============================================================================
 FROM deps-base AS app-base
-
-# Copy FTM model from parallel stage
-COPY --from=models-ftm /app/models /app/models
 
 # Copy application code
 COPY pyproject.toml setup.py VERSION README.md /app/
