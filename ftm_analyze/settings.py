@@ -77,8 +77,9 @@ class Settings(BaseSettings):
     ner_type_model_path: Path = Path("./models/model_type_prediction.ftz")
     """Local path to ftm type predict model"""
 
-    ner_type_model_confidence: float = 0.85
-    """Minimum confidence for ftm type predict model"""
+    ner_type_model_confidence: float | None = None
+    """Minimum confidence for ftm type predict model (opt-in: the filter is
+    disabled if not set)"""
 
     ner_engine: Literal["spacy", "flair", "bert", "gliner"] = "spacy"
     """NER engine to use (may need install extra dependencies)"""
@@ -101,6 +102,10 @@ class Settings(BaseSettings):
     gliner_threshold: float = 0.5
     """Confidence threshold for GLiNER (0-1)"""
 
+    device: str | None = None
+    """Torch device for the flair, bert and gliner engines (e.g. `cpu`, `cuda`,
+    `cuda:1`), default: `cuda` if available, otherwise `cpu`"""
+
     # Model cache directories for external volume mounts
     flair_cache_root: Path | None = None
     """Flair model cache directory (also settable via FLAIR_CACHE_ROOT)"""
@@ -117,17 +122,11 @@ class Settings(BaseSettings):
     extract_known_names: bool = False
     """Extract known names in one pass via the `juditha` Aho-Corasick automaton"""
 
-    refine_mentions: bool = False
-    """Refine schema classification for mentions via `juditha` fasttext model"""
-
     refine_locations: bool = False
     """Refine location mentions via geonames"""
 
     annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
-
-    validate_names: bool = False
-    """Validate NER results against known name tokens via `juditha`"""
 
     overwrite_lang: bool = False
     """Ignore the language property, overwrite the detectedLanguage property"""

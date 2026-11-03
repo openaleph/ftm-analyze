@@ -28,7 +28,7 @@ When using `ftm-analyze` now, it will turn known person names into actual `Perso
 
 ### juditha server
 
-Instead of opening the store in every `ftm-analyze` worker, juditha can serve it (read-only) over gRPC. Point `JUDITHA_URI` at the server and all juditha-backed features (`resolve_mentions`, `validate_names`, `refine_mentions`, `extract_known_names`) run against it, no other configuration needed:
+Instead of opening the store in every `ftm-analyze` worker, juditha can serve it (read-only) over gRPC. Point `JUDITHA_URI` at the server and all juditha-backed features (`resolve_mentions`, `extract_known_names`) run against it, no other configuration needed:
 
     juditha serve  # next to the store, binds localhost:50051 by default, see --host / --port
     export JUDITHA_URI=grpc://juditha-host:50051
@@ -37,7 +37,7 @@ If the server is unreachable, the analysis fails (instead of silently skipping j
 
 ## Extract known names
 
-NER only finds what its model recognizes, and the fastText confidence filter drops extracted names it is unsure about (e.g. "Bundesamt für Verfassungsschutz"), even if they are in the juditha index. With `extract_known_names` enabled, `ftm-analyze` additionally scans every text in one pass for all names juditha knows, using the Aho-Corasick automaton that `juditha build` writes into the store (`automaton.txt`).
+NER only finds what its model recognizes, and may cut or mistype a name it does find, even if the name is in the juditha index. With `extract_known_names` enabled, `ftm-analyze` additionally scans every text in one pass for all names juditha knows, using the Aho-Corasick automaton that `juditha build` writes into the store (`automaton.txt`).
 
     export FTM_ANALYZE_EXTRACT_KNOWN_NAMES=true
 
@@ -47,10 +47,10 @@ or per run:
 
 How it behaves:
 
-- Matching is case and accent insensitive and aligned to token boundaries. Only multi-token names of at least 8 normalized characters are in the automaton (single-token names are too noisy), see `JUDITHA_MIN_TOKEN_LENGTH`.
-- It runs in addition to the configured NER engine, on the same schemata plus `Table` (NER skips `Table`, `Folder`, `Package`, `Workbook`). A name found by both is deduplicated.
+- Matching is case and accent insensitive and aligned to token boundaries. Only multi-token names of at least 8 normalized characters are in the automaton (single-token names are too noisy), see `JUDITHA_MIN_TOKEN_LENGTH`. `ftm-analyze` also ignores hits of a single word shorter than 8 characters, these are left to NER, which sees the context.
+- It runs in addition to the configured NER engine, on the same schemata plus `Table` (NER skips `Table`, `Folder`, `Package`, `Workbook`). Its hits win over NER results at the same or an overlapping position: a known `Bodo Ramelow` replaces an NER `Ministerpräsident Bodo Ramelow` or `Ramelow`, and an NER location `Thüringer Landtag` becomes the known `PublicBody`. A single-word hit only wins at the same position: an NER `Alternative für Deutschland` is kept over a known `Deutschland`.
+- Hits skip the (opt-in) fastText confidence filter `ner_type_model_confidence`, as they are exact matches of known names.
 - For a `Table`, each (non-numeric) cell is matched on its own, so a name split across two cells is not found. With a juditha server this means one request per distinct cell value.
-- Hits skip the fastText confidence filter, as they are exact matches of known names.
-- Hits are emitted as entities with the schema juditha knows for the name (e.g. `Person`, `Company`, `PublicBody`, or `LegalEntity` if the sources disagree) instead of `Mention` entities, the same way `resolve_mentions` does it. The entity carries the source document as `proof`. The rigour heuristics and `validate_names` don't override or drop them. If `resolve_mentions` is enabled as well, the juditha lookup still runs for them to pick up the canonical name.
+- Hits are emitted as entities with the schema juditha knows for the name (e.g. `Person`, `Company`, `PublicBody`, or `LegalEntity` if the sources disagree) instead of `Mention` entities, the same way `resolve_mentions` does it. The entity carries the source document as `proof`. If `resolve_mentions` is enabled as well, the juditha lookup still runs for the persons and organizations among them to pick up the canonical name.
 - Where the automaton lives depends on `JUDITHA_URI`. With a local store path, each worker process loads it lazily on the first extraction and keeps it for its lifetime, which for large juditha stores costs memory per worker and some startup time on the first document. With a [juditha server](#juditha-server) (`grpc://…`), extraction runs on the server, which holds the automaton once for all workers.
 - If the juditha store has no automaton (`juditha build` has not run), nothing is extracted and no error is raised.

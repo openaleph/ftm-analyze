@@ -1,6 +1,7 @@
 from ftm_analyze.analysis.extract.base import (
     NER_TYPES,
     NERs,
+    Span,
     ner_result,
     test_name,
     validate_person_name,
@@ -14,6 +15,7 @@ from ftm_analyze.analysis.extract.spacy import handle as extract_spacy
 __all__ = [
     "NERs",
     "NER_TYPES",
+    "Span",
     "ner_result",
     "test_name",
     "validate_person_name",

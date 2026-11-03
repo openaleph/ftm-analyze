@@ -41,4 +41,6 @@ def handle(entity: EntityProxy, text: str) -> NERs:
     for model in _get_models(entity):
         doc = model(text)
         for ent in doc.ents:
-            yield from ner_result(ent.label_, ent.text, "Spacy")
+            yield from ner_result(
+                ent.label_, ent.text, "Spacy", ent.start_char, ent.end_char
+            )

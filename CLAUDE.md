@@ -67,16 +67,13 @@ ftm_analyze/analysis/
 │   ├── gliner.py         # GlinerExtractor
 │   └── patterns.py       # PatternExtractor (emails, phones, IBANs)
 ├── aggregate/            # Aggregation layer
-│   ├── aggregator.py     # Unified Aggregator with deduplication
-│   └── confidence.py     # ConfidenceScorer (fastText model)
+│   └── aggregator.py     # NameAggregator: merge by position, deduplication, opt-in fastText filter
 ├── resolve/              # Resolution layer
 │   ├── pipeline.py       # ResolutionPipeline, ResolutionContext, ResolutionStage protocol
 │   ├── mention.py        # Mention data class
 │   └── stages/           # Composable resolution stages
-│       ├── rigour.py     # RigourStage (heuristic classification)
-│       ├── juditha.py    # JudithaClassifierStage, JudithaValidatorStage, JudithaLookupStage
-│       ├── geonames.py   # GeonamesStage (location canonization)
-│       └── confidence.py # ConfidenceStage (threshold filtering)
+│       ├── juditha.py    # JudithaLookupStage
+│       └── geonames.py   # GeonamesStage (location canonization)
 ├── emit/                 # Entity creation layer
 │   └── entity_factory.py # EntityFactory (Mention → FTM entities)
 ├── tracer.py             # ExtractionTracer for debugging
@@ -92,29 +89,26 @@ Input Entity
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Analyzer.feed()                                             │
+│ Analyzer.feed() (per text chunk)                            │
 │   ├── Language Detection                                    │
-│   ├── NER Extraction (spacy/flair/bert/gliner)             │
-│   └── Pattern Extraction (emails, phones, IBANs)           │
+│   ├── NER Extraction (spacy/flair/bert/gliner) with offsets │
+│   ├── Known Names (juditha automaton) [opt] with offsets    │
+│   └── Pattern Extraction (emails, phones, IBANs)            │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Aggregator                                                  │
-│   ├── Deduplication (by normalized key)                    │
-│   ├── Confidence Scoring (fastText classifier)             │
-│   └── Trash Filtering (hard reject "trash" labels)         │
+│ NameAggregator                                              │
+│   ├── Merge by position (known names win over               │
+│   │   overlapping NER results)                              │
+│   └── Deduplication (by normalized key)                     │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ Resolution Pipeline (composable stages)                     │
-│   ├── RigourStage            [enabled] - Heuristic PER/ORG │
-│   ├── JudithaClassifierStage [opt]     - ML tag refinement │
-│   ├── JudithaValidatorStage  [opt]     - PER name valid.   │
-│   ├── GeonamesStage          [opt]     - LOC canonization  │
-│   ├── JudithaLookupStage     [opt]     - Entity resolution │
-│   └── ConfidenceStage        [enabled] - Threshold filter  │
+│ Mention.resolve() (NER tag kept, legal form -> ORG)         │
+│   ├── GeonamesStage      [opt] - LOC canonization           │
+│   └── JudithaLookupStage [opt] - link PER/ORG, same type    │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
@@ -129,15 +123,11 @@ Input Entity
 Output: Entity fragments + Annotated source entity
 ```
 
-**Confidence Filtering**: Trash filtering (hard reject) happens early in the Aggregator.
-Threshold-based confidence filtering happens AFTER resolution stages, so RigourStage
-and other stages can validate mentions before they're rejected for low confidence.
-Stages call `mention.validate(stage_name)` to mark successful validation; ConfidenceStage
-skips mentions where `validated_by` is set.
+**Filtering**: there is no separate noise filter by default (the fastText type model filter is opt-in via `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE`, known names skip it). A name needs a letter and at most 100 chars (`test_name`), GLiNER applies its own confidence threshold, and the NER model's label is trusted: the only re-classification is a legal form in the name (rigour `ORG_CLASS` symbols, e.g. GmbH, e.V.) making it an organization.
 
 ### Key Types
 
-- `ExtractionResult`: Single extraction with value, tag, source, confidence
+- `Span`: A name found in a text, with its character offsets (and the schema of a known name)
 - `AggregatedResult`: Deduplicated results grouped by normalized key
 - `Mention`: Data class for resolution pipeline (tag, values, resolution state)
 - `ResolutionStage`: Protocol for pipeline stages (process method)
@@ -150,11 +140,10 @@ Settings via environment variables with `FTM_ANALYZE_` prefix (see `settings.py`
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FTM_ANALYZE_NER_ENGINE` | `spacy` | NER engine: spacy, flair, bert, gliner |
-| `FTM_ANALYZE_REFINE_MENTIONS` | `false` | Enable JudithaClassifierStage |
-| `FTM_ANALYZE_VALIDATE_NAMES` | `false` | Enable JudithaValidatorStage |
 | `FTM_ANALYZE_REFINE_LOCATIONS` | `false` | Enable GeonamesStage |
 | `FTM_ANALYZE_RESOLVE_MENTIONS` | `false` | Enable JudithaLookupStage |
 | `FTM_ANALYZE_EXTRACT_KNOWN_NAMES` | `false` | Extract known names via the juditha Aho-Corasick automaton (local store, or a `juditha serve` gRPC server via `JUDITHA_URI=grpc://…`), emitted as entities (not Mentions) |
+| `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE` | not set | Opt-in fastText type model filter for NER results (model at `FTM_ANALYZE_NER_TYPE_MODEL_PATH`, not in the Docker images) |
 | `FTM_ANALYZE_ANNOTATE` | `false` | Rewrite text properties with ZWJ per-word entity markers (see Annotate Module) |
 
 Spacy model overrides: `FTM_ANALYZE_SPACY_MODELS_DEU=de_core_news_lg`
@@ -162,7 +151,7 @@ GLiNER settings: `FTM_ANALYZE_GLINER_MODEL`, `FTM_ANALYZE_GLINER_THRESHOLD`
 
 ### External Dependencies
 
-- **juditha**: Entity lookup/resolution service, ML classifier, name validation
+- **juditha**: Entity lookup/resolution service, ML classifier
 - **rigour**: Name normalization and entity type classification heuristics
 - **geonames_tagger**: Location name refinement
 - **schwifty**: IBAN validation and parsing

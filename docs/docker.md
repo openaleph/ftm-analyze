@@ -155,7 +155,7 @@ Running them requires an nvidia GPU on the host with the nvidia driver and the [
 docker run --gpus all -v flair-cache:/root/.flair ghcr.io/openaleph/ftm-analyze:flair-gpu ftm-analyze --help
 ```
 
-Without `--gpus all` (or on a host without a GPU) the images still work, torch just falls back to CPU execution.
+Without `--gpus all` (or on a host without a GPU) the images still work, torch just falls back to CPU execution. To pin the device (e.g. a second GPU), set [`FTM_ANALYZE_DEVICE`](./reference/settings.md#device), for example `-e FTM_ANALYZE_DEVICE=cuda:1`.
 
 ## Running with Docker
 

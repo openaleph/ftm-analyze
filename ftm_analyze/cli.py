@@ -68,12 +68,6 @@ def cli_analyze(
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
     ] = settings.annotate,
-    validate_names: Annotated[
-        bool, typer.Option(help="Validate NER extracted names against known tokens")
-    ] = settings.validate_names,
-    refine_mentions: Annotated[
-        bool, typer.Option(help="Refine mentions using additional heuristics")
-    ] = settings.refine_mentions,
     refine_locations: Annotated[
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
@@ -96,8 +90,6 @@ def cli_analyze(
             entities,
             resolve_mentions,
             annotate,
-            validate_names,
-            refine_mentions,
             refine_locations,
             overwrite_lang,
             extract_known_names=extract_known_names,
@@ -115,12 +107,6 @@ def cli_analyze_text(
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
     ] = settings.annotate,
-    validate_names: Annotated[
-        bool, typer.Option(help="Validate NER extracted names against known tokens")
-    ] = settings.validate_names,
-    refine_mentions: Annotated[
-        bool, typer.Option(help="Refine mentions using additional heuristics")
-    ] = settings.refine_mentions,
     refine_locations: Annotated[
         bool, typer.Option(help="Refine location mentions via geonames")
     ] = settings.refine_locations,
@@ -145,8 +131,6 @@ def cli_analyze_text(
             entity,
             resolve_mentions,
             annotate,
-            validate_names,
-            refine_mentions,
             refine_locations,
             extract_known_names=extract_known_names,
         )
