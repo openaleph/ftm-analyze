@@ -19,7 +19,7 @@ def test_refine_legal_form():
         original_values={"Hirak e.V."},
         ner_tag="PER",
     )
-    mention.resolve(resolve_mentions=False, refine_locations=False)
+    mention.resolve(resolve_mentions=False)
     assert mention.ner_tag == "ORG"
     entity = mention.to_entity()
     assert entity is not None

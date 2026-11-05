@@ -28,7 +28,6 @@ from ftm_analyze.analysis.refine import (
     TYPE_PROPS,
     clean_name,
     is_rigour_org,
-    refine_location,
 )
 from ftm_analyze.analysis.util import (  # is_numeric,
     ANALYZABLE,
@@ -104,7 +103,6 @@ class Mention(BaseModel):
     def resolve(
         self,
         resolve_mentions: bool | None = settings.resolve_mentions,
-        refine_locations: bool | None = settings.refine_locations,
     ) -> None:
         # the NER tag is kept (the model saw the context), only a legal form in
         # the name (rigour org class symbols, e.g. GmbH, e.V.) makes it an
@@ -116,23 +114,21 @@ class Mention(BaseModel):
             [clean_name(v, self.ner_tag, normalize_name) for v in self.original_values]
         )
 
-        # 1. geonames_tagger
-        if refine_locations and self.ner_tag == "LOC":
-            location = refine_location(self.caption)
-            if location is not None:
-                self.canonized_value = location.name
-
-        # 2. juditha lookup: links persons and organizations to known entities
-        # of the same type, one pass over the resolved values, the first hit
-        # becomes the resolved entity
-        if resolve_mentions and self.ner_tag in ("PER", "ORG"):
+        # juditha lookup: links persons, organizations and locations (`Address`
+        # in juditha) to known entities of the same type, one pass over the
+        # resolved values, the first hit becomes the resolved entity
+        if resolve_mentions and self.ner_tag in ("PER", "ORG", "LOC"):
             schemata = tuple(s for s, tag in SCHEMA_NER.items() if tag == self.ner_tag)
             for name in self.resolved_values:
                 result = juditha.lookup(name, schemata=schemata)
                 if result is None:
                     continue
                 self.canonized_value = result.caption
-                self.schema_name = result.common_schema
+                # a place can also be known as another type (Berlin, Ukraine),
+                # its common schema would then be `LegalEntity`
+                self.schema_name = (
+                    "Address" if self.ner_tag == "LOC" else result.common_schema
+                )
                 return
 
     def to_entity(self) -> EntityProxy | None:
@@ -162,7 +158,6 @@ class Analyzer:
         entity: EntityProxy,
         resolve_mentions: bool | None = settings.resolve_mentions,
         annotate: bool | None = settings.annotate,
-        refine_locations: bool | None = settings.refine_locations,
         extract_known_names: bool | None = settings.extract_known_names,
     ):
         self.entity = model.make_entity(entity.schema)
@@ -173,7 +168,6 @@ class Analyzer:
             self.entity.set("detectedLanguage", entity.get("detectedLanguage"))
         self.aggregator_entities = NameAggregator()
         self.aggregator_patterns = TagAggregator()
-        self.refine_locations = refine_locations
         self.resolve_mentions = resolve_mentions
         self.annotate = annotate
         self.annotator = Annotator(entity)
@@ -265,10 +259,7 @@ class Analyzer:
                 ner_tag=PROPS_NER_TAGS.get(prop, "OTHER"),
                 schema_name=self.aggregator_entities.get_schema(key, prop),
             )
-            mention.resolve(
-                resolve_mentions=self.resolve_mentions,
-                refine_locations=self.refine_locations,
-            )
+            mention.resolve(resolve_mentions=self.resolve_mentions)
             if mention.ner_tag == "LOC":
                 for value in values:
                     self.entity.add(

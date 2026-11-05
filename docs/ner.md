@@ -26,6 +26,11 @@ For example, to load all [PEPs by OpenSanctions](https://www.opensanctions.org/d
 
 When using `ftm-analyze` now, it will turn known person names into actual `Person` entities (instead of _mentions_) if they are within this PEPs list (including fuzzy matching).
 
+To link location mentions as well, load places from GeoNames as `Address` entities (this needs the `juditha[geonames]` extra):
+
+    juditha load-geonames
+    juditha build
+
 ### juditha server
 
 Instead of opening the store in every `ftm-analyze` worker, juditha can serve it (read-only) over gRPC. Point `JUDITHA_URI` at the server and all juditha-backed features (`resolve_mentions`, `extract_known_names`) run against it, no other configuration needed:
@@ -51,6 +56,6 @@ How it behaves:
 - It runs in addition to the configured NER engine, on the same schemata plus `Table` (NER skips `Table`, `Folder`, `Package`, `Workbook`). Its hits win over NER results at the same or an overlapping position: a known `Bodo Ramelow` replaces an NER `Ministerpräsident Bodo Ramelow` or `Ramelow`, and an NER location `Thüringer Landtag` becomes the known `PublicBody`. A single-word hit only wins at the same position: an NER `Alternative für Deutschland` is kept over a known `Deutschland`.
 - Hits skip the (opt-in) fastText confidence filter `ner_type_model_confidence`, as they are exact matches of known names.
 - For a `Table`, each (non-numeric) cell is matched on its own, so a name split across two cells is not found. With a juditha server this means one request per distinct cell value.
-- Hits are emitted as entities with the schema juditha knows for the name (e.g. `Person`, `Company`, `PublicBody`, or `LegalEntity` if the sources disagree) instead of `Mention` entities, the same way `resolve_mentions` does it. The entity carries the source document as `proof`. If `resolve_mentions` is enabled as well, the juditha lookup still runs for the persons and organizations among them to pick up the canonical name.
+- Hits are emitted as entities with the schema juditha knows for the name (e.g. `Person`, `Company`, `PublicBody`, or `LegalEntity` if the sources disagree) instead of `Mention` entities, the same way `resolve_mentions` does it. The entity carries the source document as `proof`. If `resolve_mentions` is enabled as well, the juditha lookup still runs for the persons, organizations and locations among them to pick up the canonical name.
 - Where the automaton lives depends on `JUDITHA_URI`. With a local store path, each worker process loads it lazily on the first extraction and keeps it for its lifetime, which for large juditha stores costs memory per worker and some startup time on the first document. With a [juditha server](#juditha-server) (`grpc://…`), extraction runs on the server, which holds the automaton once for all workers.
 - If the juditha store has no automaton (`juditha build` has not run), nothing is extracted and no error is raised.

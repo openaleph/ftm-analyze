@@ -72,8 +72,7 @@ ftm_analyze/analysis/
 │   ├── pipeline.py       # ResolutionPipeline, ResolutionContext, ResolutionStage protocol
 │   ├── mention.py        # Mention data class
 │   └── stages/           # Composable resolution stages
-│       ├── juditha.py    # JudithaLookupStage
-│       └── geonames.py   # GeonamesStage (location canonization)
+│       └── juditha.py    # JudithaLookupStage
 ├── emit/                 # Entity creation layer
 │   └── entity_factory.py # EntityFactory (Mention → FTM entities)
 ├── tracer.py             # ExtractionTracer for debugging
@@ -107,8 +106,7 @@ Input Entity
     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ Mention.resolve() (NER tag kept, legal form -> ORG)         │
-│   ├── GeonamesStage      [opt] - LOC canonization           │
-│   └── JudithaLookupStage [opt] - link PER/ORG, same type    │
+│   └── JudithaLookupStage [opt] - link PER/ORG/LOC, same type│
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
@@ -140,7 +138,6 @@ Settings via environment variables with `FTM_ANALYZE_` prefix (see `settings.py`
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FTM_ANALYZE_NER_ENGINE` | `spacy` | NER engine: spacy, flair, bert, gliner |
-| `FTM_ANALYZE_REFINE_LOCATIONS` | `false` | Enable GeonamesStage |
 | `FTM_ANALYZE_RESOLVE_MENTIONS` | `false` | Enable JudithaLookupStage |
 | `FTM_ANALYZE_EXTRACT_KNOWN_NAMES` | `false` | Extract known names via the juditha Aho-Corasick automaton (local store, or a `juditha serve` gRPC server via `JUDITHA_URI=grpc://…`), emitted as entities (not Mentions) |
 | `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE` | not set | Opt-in fastText type model filter for NER results (model at `FTM_ANALYZE_NER_TYPE_MODEL_PATH`, not in the Docker images) |
@@ -153,7 +150,6 @@ GLiNER settings: `FTM_ANALYZE_GLINER_MODEL`, `FTM_ANALYZE_GLINER_THRESHOLD`
 
 - **juditha**: Entity lookup/resolution service, ML classifier
 - **rigour**: Name normalization and entity type classification heuristics
-- **geonames_tagger**: Location name refinement
 - **schwifty**: IBAN validation and parsing
 - **countrytagger**: Location-to-country mapping
 

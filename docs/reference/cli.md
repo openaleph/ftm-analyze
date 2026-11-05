@@ -50,7 +50,6 @@ Analyze a stream of FollowTheMoney entities. Reads entities from `-i` and writes
 | `-o TEXT` | `-` | Output entities URI (file, http, s3, …). |
 | `--resolve-mentions / --no-resolve-mentions` | from [`FTM_ANALYZE_RESOLVE_MENTIONS`](./settings.md#resolve_mentions) | Resolve known mentions against `juditha`. |
 | `--annotate / --no-annotate` | from [`FTM_ANALYZE_ANNOTATE`](./settings.md#annotate) | Annotate extracted patterns, names, and mentions in text properties (see [annotate](../annotate.md)). |
-| `--refine-locations / --no-refine-locations` | from [`FTM_ANALYZE_REFINE_LOCATIONS`](./settings.md#refine_locations) | Canonicalize location mentions via `geonames_tagger`. |
 | `--extract-known-names / --no-extract-known-names` | from [`FTM_ANALYZE_EXTRACT_KNOWN_NAMES`](./settings.md#extract_known_names) | Extract known names via the `juditha` automaton and emit them as entities. |
 | `--overwrite-lang / --no-overwrite-lang` | from [`FTM_ANALYZE_OVERWRITE_LANG`](./settings.md#overwrite_lang) | Ignore any pre-existing `language` property and rewrite `detectedLanguage`. |
 | `--help` |  | Show help and exit. |
@@ -81,7 +80,6 @@ Analyze a single text string. The input is wrapped in a synthetic `PlainText` en
 | `-o TEXT` | `-` | Output entities URI. |
 | `--resolve-mentions / --no-resolve-mentions` | from settings | Resolve known mentions against `juditha`. |
 | `--annotate / --no-annotate` | from settings | Annotate extracted patterns, names, and mentions. |
-| `--refine-locations / --no-refine-locations` | from settings | Canonicalize location mentions. |
 | `--extract-known-names / --no-extract-known-names` | from settings | Extract known names via the `juditha` automaton. |
 | `--help` |  | Show help and exit. |
 
