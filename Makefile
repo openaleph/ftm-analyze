@@ -111,4 +111,4 @@ clean:
 
 documentation:
 	zensical build
-	putfs sync --delete ./site putfs://static.darc.zone/openaleph.org/docs/lib/ftm-analyze
+	putfs sync --delete ./site putfs://static.darc.zone/darc.li/docs/ftm-analyze
