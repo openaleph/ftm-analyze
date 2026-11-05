@@ -18,8 +18,8 @@ classifiers = [
 ]
 requires-python = ">=3.12,<3.15"
 dependencies = [
-    "anystore (>=1.5.6,<2.0.0)",
-    "ftmq (>=5.3.1,<6.0.0)",
+    "anystore (>=1.5.7,<2.0.0)",
+    "ftmq (>=5.3.2,<6.0.0)",
     "pydantic (>=2.11.7,<3.0.0)",
     "pydantic-settings (>=2.14.2,<3.0.0)",
     "countrytagger (>=0.1.2,<0.2.0)",
@@ -29,7 +29,6 @@ dependencies = [
     "followthemoney (>=4.11.2,<5.0.0)",
     "schwifty (>=2026.10.1,<2027.0.0)",
     "cachetools (<6)",
-    "geonames-tagger (>=1.1.0,<2.0.0)",
 ]
 
 [project.optional-dependencies]
