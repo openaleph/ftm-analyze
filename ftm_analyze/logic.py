@@ -17,7 +17,6 @@ def analyze_entity(
     entity: EntityProxy,
     resolve_mentions: bool | None = settings.resolve_mentions,
     annotate: bool | None = settings.annotate,
-    refine_locations: bool | None = settings.refine_locations,
     overwrite_lang: bool = False,
     extract_known_names: bool | None = settings.extract_known_names,
 ) -> Generator[EntityProxy, None, None]:
@@ -39,7 +38,6 @@ def analyze_entity(
         entity,
         resolve_mentions,
         annotate,
-        refine_locations,
         extract_known_names,
     )
     analyzer.feed(entity, overwrite_lang=overwrite_lang)
@@ -50,7 +48,6 @@ def analyze_entities(
     entities: Iterable[EntityProxy],
     resolve_mentions: bool | None = settings.resolve_mentions,
     annotate: bool | None = settings.annotate,
-    refine_locations: bool | None = settings.refine_locations,
     overwrite_lang: bool = False,
     extract_known_names: bool | None = settings.extract_known_names,
 ) -> Generator[EntityProxy, None, None]:
@@ -59,7 +56,6 @@ def analyze_entities(
             e,
             resolve_mentions,
             annotate,
-            refine_locations,
             overwrite_lang,
             extract_known_names,
         )

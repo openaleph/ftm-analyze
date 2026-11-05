@@ -122,9 +122,6 @@ class Settings(BaseSettings):
     extract_known_names: bool = False
     """Extract known names in one pass via the `juditha` Aho-Corasick automaton"""
 
-    refine_locations: bool = False
-    """Refine location mentions via geonames"""
-
     annotate: bool = False
     """Insert annotations into `indexText` for resolved mentions"""
 

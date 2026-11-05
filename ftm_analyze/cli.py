@@ -68,9 +68,6 @@ def cli_analyze(
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
     ] = settings.annotate,
-    refine_locations: Annotated[
-        bool, typer.Option(help="Refine location mentions via geonames")
-    ] = settings.refine_locations,
     extract_known_names: Annotated[
         bool, typer.Option(help="Extract known names via the `juditha` automaton")
     ] = settings.extract_known_names,
@@ -90,7 +87,6 @@ def cli_analyze(
             entities,
             resolve_mentions,
             annotate,
-            refine_locations,
             overwrite_lang,
             extract_known_names=extract_known_names,
         )
@@ -107,9 +103,6 @@ def cli_analyze_text(
     annotate: Annotated[
         bool, typer.Option(help="Annotate extracted patterns, names and mentions")
     ] = settings.annotate,
-    refine_locations: Annotated[
-        bool, typer.Option(help="Refine location mentions via geonames")
-    ] = settings.refine_locations,
     extract_known_names: Annotated[
         bool, typer.Option(help="Extract known names via the `juditha` automaton")
     ] = settings.extract_known_names,
@@ -131,7 +124,6 @@ def cli_analyze_text(
             entity,
             resolve_mentions,
             annotate,
-            refine_locations,
             extract_known_names=extract_known_names,
         )
         smart_write_proxies(out_uri, results)

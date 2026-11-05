@@ -19,7 +19,7 @@ These flags control which optional resolution stages run. They default to `false
 | Type | `bool` |
 | Default | `false` |
 
-Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. Only person and organization mentions are looked up, and only against known entities of the same type, so the lookup never changes the NER label. See [NER](../ner.md) for how to populate the juditha index.
+Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. Only person, organization and location mentions are looked up, and only against known entities of the same type, so the lookup never changes the NER label. Locations are matched against `Address` entities in juditha, a hit emits an `Address` entity. See [NER](../ner.md) for how to populate the juditha index.
 
 ### `extract_known_names`
 
@@ -29,15 +29,6 @@ Resolve known mentions to real entities via `juditha.lookup`. When the lookup re
 | Default | `false` |
 
 Extract known names in one pass via the Aho-Corasick automaton that `juditha build` writes next to the juditha index. Runs in addition to the configured `ner_engine`, and both results are merged by position. Hits are emitted as entities with the schema juditha knows for them (Person, Company, …) instead of `Mention` entities. See [NER](../ner.md#extract-known-names).
-
-### `refine_locations`
-
-| Env | `FTM_ANALYZE_REFINE_LOCATIONS` |
-| --- | --- |
-| Type | `bool` |
-| Default | `false` |
-
-Canonicalize location mentions against `geonames_tagger`. When enabled, a `LOC` mention whose surface form fuzzy-matches a geonames entry is rewritten to the canonical place name.
 
 ### `annotate`
 

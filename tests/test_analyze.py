@@ -6,8 +6,9 @@ from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
+from ftm_analyze.analysis.analyzer import Mention
 from ftm_analyze.analysis.extract import Span, extract_juditha
-from ftm_analyze.analysis.util import TAG_COMPANY
+from ftm_analyze.analysis.util import TAG_COMPANY, TAG_LOCATION
 from ftm_analyze.annotate.annotator import ZWJ
 
 
@@ -180,6 +181,46 @@ def test_analyze_extract_location():
     entity = _analyze_entity(entity)
     assert entity.first("locationMentioned", "New York City")
     assert "lives in [New York City](LOC)"
+
+
+def test_analyze_resolve_locations(monkeypatch, tmp_path):
+    monkeypatch.setenv("JUDITHA_URI", str(tmp_path / "juditha.db"))
+    get_store.cache_clear()
+    known = tmp_path / "known.ftm.json"
+    proxies = [
+        {"id": "GEO:1", "schema": "Address", "properties": {"name": ["New York City"]}},
+        {"id": "GEO:2", "schema": "Address", "properties": {"name": ["Ukraine"]}},
+        {"id": "org", "schema": "Organization", "properties": {"name": ["Ukraine"]}},
+    ]
+    known.write_text("\n".join(json.dumps(p) for p in proxies))
+    load_proxies(known, sync=True)
+
+    def _resolve(name):
+        mention = Mention(
+            key=name,
+            entity_id="doc",
+            prop=TAG_LOCATION,
+            original_values={name},
+            ner_tag="LOC",
+        )
+        mention.resolve(resolve_mentions=True)
+        return mention.to_entity()
+
+    # a name that is also known as another type stays a location
+    entity = _resolve("Ukraine")
+    assert entity is not None
+    assert entity.schema.name == "Address"
+    assert entity.first("proof") == "doc"
+
+    # unknown locations emit nothing, as before
+    assert _resolve("Atlantis") is None
+
+    entity = model.make_entity("PlainText")
+    entity.id = "test-location"
+    entity.add("bodyText", "My friend lives in New York City and works there.")
+    *entities, doc = logic.analyze_entity(entity, resolve_mentions=True)
+    assert [e.schema.name for e in entities] == ["Address"]
+    assert "new york city" in doc.get("locationMentioned")
 
 
 def test_analyze_location_countries():
