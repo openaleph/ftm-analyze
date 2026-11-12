@@ -3,6 +3,7 @@ from typing import Generator, Iterable
 from anystore.decorators import error_handler
 from anystore.io import logged_items
 from anystore.logging import get_logger
+from followthemoney.namespace import Namespace
 from followthemoney.proxy import EntityProxy
 
 from ftm_analyze.analysis.analyzer import Analyzer
@@ -19,6 +20,7 @@ def analyze_entity(
     annotate: bool | None = settings.annotate,
     overwrite_lang: bool = False,
     extract_known_names: bool | None = settings.extract_known_names,
+    namespace: str | None = None,
 ) -> Generator[EntityProxy, None, None]:
     """
     Analyze an Entity.
@@ -30,6 +32,8 @@ def analyze_entity(
         annotate: Annotate extracted patterns, names and mentions in `indexText`
         extract_known_names: Extract known names via the `juditha` automaton and
             emit them as entities instead of mentions
+        namespace: Sign the ids (and entity references) of all emitted entities
+            with this namespace, as OpenAleph stores them namespaced
 
     Yields:
         A generator of entity fragments
@@ -41,7 +45,14 @@ def analyze_entity(
         extract_known_names,
     )
     analyzer.feed(entity, overwrite_lang=overwrite_lang)
-    yield from analyzer.flush()
+    if not namespace:
+        yield from analyzer.flush()
+        return
+    # new entities (mentions, resolved entities, bank accounts) get a plain id
+    # from the analyzer; signing is idempotent for the already signed input
+    ns = Namespace(namespace)
+    for result in analyzer.flush():
+        yield ns.apply(result)
 
 
 def analyze_entities(
@@ -50,6 +61,7 @@ def analyze_entities(
     annotate: bool | None = settings.annotate,
     overwrite_lang: bool = False,
     extract_known_names: bool | None = settings.extract_known_names,
+    namespace: str | None = None,
 ) -> Generator[EntityProxy, None, None]:
     for e in logged_items(entities, "Analyze", 1000, item_name="Entity", logger=log):
         yield from analyze_entity(
@@ -58,4 +70,5 @@ def analyze_entities(
             annotate,
             overwrite_lang,
             extract_known_names,
+            namespace,
         )
