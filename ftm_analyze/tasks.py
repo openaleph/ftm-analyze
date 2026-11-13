@@ -36,9 +36,13 @@ def analyze(job: DatasetJob) -> None:
     to_index: list[EntityProxy] = []
 
     overwrite_lang = job.context.get("overwrite_lang", False)
+    # OpenAleph stores entities under namespaced ids, sign the new ones as well
+    namespace = job.context.get("namespace")
     with job.get_writer() as bulk:
         for entity in job.load_entities():
-            for result in analyze_entity(entity, overwrite_lang=overwrite_lang):
+            for result in analyze_entity(
+                entity, overwrite_lang=overwrite_lang, namespace=namespace
+            ):
                 bulk.put(result, origin=ORIGIN, fragment=entity.id)
                 to_index.append(make_stub_entity(result))
                 if should_geocode(result):

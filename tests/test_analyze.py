@@ -1,6 +1,7 @@
 import json
 
 from followthemoney import model
+from followthemoney.namespace import Namespace
 from followthemoney.types import registry
 from juditha import get_store
 from juditha.io import load_proxies
@@ -270,3 +271,32 @@ def test_analyze_language_preservation():
     entity = [e for e in logic.analyze_entity(entity, overwrite_lang=True)][-1]
     # the property should be corrected
     assert entity.get("detectedLanguage") == ["fra"]
+
+
+def test_analyze_namespace():
+    # OpenAleph stores entities namespaced, the entities created by the
+    # analyzer have to be signed, too (openaleph/openaleph#147)
+    ns = Namespace("test_dataset")
+    text = "Das ist der Pudel von Angela Merkel. " * 5
+    text += "Sie hat das Konto CH5604835012345678009."
+    entity = model.make_entity("PlainText")
+    entity.id = ns.sign("test-ns")
+    entity.add("bodyText", text)
+
+    results = list(logic.analyze_entity(entity, namespace="test_dataset"))
+    schemata = {e.schema.name for e in results}
+    assert {"Mention", "BankAccount", "PlainText"} <= schemata, schemata
+    for result in results:
+        assert ns.verify(result.id), result.to_dict()
+        for prop in result.iterprops():
+            if prop.type == registry.entity:
+                for value in result.get(prop):
+                    assert ns.verify(value), (prop.name, value)
+    # the already signed input entity keeps its id
+    doc = [e for e in results if e.schema.name == "PlainText"][0]
+    assert doc.id == entity.id
+
+    # without a namespace, ids are left as the analyzer creates them
+    results = list(logic.analyze_entity(entity))
+    mention = [e for e in results if e.schema.is_a("Mention")][0]
+    assert not ns.verify(mention.id)
