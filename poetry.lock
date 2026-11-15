@@ -3366,17 +3366,19 @@ attrs = ">=19.2.0"
 
 [[package]]
 name = "juditha"
-version = "4.7.0"
+version = "4.8.0"
 description = "A super-fast canonical name lookup service"
 optional = false
-python-versions = ">=3.11,<3.15"
+python-versions = "<3.15,>=3.11"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "juditha-4.8.0-py3-none-any.whl", hash = "sha256:5515d4b88d50f7810e1432dd8f0e97d543fd9797e998633be59283d388010395"},
+    {file = "juditha-4.8.0.tar.gz", hash = "sha256:65ac4f2e027b3fc5e6648f13f65217d6c7f47a6da0bb2606a95b29564a961eb8"},
+]
 
 [package.dependencies]
 ahocorasick-rs = ">=1.0.3,<2.0.0"
-anystore = ">=1.5.6,<2.0.0"
+anystore = ">=1.5.7,<2.0.0"
 datapatch = ">=1.2.4,<2.0.0"
 followthemoney = ">=4.11.2,<5.0.0"
 ftmq = {version = ">=5.3.1,<6.0.0", extras = ["level"]}
@@ -3384,17 +3386,11 @@ grpcio = ">=1.85.1,<2.0.0"
 jellyfish = ">=1.3.0,<2.0.0"
 protobuf = ">=7.36.2,<8.0.0"
 rapidfuzz = ">=3.14.6,<4.0.0"
-rigour = ">=2.6.1,<3.0.0"
+rigour = ">=2.6.2,<3.0.0"
 tantivy = ">=0.27.0,<0.28.0"
 
 [package.extras]
 geonames = ["wordfreq (>=3.1.1,<4.0.0)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/dataresearchcenter/juditha"
-reference = "feat/batch-search"
-resolved_reference = "80d004d359262ddc1ce0729f10d174bac5cd83d4"
 
 [[package]]
 name = "kiwisolver"
@@ -9587,4 +9583,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.15"
-content-hash = "1d5916308d336cc2c20538feb6757accdf7d296e11cb5068385b8a114ba3be98"
+content-hash = "5641ad38811045dac96884aeff3759adbd5b208bb06160aad11e2e227c2e9351"
