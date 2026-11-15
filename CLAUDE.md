@@ -58,24 +58,18 @@ make build            # or: poetry build
 
 ```
 ftm_analyze/analysis/
-├── analyzer.py           # Main Analyzer orchestrator
-├── extract/              # Extraction layer
-│   ├── base.py           # ExtractionResult, ExtractionContext, Extractor protocol
-│   ├── spacy.py          # SpacyExtractor (default NER)
-│   ├── flair.py          # FlairExtractor
-│   ├── bert.py           # BertExtractor
-│   ├── gliner.py         # GlinerExtractor
-│   └── patterns.py       # PatternExtractor (emails, phones, IBANs)
-├── aggregate/            # Aggregation layer
-│   └── aggregator.py     # NameAggregator: merge by position, deduplication, opt-in fastText filter
-├── resolve/              # Resolution layer
-│   ├── pipeline.py       # ResolutionPipeline, ResolutionContext, ResolutionStage protocol
-│   ├── mention.py        # Mention data class
-│   └── stages/           # Composable resolution stages
-│       └── juditha.py    # JudithaLookupStage
-├── emit/                 # Entity creation layer
-│   └── entity_factory.py # EntityFactory (Mention → FTM entities)
-├── tracer.py             # ExtractionTracer for debugging
+├── analyzer.py           # Analyzer orchestrator (feed/flush), Mention model, lookup_mentions (juditha)
+├── extract/              # Extraction layer, each engine a `handle()` yielding `Span`s
+│   ├── base.py           # Span, test_name, shared NER helpers
+│   ├── spacy.py          # spaCy (default NER)
+│   ├── flair.py          # Flair
+│   ├── bert.py           # BERT
+│   ├── gliner.py         # GLiNER
+│   └── juditha.py        # Known names via the juditha Aho-Corasick automaton
+├── aggregate.py          # merge_spans, NameAggregator (merge by position, dedupe, opt-in fastText filter), TagAggregator
+├── refine.py             # clean_name, is_rigour_org, NER tag <-> property maps
+├── patterns.py           # Pattern extraction (emails, phones, IBANs)
+├── ft_type_model.py      # Opt-in fastText type model
 ├── language.py           # Language detection via fastText
 ├── country.py            # Location-to-country resolution
 └── util.py               # Shared utilities and constants
@@ -106,15 +100,16 @@ Input Entity
     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ Mention.resolve() (NER tag kept, legal form -> ORG)         │
-│   └── JudithaLookupStage [opt] - link PER/ORG/LOC, same type│
+│   └── lookup_mentions() [opt] - link PER/ORG/LOC, same type,│
+│       one batch per type, known names skipped               │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌─────────────────────────────────────────────────────────────┐
-│ EntityFactory                                               │
-│   ├── Resolved entities (Person, Organization, etc.)       │
-│   ├── Mention entities (unresolved PER/ORG)                │
-│   └── BankAccount entities (from IBANs)                    │
+│ Mention.to_entity() / Analyzer.flush()                      │
+│   ├── Known / resolved names as entities (Person, ...)      │
+│   ├── Mention entities (unresolved PER/ORG)                 │
+│   └── BankAccount entities (from IBANs)                     │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
@@ -123,12 +118,12 @@ Output: Entity fragments + Annotated source entity
 
 **Filtering**: there is no separate noise filter by default (the fastText type model filter is opt-in via `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE`, known names skip it). A name needs a letter and at most 100 chars (`test_name`), GLiNER applies its own confidence threshold, and the NER model's label is trusted: the only re-classification is a legal form in the name (rigour `ORG_CLASS` symbols, e.g. GmbH, e.V.) making it an organization.
 
+**Known names vs. lookup**: the automaton (`FTM_ANALYZE_EXTRACT_KNOWN_NAMES`) finds exact, multi-token known names (single tokens only for places) with their schema, also where NER missed them. The lookup (`FTM_ANALYZE_RESOLVE_MENTIONS`) is fuzzy and covers what the automaton can't: single-word names, spelling variants, inflections, OCR noise. So it only runs on mentions without a schema; known names keep the caption of their surface form, not juditha's canonical caption.
+
 ### Key Types
 
 - `Span`: A name found in a text, with its character offsets (and the schema of a known name)
-- `AggregatedResult`: Deduplicated results grouped by normalized key
-- `Mention`: Data class for resolution pipeline (tag, values, resolution state)
-- `ResolutionStage`: Protocol for pipeline stages (process method)
+- `Mention`: One aggregated name (NER tag, values, schema of a known name, resolution state), emits its entity via `to_entity()`
 - `EntityProxy`: FTM entity output
 
 ### Configuration
@@ -138,7 +133,7 @@ Settings via environment variables with `FTM_ANALYZE_` prefix (see `settings.py`
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FTM_ANALYZE_NER_ENGINE` | `spacy` | NER engine: spacy, flair, bert, gliner |
-| `FTM_ANALYZE_RESOLVE_MENTIONS` | `false` | Enable JudithaLookupStage |
+| `FTM_ANALYZE_RESOLVE_MENTIONS` | `false` | Link mentions (PER/ORG/LOC) to known entities via a batched, fuzzy juditha lookup (`lookup_mentions`), skipping known names from the automaton |
 | `FTM_ANALYZE_EXTRACT_KNOWN_NAMES` | `false` | Extract known names via the juditha Aho-Corasick automaton (local store, or a `juditha serve` gRPC server via `JUDITHA_URI=grpc://…`), emitted as entities (not Mentions) |
 | `FTM_ANALYZE_NER_TYPE_MODEL_CONFIDENCE` | not set | Opt-in fastText type model filter for NER results (model at `FTM_ANALYZE_NER_TYPE_MODEL_PATH`, not in the Docker images) |
 | `FTM_ANALYZE_ANNOTATE` | `false` | Rewrite text properties with ZWJ per-word entity markers (see Annotate Module) |
