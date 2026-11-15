@@ -203,32 +203,44 @@ For production deployments, you can mount external volumes for model storage ins
 
 - Sharing models across containers
 - Updating models without rebuilding images
-- Reducing image size (use `minimal` target)
+- Running large models without baking them into every image
 - Persisting downloaded models across container restarts
 
 ### Volume Configuration by Engine
 
 #### spaCy
 
-spaCy models are Python packages installed in site-packages. For custom model locations, use a custom data directory:
+`spacy.load()` accepts a model directory as well as a package name, so `FTM_ANALYZE_SPACY_MODELS_<LANG>` can point at a model on a mounted volume. This is how to run the large (`lg`) models without baking them into the image. Unpack the model wheels once into a shared directory with `contrib/download-spacy-models.sh` (a wheel is a zip, no pip needed):
+
+```bash
+contrib/download-spacy-models.sh /srv/models/spacy en_core_web_lg de_core_news_lg
+```
+
+The model version must match the spaCy minor version of the image (`3.8.0` for spaCy 3.8, override with `SPACY_MODELS_VERSION`). The script prints the directory to configure for each model: the versioned subdirectory containing `config.cfg`, not the package root.
+
+Mount it read-only and override the languages that should use it:
 
 ```bash
 docker run \
-    -v /path/to/spacy-models:/models/spacy \
-    -e SPACY_DATA=/models/spacy \
-    ghcr.io/openaleph/ftm-analyze:minimal \
+    -v /srv/models/spacy:/models/spacy:ro \
+    -e FTM_ANALYZE_SPACY_MODELS_ENG=/models/spacy/en_core_web_lg/en_core_web_lg-3.8.0 \
+    -e FTM_ANALYZE_SPACY_MODELS_DEU=/models/spacy/de_core_news_lg/de_core_news_lg-3.8.0 \
+    ghcr.io/openaleph/ftm-analyze:spacy-slim \
     ftm-analyze analyze -i /data/input.json
 ```
 
-Or override specific language models:
+Use the `spacy` or `spacy-slim` image, they keep the small models as fallbacks for every language that is not overridden. The `minimal` image has NER disabled and no spaCy models, so every detected language would need an override. Russian models need `pymorphy3`, which only the `spacy` image ships.
+
+Models are loaded lazily on the first document in a language, so a wrong path only fails once the queue reaches such a document. Check the paths at deploy time:
 
 ```bash
-docker run \
-    -e FTM_ANALYZE_SPACY_MODELS_ENG=/models/en_core_web_lg \
-    -e FTM_ANALYZE_SPACY_MODELS_DEU=/models/de_core_news_lg \
-    ghcr.io/openaleph/ftm-analyze:minimal \
-    ftm-analyze analyze -i /data/input.json
+docker run --rm -v /srv/models/spacy:/models/spacy:ro \
+    ghcr.io/openaleph/ftm-analyze:spacy-slim \
+    python -c "import spacy; spacy.load('/models/spacy/en_core_web_lg/en_core_web_lg-3.8.0')"
 ```
+
+!!! warning "Memory"
+    A shared mount saves image size and disk, not RAM: every worker process loads its own copy. A process keeps every configured model it has used in memory (no eviction), and a `lg` model takes roughly 0.6 to 0.8 GB, mostly its word vectors. Override only the languages that need it and size the memory limit for the worst case. The `md` models (e.g. `en_core_web_md`) keep only about 20k vectors and are a much cheaper middle ground.
 
 #### Flair
 
@@ -281,8 +293,7 @@ docker run --rm \
 
 | Variable | Engine | Description |
 |----------|--------|-------------|
-| `SPACY_DATA` | spaCy | Custom spaCy data directory |
-| `FTM_ANALYZE_SPACY_MODELS_<LANG>` | spaCy | Override model for specific language |
+| `FTM_ANALYZE_SPACY_MODELS_<LANG>` | spaCy | Override model (package name or model directory) for specific language |
 | `FLAIR_CACHE_ROOT` | Flair | Flair model cache directory |
 | `HF_HOME` | GLiNER, Transformers | HuggingFace cache directory |
 | `TRANSFORMERS_CACHE` | Transformers | Alternative to HF_HOME |
