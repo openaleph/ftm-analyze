@@ -99,6 +99,24 @@ def test_analyze_extract_known_names(monkeypatch, tmp_path):
     assert "bundesamt für verfassungsschutz" in doc.get("companiesMentioned")
     assert f"Bundesamt{ZWJ}__LEG__{ZWJ}__ORG__" in doc.first("bodyText")
 
+    # the lookup skips known names (they carry their schema already) and only
+    # resolves the other mentions
+    known_mention = Mention(
+        key="bfv",
+        entity_id="doc",
+        prop=TAG_COMPANY,
+        original_values={"Bundesamt für Verfassungsschutz"},
+        ner_tag="ORG",
+        schema_name="PublicBody",
+    )
+    ner_mention = known_mention.model_copy(update={"schema_name": None})
+    for mention in (known_mention, ner_mention):
+        mention.resolve()
+    lookup_mentions([known_mention, ner_mention])
+    assert known_mention.canonized_value is None
+    assert ner_mention.canonized_value == "Bundesamt für Verfassungsschutz"
+    assert ner_mention.schema_name == "PublicBody"
+
     def _analyze_table(*cells):
         table = model.make_entity("Table")
         table.id = "test-table"

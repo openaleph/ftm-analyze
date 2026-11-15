@@ -137,13 +137,14 @@ def lookup_mentions(mentions: list[Mention]) -> None:
     locations (`Address` in juditha) to known entities of the same type. One
     `search_many` batch per type over all resolved values (against a
     `grpc://` store one round trip instead of one per name), the first hit of
-    a mention becomes its resolved entity."""
+    a mention becomes its resolved entity. Known names (from the juditha
+    automaton) already carry their schema and are skipped."""
     store = juditha.get_store()
     for tag in ("PER", "ORG", "LOC"):
         queries = [
             (m, name)
             for m in mentions
-            if m.ner_tag == tag
+            if m.ner_tag == tag and m.schema_name is None
             for name in m.resolved_values
         ]
         if not queries:
