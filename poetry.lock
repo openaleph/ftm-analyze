@@ -2222,14 +2222,14 @@ pyflakes = ">=4.1.0,<4.2.0"
 
 [[package]]
 name = "followthemoney"
-version = "4.11.2"
+version = "4.11.3"
 description = "A data model for anti corruption data modeling and analysis."
 optional = false
 python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "followthemoney-4.11.2-py3-none-any.whl", hash = "sha256:3cc259e9d9caf13e60f932d4d8c69b26d1d79beb6984513915b7eb7d025a7e46"},
-    {file = "followthemoney-4.11.2.tar.gz", hash = "sha256:cc86fdf8caf5265693a7dc0d8597a5da7ce2a0877fe8c751bef767a1ff0885e6"},
+    {file = "followthemoney-4.11.3-py3-none-any.whl", hash = "sha256:3d3db7b9083314427cbbbff3417fde213e67c4a042278d807ac85ac37f9c61f3"},
+    {file = "followthemoney-4.11.3.tar.gz", hash = "sha256:4dff8aeb9cf3ae96a3e3dbe75bd3d28ae6787078c6c1512dcecc7cad09142d5f"},
 ]
 
 [package.dependencies]
@@ -2248,11 +2248,11 @@ pyyaml = ">=5.0.0,<7.0.0"
 rdflib = ">=6.2.0,<7.7.0"
 requests = ">=2.21.0,<3.0.0"
 rich = ">=13.0.0,<16.0.0"
-rigour = ">=2.6.0,<3.0.0"
+rigour = ">=2.6.2,<3.0.0"
 sqlalchemy = {version = ">=2.0.0,<3.0.0", extras = ["mypy"]}
 
 [package.extras]
-dev = ["build", "bump2version", "coverage (>=4.1)", "mypy", "pip (>=10.0.0)", "pytest", "pytest-cov", "recommonmark (>=0.4.0)", "responses (>=0.9.0)", "ruff (>=0.16.0)", "transifex-client", "twine", "types-openpyxl", "types-pyyaml", "types-requests", "types-setuptools", "wheel (>=0.29.0)"]
+dev = ["build", "bump-my-version", "coverage (>=4.1)", "mypy", "pip (>=10.0.0)", "pytest", "pytest-cov", "recommonmark (>=0.4.0)", "responses (>=0.9.0)", "ruff (>=0.16.0)", "transifex-client", "twine", "types-openpyxl", "types-pyyaml", "types-requests", "types-setuptools", "wheel (>=0.29.0)"]
 docs = ["mkdocs (>=1.4.0)", "mkdocs-gen-files", "mkdocs-macros-plugin", "mkdocs-material (>=9.0.0)", "mkdocstrings[python]"]
 
 [[package]]
@@ -9583,4 +9583,4 @@ openaleph = ["openaleph-procrastinate"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.15"
-content-hash = "207a778c794f654a330e472b6c9c1dfb55dd9330fa7fcf5355cd809900cdc3db"
+content-hash = "c64b7b9993a7b919c263940d5afc9cffe5abd0733d4b63695d44f5dd64e4c1bf"
