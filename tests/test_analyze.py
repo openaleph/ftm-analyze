@@ -7,7 +7,7 @@ from juditha import get_store
 from juditha.io import load_proxies
 
 from ftm_analyze import logic
-from ftm_analyze.analysis.analyzer import Mention
+from ftm_analyze.analysis.analyzer import Mention, lookup_mentions
 from ftm_analyze.analysis.extract import Span, extract_juditha
 from ftm_analyze.analysis.util import TAG_COMPANY, TAG_LOCATION
 from ftm_analyze.annotate.annotator import ZWJ
@@ -204,7 +204,8 @@ def test_analyze_resolve_locations(monkeypatch, tmp_path):
             original_values={name},
             ner_tag="LOC",
         )
-        mention.resolve(resolve_mentions=True)
+        mention.resolve()
+        lookup_mentions([mention])
         return mention.to_entity()
 
     # a name that is also known as another type stays a location
