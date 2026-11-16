@@ -1,6 +1,6 @@
 import logging
 import textwrap
-from typing import Generator
+from typing import Generator, Iterable
 
 import juditha
 from followthemoney import Property, model
@@ -100,10 +100,7 @@ class Mention(BaseModel):
         values = {clean_name(v, self.ner_tag) for v in values}
         return {v for v in values if v}
 
-    def resolve(
-        self,
-        resolve_mentions: bool | None = settings.resolve_mentions,
-    ) -> None:
+    def resolve(self) -> None:
         # the NER tag is kept (the model saw the context), only a legal form in
         # the name (rigour org class symbols, e.g. GmbH, e.V.) makes it an
         # organization. Known names (from the juditha automaton) already carry
@@ -113,23 +110,6 @@ class Mention(BaseModel):
         self.resolved_values = set(
             [clean_name(v, self.ner_tag, normalize_name) for v in self.original_values]
         )
-
-        # juditha lookup: links persons, organizations and locations (`Address`
-        # in juditha) to known entities of the same type, one pass over the
-        # resolved values, the first hit becomes the resolved entity
-        if resolve_mentions and self.ner_tag in ("PER", "ORG", "LOC"):
-            schemata = tuple(s for s, tag in SCHEMA_NER.items() if tag == self.ner_tag)
-            for name in self.resolved_values:
-                result = juditha.lookup(name, schemata=schemata)
-                if result is None:
-                    continue
-                self.canonized_value = result.caption
-                # a place can also be known as another type (Berlin, Ukraine),
-                # its common schema would then be `LegalEntity`
-                self.schema_name = (
-                    "Address" if self.ner_tag == "LOC" else result.common_schema
-                )
-                return
 
     def to_entity(self) -> EntityProxy | None:
         if self.schema_name:
@@ -150,6 +130,34 @@ class Mention(BaseModel):
             mention.add("name", self.names)
             mention.add("detectedSchema", schema)
             return mention
+
+
+def lookup_mentions(mentions: list[Mention]) -> None:
+    """juditha lookup of resolved mentions: links persons, organizations and
+    locations (`Address` in juditha) to known entities of the same type. One
+    `search_many` batch per type over all resolved values (against a
+    `grpc://` store one round trip instead of one per name), the first hit of
+    a mention becomes its resolved entity. Known names (from the juditha
+    automaton) already carry their schema and are skipped."""
+    store = juditha.get_store()
+    for tag in ("PER", "ORG", "LOC"):
+        queries = [
+            (m, name)
+            for m in mentions
+            if m.ner_tag == tag and m.schema_name is None
+            for name in m.resolved_values
+        ]
+        if not queries:
+            continue
+        schemata = tuple(s for s, t in SCHEMA_NER.items() if t == tag)
+        results = store.search_many([name for _, name in queries], schemata=schemata)
+        for (mention, _), result in zip(queries, results, strict=True):
+            if result is None or mention.canonized_value is not None:
+                continue
+            mention.canonized_value = result.caption
+            # a place can also be known as another type (Berlin, Ukraine),
+            # its common schema would then be `LegalEntity`
+            mention.schema_name = "Address" if tag == "LOC" else result.common_schema
 
 
 class Analyzer:
@@ -247,7 +255,9 @@ class Analyzer:
                 for value in values:
                     self.annotator.add_tag(prop, value)
 
-        # NER mentions
+        # NER mentions, all resolved before the juditha lookup so that it goes
+        # out in one batch per type
+        mentions: list[tuple[Mention, Iterable[str]]] = []
         for key, prop, values in self.aggregator_entities.results():
             if not key:
                 continue
@@ -259,7 +269,12 @@ class Analyzer:
                 ner_tag=PROPS_NER_TAGS.get(prop, "OTHER"),
                 schema_name=self.aggregator_entities.get_schema(key, prop),
             )
-            mention.resolve(resolve_mentions=self.resolve_mentions)
+            mention.resolve()
+            mentions.append((mention, values))
+        if self.resolve_mentions:
+            lookup_mentions([mention for mention, _ in mentions])
+
+        for mention, values in mentions:
             if mention.ner_tag == "LOC":
                 for value in values:
                     self.entity.add(

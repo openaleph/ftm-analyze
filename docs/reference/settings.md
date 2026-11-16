@@ -19,7 +19,7 @@ These flags control which optional resolution stages run. They default to `false
 | Type | `bool` |
 | Default | `false` |
 
-Resolve known mentions to real entities via `juditha.lookup`. When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. Only person, organization and location mentions are looked up, and only against known entities of the same type, so the lookup never changes the NER label. Locations are matched against `Address` entities in juditha, a hit emits an `Address` entity. See [NER](../ner.md) for how to populate the juditha index.
+Resolve known mentions to real entities via juditha. The lookups of a document go out as one `search_many` batch per type (one round trip each against a `grpc://` juditha server). When the lookup returns a hit above its score threshold the analyzer emits the resolved entity (Person, Organization, …) instead of a `Mention` entity. Only person, organization and location mentions are looked up, and only against known entities of the same type, so the lookup never changes the NER label. Locations are matched against `Address` entities in juditha, a hit emits an `Address` entity. See [NER](../ner.md) for how to populate the juditha index.
 
 ### `extract_known_names`
 
