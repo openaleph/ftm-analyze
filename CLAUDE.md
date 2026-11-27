@@ -151,7 +151,7 @@ GLiNER settings: `FTM_ANALYZE_GLINER_MODEL`, `FTM_ANALYZE_GLINER_THRESHOLD`
 ### Annotate Module
 
 `ftm_analyze/annotate/` produces the ZWJ per-word annotation format consumed by
-`openaleph-search` (see `./annotations.md` at the repo root for the authoritative
+`openaleph-search` (see `docs/annotate.md` for the authoritative
 spec). Each surface word of an annotated span carries ZWJ-joined (`‍`)
 markers so annotation tokens and surface words land at the same Lucene position
 (via a `pattern_capture` filter on the search side), keeping phrase queries
